@@ -62,9 +62,11 @@ export default class ActionItemSliderWebPart extends BaseClientSideWebPart<
   public getListFields() {
     let options: { key: any; text: any }[];
     const filter2 = `Hidden eq false and CanBeDeleted eq true`;
+    const select = this.properties.multiSelect;
+    console.log(select);
     sp.web.lists
       .getById(this.properties.lists)
-      .fields.select()
+      .fields.select(...select)
       .filter(filter2)
       .get()
       .then(selectedFields => {
@@ -85,7 +87,7 @@ export default class ActionItemSliderWebPart extends BaseClientSideWebPart<
     this.properties.multiSelect = null;
 
     this.getListFields();
-    this.context.propertyPane.refresh();
+    // this.context.propertyPane.refresh();
   };
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {

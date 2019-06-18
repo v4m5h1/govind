@@ -1,0 +1,1 @@
+{"version":3,"sources":["propertyFields/collectionData/collectionIconField/index.ts"],"names":[],"mappings":";;;;;AACA,2CAAsC","file":"propertyFields/collectionData/collectionIconField/index.js","sourcesContent":["export * from \"./ICollectionIconFieldProps\";\nexport * from \"./CollectionIconField\";\n"],"sourceRoot":"../../../../src"}

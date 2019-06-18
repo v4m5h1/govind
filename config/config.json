@@ -9,12 +9,21 @@
           "manifest": "./src/webparts/actionItemSlider/ActionItemSliderWebPart.manifest.json"
         }
       ]
+    },
+    "top-navigation-application-customizer": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/topNavigation/TopNavigationApplicationCustomizer.js",
+          "manifest": "./src/extensions/topNavigation/TopNavigationApplicationCustomizer.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "ActionItemSliderWebPartStrings": "lib/webparts/actionItemSlider/loc/{locale}.js",
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
-    "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js"
+    "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js",
+    "TopNavigationApplicationCustomizerStrings": "lib/extensions/topNavigation/loc/{locale}.js"
   }
 }

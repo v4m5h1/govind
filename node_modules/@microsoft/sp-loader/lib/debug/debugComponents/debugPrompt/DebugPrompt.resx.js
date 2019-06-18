@@ -1,0 +1,6 @@
+var key = '_upo3vfLFBbnbzl2hKy2TwA';
+var allStrings = (typeof DEPRECATED_UNIT_TEST === 'undefined' || DEPRECATED_UNIT_TEST) ?
+    require("../../../resx-strings/en-us.json") :
+    require("resx-strings");
+var strings = allStrings[key];
+export default strings;

@@ -1,0 +1,1 @@
+{"version":3,"sources":["PropertyPaneWebPartInformation.ts"],"names":[],"mappings":";;;;;AAAA,yDAAoD","file":"PropertyPaneWebPartInformation.js","sourcesContent":["export * from './propertyFields/webPartInformation';\n"],"sourceRoot":"../src"}

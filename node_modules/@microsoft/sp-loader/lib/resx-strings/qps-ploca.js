@@ -1,0 +1,143 @@
+define([], function() {
+  var strings = {
+    "_nQNACBeQ34aV6bVwtFBayA": {
+      "loaderUserFriendlyError": "Čâň'ť ŀơáď ťĥē äƥƥŀıćåťĭōń ŏŉ ţĥīś ƥăĝĕ. Ųŝȇ ţħȅ Ƅŕőŵšęŗ Ƀâĉĸ Ƅűťŧŏŉ ťơ ŗęŧŗɏ. Ĩƒ ŧĥē ƿřőƄļėm ƥėŗşĩśţş, ĉőŉŧȃćţ ťĥě åďmĩňīşŧŕáţŏŕ ŏƒ ŧħĕ ŝĩţĕ ȃƞď ģıvě ŧĥęm ŧħȇ įņƒőřmäţĭŏŋ įŋ Ŧȇĉħŉıčǻŀ Ɗȇťȃĭłš.",
+      "platformFailedToLoadError": "***Ƥļȁťƒőŗm ƒàįļȇđ ŧō ľơàď. Ĭď: \"{0}\", ňǻmȅ: \"{1}\"",
+      "platformFailedToLoadWithMessageError": "***Ƥļåťƒŏŗm ƒǻīļėđ ŧő ļōåđ. Įđ: \"{0}\", ņâmȇ: \"{1}\".\r\nĖřŗơř: {2}",
+      "applicationFailedToInitializeError": "***Ėřŗŏŗ ĭƞīťĩāļīžĩŋġ ąƿƥľıćàŧĩơƞ. Ěŕřŏŗ: {0}",
+      "invalidPreloadedDataError": "***Īņvȁłīď ƿřĕļōãđēđ đáţã.",
+      "manifestNotFoundByIdError": "***Máŉĭƒėşť ƞŏţ ƒŏųńď ƒơŕ čŏmƿơņėƞţ įđ \"{0}\".",
+      "manifestNotFoundError": "***Mąŋĩƒȅśŧ ňőţ ƒōųņď ƒōŗ ĉōmƿŏŋėňť ĭđ \"{0}\" àŉď vėŗšĭŏń \"{1}\".",
+      "systemConfigDisabledError": "***Ŝƴşŧȅm.ĉōƞƒįğ() ıś ņơť śųƿƥōŗţȇď. Ůšě â måŋīƒěśţ ţơ şƿȇĉīƒɏ ŧħě ĉơŋƒīġūřȁťıŏŋ.",
+      "loadComponentLog": "***Ľŏāđıŉĝ ćŏmƥőŉēņţ \"{0}\" ({1}).",
+      "loadComponentEndLog": "***Ĉŏmƥơńęŋŧ \"{0}\" ({1}) ľơáđĕđ.",
+      "loadComponentRetryLog": "***Łōãđĩƞģ ćōmƿőņěņť \"{0}\" ({1}). Âťťēmƿť {2} ōƒ {3}.",
+      "loadComponentError": "***Ƒáīľȅď ŧŏ ĺơąđ čŏmƿōŉĕňţ \"{0}\" ({1}).\r\nŌŗīĝĭńąļ ěŗŕőŕ: {2}",
+      "loadComponentMaxRetriesError": "***Âţţȅmƥţēď ţō ĺőąď ćőmƥōŉĕņť \"{0}\" ({1}) {2} ŧīměş ŵįťĥōųŧ ŝūčĉęšš.",
+      "loadComponentDependencyError": "***Ƒàīłĕđ ŧō ŀōăď ċŏmƿōńĕŋť ďęƿȇŋđĕńĉɏ \"{0}\" ƒŗŏm ćōmƿőńěņť \"{1}\" ({2}).\r\nŌŕīğīņáł ěŗřŏŕ: {3}",
+      "loadComponentDependencyFailoverPathError": "***Ƒàīŀěď ťơ ļōǻđ čōmƿơńěŋť ďȇƿēŉđēňčȳ \"{0}\" ŵĩŧħ ƒáīļővěŕ ƿȃŧħ \"{1}\" ƒŗŏm ċōmƥōņȇŋŧ \"{2}\" ({3}).\r\nŌřĭĝıńăľ ěŕřőŗ: {4}",
+      "loadPathDependencyLog": "***Ĺơāđıņĝ ƥǻţĥ ďēƿȅņďĕŋćȳ \"{0}\" ƒŕōm ĉŏmƿōńęƞť \"{1}\" ({2})",
+      "loadPathDependencyError": "***Ƒâĭļȇđ ťő ŀŏáď ƥâťĥ ďĕƿęņďĕňćƴ \"{0}\" ƒŕōm ćōmƿơńȇŋť \"{1}\" ({2}).\r\nƠŗīĝıņåł ęřŗŏř: {3}",
+      "loadPathDependencyBlockedByAnotherDependencyError": "***Ƒăıļěď ŧō ļŏąđ ƥáťħ đęƿĕŋđȅƞćȳ \"{0}\" ƒŗōm ĉŏmƥŏŉȇŉŧ \"{1}\" ({2}) ďűȅ ťő ąņŏŧħȅř ďȅƿēŋďĕƞčɏ ťħåť ƒàīļēď ŧō łőāđ.",
+      "loadEntryPointError": "***Ƒȃĭłȇđ ŧō ĺơăđ ĕņťŕɏ ƥŏĩňť ƒřőm ĉơmƿōƞęŋŧ \"{0}\" ({1}).\r\nŐŕĭģīŉąľ ėŕřŏŗ: {2}",
+      "loadComponentReturnsEmptyError": "***ľőǻđĆơmƥơƞĕƞţ() ŕęťūŕňěđ āń ēmƥŧƴ ŏƂĴȅčŧ ƒőŗ ćőmƿōņěņť \"{0}\" ({1}).",
+      "loadComponentReturnsDefaultEmptyError": "***ŀōâďĈőmƿơŋēŋŧ() ŗēţŭřƞĕđ ȁŋ ōƀĴěčţ ŵīţħ ȃŋ ėmƥŧŷ ďěƒǻŭĺŧ ƥŕőƥȅŗťƴ ƒōŕ ĉơmƿŏŉȇƞŧ \"{0}\" ({1}).",
+      "moduleHasUndeclaredDependencyError": "***Ťĥĕ ęƞťŗȳ ƥōįŋţ ƒơŕ čơmƿŏŋȅŋţ \"{0}\" ({1}) ĥäš ą ďēƥȅńđȅƞċŷ ơŉ \"{2}\" ťħăŧ ĩŝ ƞơŧ ďȅčĺàřĕđ ıņ ťĥę măŉıƒęşţ.",
+      "loadScriptWithStringError": "***łōąďŜćřĭƥţ ƒųňċţĩőň ďŏȇŝŋ'ť ăľłōŵ á śţřıńğ ǻš 2ŋď ƿȁŕâmȇŧėŗ. Ųşĕ ĮĻōąđŚċřįƥŧƠƿţĩơňŝ ĩƞšţěäđ.",
+      "tooManyManifestsError": "***{0} måňīƒęşţŝ (vęŗšıőňś {1}) ƒơũņđ ƒơŗ ċŏmƿōŉěňŧ \"{2}\".",
+      "tooManyCompatibleVersionsError": "***{0} ċơmƿāŧĭƅĺȇ vēřŝīơŉš ({1}) ƒōŭňđ ƒőř ĉőmƥơņȅņţ \"{2}\" vēŕŝīơŉ \"{3}\".",
+      "tooManyComponentsError": "***Ŧŏŏ măņƴ čőmƿŏŋęņťŝ ƒōůńď ƒơŕ ĭď \"{0}\".",
+      "noComponentFoundError": "***Ņơ ćőmƥőňȅŋť ƒơŭńđ ƒōŕ ĭď \"{0}\".",
+      "deleteComponentLog": "***Ɖėľȇŧıƞģ čōmƿŏńęŉŧ \"{0}\" vēŕśīơƞ \"{1}\" ƒřơm ťħě šţŏŗę.",
+      "browserNotSupportedError": "***Ťħĭŝ věŗŝīőň ŏƒ ŷōűŗ Ƅŕơŵśĕř įš ņőţ şűƿƥŏŗťȇď.\r\nƤĺȅȁšē ųƥďăţȇ ɏōůř ƀřŏŵŝȅř ťő ťħę ŀáţĕśŧ vȅŗŝĭōņ.",
+      "ie9OrOlderNotSupportedError": "***Ţĥĭŝ ƿȃģě đŏęş ńőţ šųƥƥơŕţ Ĭƞŧěŕŉȇť Ěxƿľŏŗȅŕ ŗěłȅáşēŝ ōĺďęŕ ţħåń vĕŕŝĭơŋ 10. Ƥĺėȃşě ųƿđåťę ɏŏųŕ ŵȇƀ ƀŗŏŵšȅř.",
+      "firefox43OrOlderNotSupportedError": "***Ťĥıš ƥȃğě ďőĕś ŉőţ şůƥƿōřŧ Mơżıŀłą Ƒıŗěƒōx ŕȇĺěąşēş ōľđěŗ ţħåŋ vȅŕŝįōń 44. Ƥłęãśě ŭƿďäťĕ ɏơũŗ ŵęƄ ƃřơŵşēŗ.",
+      "resourceNotFoundError": "***Ŗȅšŏūŗĉȅ \"{0}\" ńōţ ƒőūňđ ĭń łōâďęŕ ćŏňƒĩğŭřäŧįőň ơƒ mäňıƒěšť ƒŏř čŏmƿőŉěŉŧ \"{1}\" ({2}).",
+      "noFailoverPathError": "***Ĉåƞňōŧ ćäľĺ ŗȅşőľvȇȀďďřȇŝŝ() ơń ȁ čŏmƥōňȅŋť ŵįŧĥ ŉō ƒăįļōvȅř ƥȁŧħ",
+      "urlStatusLocalhostFileNotFoundError": "***Ƒäīłĕđ ţō ĺőáď ŮŖĻ '{3}' ƒōŗ řȅŝơūřčę '{2}' ıņ čơmƥŏƞēňŧ '{0}' ({1}). Ţħē ƒįĺę ŵǻś ƞŏŧ ƒŏũńđ ĩŉ ţĥė şēŗvěŗ.\r\nMǻƙę ŝűřĕ ŧĥàţ ɏơų åŕė řůŋƞīńģ 'ğųŀƥ šȇřvȅ'.",
+      "urlStatusFileNotFoundError": "***Ƒāĩłęđ ťő ŀŏãđ ŰŘĹ '{3}' ƒŏŗ ŗȇśőŭřćȇ '{2}' īń čơmƥŏŉěńţ '{0}' ({1}). Ťĥę ƒĩļȅ ŵȁś ňŏť ƒőűŉď ıƞ ťĥę şēŗvěŗ.",
+      "urlStatusForbiddenError": "***Ƒäıłěď ŧő ŀőȁď ŪŔĻ '{3}' ƒơř řȅšōůŗčȇ '{2}' īƞ ĉőmƿơńȇƞţ '{0}' ({1}). Ťħȅ åćċęŝš ŧō ŧĥė ƒįĺě ĩŝ ƒŏŕƄĩďđēń.",
+      "urlStatusClientErrorError": "***Ƒăīŀęď ţŏ łőáď ŬƦĹ '{3}' ƒơŕ ŕęšŏūŗĉĕ '{2}' įŋ ćŏmƥŏńėńŧ '{0}' ({1}). Ŧĥęŕĕ ŵāş ǻń ȅŕŗơř řȇǭůēšţīƞġ ťĥē ƒĩľė.",
+      "urlStatusServerErrorError": "***Ƒâįŀęď ťō ŀŏåđ ŲŖĹ '{3}' ƒōŗ ŕȅşơųřčȇ '{2}' ĭŉ ċōmƿōňēňţ '{0}' ({1}). Ťħēŗĕ ŵãŝ á ƿŕōƅłęm įň ťħē ŝēŕvęŕ.",
+      "urlStatusLocalhostNetworkErrorError": "***Ƒāīŀȇđ ţơ łōãď ŪŖĻ '{3}' ƒőŕ ŕȇśőŭŕċȅ '{2}' ıƞ ćōmƿőƞȅňť '{0}' ({1}). Ťĥȇŕė ŵāŝ ą ņȅŧŵơřƙ ƥŗŏƅľȇm.\r\nMâĸȇ šūřė ŧĥǻť ȳơŭ äŕė ŕūŉŋĭńġ 'ğŭľƥ ŝȇŗvė' âƞđ ŷŏů ħąvě řūň 'ĝŭļƥ ţŗūšŧ-đēv-ĉȇŕţ'.",
+      "urlStatusHttpsNetworkErrorError": "***Ƒȁıļęď ţơ ľőǻď ŮŘĻ '{3}' ƒōŗ ŗēšőŭŗĉē '{2}' įŋ čơmƿōŉēňţ '{0}' ({1}). Ţĥěřě ŵāś ã ņėŧŵőřĸ ƥřōɓŀȅm.\r\nŢĥĩš mȃŷ Ƃě â ƥřōƀļȅm ŵįŧĥ â ĤŦŦƤŜ ĉęŕŧĩƒįċȃťĕ. Mȁƙě śŭřȅ ȳŏū ĥávę ťĥě řīģĥţ ĉėřŧīƒĭčǻťĕ.",
+      "urlStatusNetworkErrorError": "***Ƒàıļȇđ ţő ŀŏáđ ŨŖĻ '{3}' ƒōř ŗěśőŭŕĉė '{2}' ĩƞ ċơmƥơńėņť '{0}' ({1}). Ŧħěřę ŵȁş ă ƞęŧŵōřĸ ƥŕőɓļȇm.",
+      "urlStatusUndefinedError": "***Ƒȃıľęď ţŏ łōãđ ŲŖĹ '{3}' ƒơŗ řėšőųřčē '{2}' ĭņ ċōmƿŏŉęƞť '{0}' ({1}) ƅėćäůşė őƒ ůŋķňōŵŉ ƥřōƄŀȇmş.",
+      "isUndefinedValidateError": "***Ţĥȇ văłůȇ ƒőŕ \"{0}\" műşť ňơŧ ƀȅ űƞďȇƒĩńĕď",
+      "failedToCreateGlobalVariableError": "***Ƒáįĺėď ţơ čŕėǻŧė ğľŏƀâľ våŗīãƄľė \"{0}\" ƒŕơm śćřīƥţ \"{1}\"",
+      "dependencyLoadError": "***Ƒãĩłēđ ťŏ łŏȃď mőđűļē '{0}' ƀěĉąűśē đėƥȇƞđȇƞċƴ {1} ŵăş ŉőţ ŀŏâďēđ",
+      "missingPathDependencyError": "***Mĩŝşīŉģ ƥåŧħ đėƿĕņďēņċɏ \"{0}\" ƒŕŏm ċơmƿơŋěƞţ \"{1}\" ({2}). Ēxīŝŧīńğ ƿȁťĥ ďęƿěňďęŉćıėş: {3}",
+      "listSeparator": ", "
+    },
+    "_FmFyAWZ1md7Z1R+V8t2S2Q": {
+      "errorLoadingDebugScriptHTTPS": "Ěŗŕōŗ łơȁďįņĝ đȇƂųģ śčŕĩƿţ. Ėņšűŗē ţħȅ śĕŗvėŕ įś ŕųňŉĩņğ āŋđ ţħę \"{0}\" ƿȃřàmȇťȅŕ ŨŘĻ ĭş ćŏřřȅċŧ.",
+      "errorLoadingDebugScriptHTTP": "Ęřŕơŕ ĺőȁďįŋĝ ďȇƃųğ šćŗĭƥť. Ěńŝűŗĕ ţħę şėŕvȇŕ īş ŕŭņņįńģ, ŧĥē \"{0}\" ƥâřåmęţĕŗ ŮƦĽ īŝ ĉŏŕŗěċť, ǻńď ŀŏáđīŋģ ŭňŝàƒĕ ŝćŕīƿťş ış äļłơŵėď. Ǻłşő ċŏňŝīďęř ůšĩŉġ ä đėvȇľőƿměƞť ċęŗţĩƒĩćǻťē äŉď ŝȅŗvīņģ ďēƃůġ śĉřįƥţŝ ŏvėř ĦŤŤƤŞ.",
+      "errorLoadingDebugScriptMalformed": "Ěřŗőŗ ļőáďıƞĝ đĕƀūğ śĉŗĩƥŧ. Ŧĥę ďȇɓųğ ŬŔĹ ({0}) āƿƿȅǻřš ţő ɓē măľƒơŗmęď.",
+      "errorLoadingDebugScriptUnknown": "Űƞķŋōŵń ĕŗřőŗ ĺơȁďĩŉğ ã ďėɓųĝ şčřīƥţ.",
+      "errorLoadingDebugLoaderTitle": "Ėŕŗōŕ ļőáđĩƞĝ ďȅƄűĝ łōåďȅř.",
+      "errorLoadingDebugManifestTitle": "Ĕŕŗőŗ ļŏȃđīƞģ đęƀűģ mâŉīƒĕšťš.",
+      "errorLoadingUnknownTitle": "Ęŗŕŏŗ ľōåđįňğ đȅƄųĝ śćřĭƿťş."
+    },
+    "_RPELcTeq3ZByqi3N5dt18w": {
+      "missingDeveloperToolsTabInitFunctionError": "Mĩśşįņģ čŏmƥőŉȇŉŧ ơŗ įŉĩŧĩåľıżėř ƒūňčťīōŋ.",
+      "closeDeveloperToolsAriaLabel": "Čļơşė ďēvȅľơƥȅř ťōŏłş."
+    },
+    "_fwMQe6Xe08yEeCPNxngd+g": {
+      "warningHeading": "Ŵåŕŋīŉğ!",
+      "warningLine1": "Ųŝė őƒ ŧĥıŝ ţơŏŀ ęxƿōŝěš ŷőų ťŏ ƥơŧēƞţįąļ śȅĉŭřīťȳ ťħŕȇàťş ŵĥįċĥ ĉȃƞ řěşũľŧ ıň ōŧħȇŕŝ ģäıƞĩńġ ǻĉćĕŝś ţō ƴőũŕ ƿěŗśơŋâľ Ŏƒƒĭċȇ 365 đàŧă (ďőčůmȅņţŝ, ȅmåĭłş, čōŋvĕŗşáŧĭőņš áŋď mőŗē). Mǻƙȇ śūŕȅ ɏōũ ţřųŝţ ŧĥȇ ƥēŕšŏŉ ơŗ ōŗģàňıžȁŧĩōň ţħåť áśĸȅď ŷōű ţŏ äćčĕŝŝ ŧħıš ţōơļ ɓěƒōŗĕ ƥŗơċęȅđĩŉğ.",
+      "warningLine2": "Ĺėǻŗƞ mőŗĕ ĥȇřė: {0}"
+    },
+    "_upo3vfLFBbnbzl2hKy2TwA": {
+      "allowDebugManifestsTitle": "Ȃĺĺŏŵ ďȅƀųĝ šĉřıƿťš?",
+      "allowDebugLoaderTitle": "Äľľőŵ đėƂūĝ ľőåđȇŕ?",
+      "allowDebugLoaderAndManifestsTitle": "Äŀļōŵ ďěƀūğ ļōȁďȇŗ ȁňď ďēƀũĝ śćřĩƥţŝ?",
+      "debugManifestLoadingWarning": "ŴĀƦƝĮŅĞ: Ţĥįš ƥȃģė ċōňŧãĭŉş ůńšāƒȇ şĉŗıƿŧš ťħǻŧ, īƒ ŀŏąďĕđ, ċơŭļď ƥơţēňťıăŀĺȳ ħȃŕm ƴơŭŗ ċŏmƥűťēř. Ɗő ŉōţ ƿřơčěęđ ūƞľĕşś ɏơų ŧŗŭśť ťĥė ďėvęľōƿēř áŉđ ųƞďĕŕşťáŉđ ŧĥě řįšĸŝ.",
+      "debugManifestLoadingWarning2": "Įƒ ȳőű åŕė ūńšūŕę, ćĺĩċķ {0}.",
+      "debugManifestLoadingConfirm": "Ŀōāđ ďēƅųĝ ščřīƥŧş",
+      "debugManifestLoadingCancel": "Ɗōŉ'ţ ľơáđ đĕƀůğ šćřıƥŧş",
+      "debugManifestLoadingCalloutText": "Ĭƒ ɏŏū ďōƞ'ť ķŉōŵ ŵĥȃť ţō ďő, ċŀıċķ ĥēŕę."
+    },
+    "_mraBnnuq2J9WjrAcnw9QNA": {
+      "debugManifestErrorDetail": "Åń ęŗřōŕ ŏĉċųŕĕď ļőȃďıŉģ đȇƃűĝ mȁŋĭƒěśŧš.",
+      "debugManifestErrorDismissButtonText": "Ďĭśmışś"
+    },
+    "_SxImp5ewsUToxeAHBkB+pw": {
+      "developerToolsTabLoadingText": "Łőàďīňğ...",
+      "developerToolsTabLoadingUnknownError": "Ųņƙƞőŵŉ ēřŗơŗ ľơąďıŉģ đȅvĕľőƥȅŕ ţŏōļş mōđůľě."
+    },
+    "_gqinlPQb8HZprTeCpwNz2w": {
+      "TabTitle": "Ťŕåĉę",
+      "EmptyTraceData": "Ņŏ ŧřāćȇŝ ľőăďēď.",
+      "ExportCSVButtonLabel": "Ȅxƿơŕţ ĆŠV",
+      "LevelHeaderLabel": "Łĕvȇł",
+      "MessageHeaderLabel": "Mėşšǻğě",
+      "ScopeHeaderLabel": "Ščōƥȇ",
+      "SourceHeaderLabel": "Śōűŗċȇ",
+      "TimestampHeaderLabel": "Ţımėšţàmƿ",
+      "TimestampFormat": "{0}/{1}/{2} {3}:{4}:{5}.{6}"
+    },
+    "_sovI4qDAUPMnD4jg3Vsyfg": {
+      "tabTitle": "Mâńīƒęšŧš",
+      "noManifestSelected": "Ňō mąņįƒȇšŧ şȅļĕĉŧęđ"
+    },
+    "_g7G0QHJ5bQYlxe+lk+DcxA": {
+      "TabTitle": "Ƥęŗƒŏřmȁŉčē",
+      "ErrorAccessingPerfDataErrorMessage": "ŲņâƂĺě ŧō řėŧŗīěvȅ ƿĕřƒŏŕmȃŋċě ďáťą: ŏƃĴȅćŧ įŝ ŉųļł ơŗ ũŋđĕƒįƞēď.",
+      "ErrorAccessingRedirectDataErrorMessage": "Ŧĥėřě ŵăŝ ǻ ƥřŏƂĺȇm ãččęşšĭƞĝ ŧħȇ ĤŦŢƤ ŕėďĭřĕċť ƿěŗƒőřmȃňċę ďăţä.",
+      "ErrorParsingPercievedLatencyErrorMessage": "Âń ęŕŕőř ŵâś ćąųġħţ ŵĥęń ƥáŗśĭňğ ŧħē ƿȅŗċĭěvȇđ ŀȃŧēŋćɏ đȃţâ.",
+      "ErrorParsingApiDataErrorMessage": "Áŉ ȅŕŕőŕ ŵãş čãųģĥť ŵĥȅŋ ƿåŕşīņģ ŧħě ÂƤĮ ďáŧá.",
+      "UnkownPerformanceDataErrorMessage": "Àƞ ŭƞķŉőŵƞ ȇřŕōŗ ĥáš ŏĉčŭŗȅđ: {0}",
+      "DefaultWebPartName": "Ŵėƅ Ƥǻŕť",
+      "ServerResponseLabel": "Ŝėŕvȇř Ʀȅśƥơŋşę",
+      "ApplicationInitializationLabel": "Ăƿƥłıćāţĭơŋ Įŉīţĩäľĩżáťĩŏƞ",
+      "ScriptFetchEvalLabel": "Şčŗįƥť ƒĕţčĥ àŉď ēvȃĺűăŧīőŉ",
+      "SpLoaderStartLabel": "ŞƤƑx ıňįŧīâļįżãťıơń",
+      "PageRenderLabel": "Ƥăģē Ŗĕňđĕŗ",
+      "LeftNavRenderLabel": "Ļęƒţ Ŋâvīĝāţıơň Řęņďȇř",
+      "CanvasRenderLabel": "Ćàŋvȃş Ŗĕńđěř",
+      "LayoutRenderLabel": "Ŀȁƴōŭŧ Ŗĕŉďęř",
+      "RedirectResponseLabel": "Ŗėďīŕēĉŧ Řȅşƿōŋšȅ",
+      "AppLoadLabel": "Àƥƥļĭċāťĭōň Ĺőäď",
+      "RenderWebPartsLabel": "Ŵȅɓ Ƥāŗŧŝ Řėƞďėŗ",
+      "TotalRenderTimeLabel": "Ťōťȁŀ",
+      "GeneralErrorMessage": "Ŝőŕŕŷ, şőmȇŧħĩŉğ ŵĕŉť ŵřơŋġ ŵĥįŀȅ ŗȅŧŕĭēvīŉğ ŧĥĕ ƿėŗƒơřmȁŋċę ďàťā.",
+      "ErrorMessagePrefix": "Ēŗŕŏŗ Mĕšşȃģē: {0}",
+      "PerformanceDataHint": "Ńơŧę: Åƒťĕř ãđďĩƞĝ őŕ ŗȇmōvīƞğ ä ŵȇɓ ƥāŗŧ, ŗěƒřĕśĥ ţħė ƿăģȅ ťō šȇĕ ūƥđāŧęđ ƥȅŗƒőřmáňčė ďăţā.",
+      "ModulesLoadedLegendLabel": "Mơďůļȇš Ĺōāđȅđ",
+      "InitializationLegendLabel": "Įňīţīǻłıżäţıőŋ",
+      "RenderTimeLegendLabel": "Ʀēņđěř Ťįmē",
+      "InitializationTimeLabel": "Īŉįţıȁŀĭžȁţıőņ ŧīmě",
+      "ModuleLoadingTimeLabel": "Mōďŭłę łőȁďĭņġ ťĩmě",
+      "ModuleLazyLoadingDelayLabel": "Mōđŭļē łŏãďīņğ đęĺăƴȅđ",
+      "DataFetchTimeLabel": "Ɗǻŧȁ ƒěťĉĥ ťįmĕ",
+      "DataFetchLegendLabel": "Ďąťá Ƒȇţćħ",
+      "ItemsColumnHeader": "İţȅmš",
+      "DurationColumnHeader": "Ɖŭŕąťĩŏņ",
+      "MillisecondsUnitLabel": "{0} mś",
+      "NAPlaceholder": "Ɲ/Å"
+    }
+  };
+
+  strings.default = strings;
+  return strings;
+});

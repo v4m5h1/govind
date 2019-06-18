@@ -1,0 +1,1 @@
+{"version":3,"sources":["PropertyFieldPeoplePicker.ts"],"names":[],"mappings":";;;;;AAAA,yDAAoD","file":"PropertyFieldPeoplePicker.js","sourcesContent":["export * from './propertyFields/peoplePicker/index';\n"],"sourceRoot":"../src"}

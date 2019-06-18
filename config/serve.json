@@ -6,5 +6,29 @@
   "api": {
     "port": 5432,
     "entryPath": "node_modules/@microsoft/sp-webpart-workbench/lib/api/"
+  },
+  "serveConfigurations": {
+    "default": {
+      "pageUrl": "https://csharpsharepoint.sharepoint.com/sites/ModernTeamSite/SitePages/Home.aspx",
+      "customActions": {
+        "26bf477a-157d-4ec2-a018-07cb707b6431": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Test message"
+          }
+        }
+      }
+    },
+    "topNavigation": {
+      "pageUrl": "https://csharpsharepoint.sharepoint.com/sites/ModernTeamSite/SitePages/Home.aspx",
+      "customActions": {
+        "26bf477a-157d-4ec2-a018-07cb707b6431": {
+          "location": "ClientSideExtension.ApplicationCustomizer",
+          "properties": {
+            "testMessage": "Test message"
+          }
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,1 @@
+{"version":3,"file":"IActionItemSliderProps.d.ts","sourceRoot":"","sources":["../../../../src/webparts/actionItemSlider/components/IActionItemSliderProps.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,sBAAsB;IACrC,WAAW,EAAE,MAAM,CAAC;IACpB,OAAO,EAAE,GAAG,CAAC;IACb,YAAY,EAAE,GAAG,CAAC;CACnB"}

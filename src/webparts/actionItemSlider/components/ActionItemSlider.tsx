@@ -13,38 +13,41 @@ export default class ActionItemSlider extends React.Component<
     super(props, state);
     this.state = {
       imageMetaData: [],
-      listTitle: String
+      listTitle: "",
+      selectedKeys: []
     };
-    // this.getPageDetails();
-    this.getListTitleById(this.props.listIds);
+    this.getListTitleById(this.props);
   }
 
   public getPageDetails = () => {
-    sp.web.lists
-      .getByTitle("Site Pages")
-      .items.get()
-      .then((items: any[]) => {
-        console.log(items);
+    if (this.state.listTitle !== "") {
+      sp.web.lists
+        .getByTitle(this.state.listTitle)
+        .items.select(...this.state.selectedKeys)
+        .get()
+        .then((items: any[]) => {
+          console.log(items);
 
-        let images = [];
-        items.map(item => {
-          let image = {};
-          if (item.Rollup_x0020_Image) {
-            image = {
-              imageUrl: item.Rollup_x0020_Image
-                ? item.Rollup_x0020_Image.Url
-                : "",
-              title: item.Title
-            };
-          }
-          if (!this.isEmpty(image)) {
-            images.push(image);
-          }
+          let images = [];
+          items.map(item => {
+            let image = {};
+            if (item.Rollup_x0020_Image) {
+              image = {
+                imageUrl: item.Rollup_x0020_Image
+                  ? item.Rollup_x0020_Image.Url
+                  : "",
+                title: item.Title
+              };
+            }
+            if (!this.isEmpty(image)) {
+              images.push(image);
+            }
+          });
+          this.setState({
+            imageMetaData: images
+          });
         });
-        this.setState({
-          imageMetaData: images
-        });
-      });
+    }
   };
 
   public isEmpty(obj) {
@@ -54,12 +57,18 @@ export default class ActionItemSlider extends React.Component<
     return true;
   }
 
-  public getListTitleById = listId => {
+  // Set the List Title and the selected keys on Property change
+  public getListTitleById = nxtProps => {
     sp.web.lists
-      .getById(listId)
+      .getById(nxtProps.listIds)
+      .select("Title")
       .get()
-      .then((lProps: any) => {
-        this.setState({ listTitle: lProps.Title });
+      .then((listProps: any) => {
+        this.setState({
+          listTitle: listProps.Title,
+          selectedKeys: nxtProps.selectedKeys
+        });
+        this.getPageDetails();
       });
   };
 
@@ -82,7 +91,7 @@ export default class ActionItemSlider extends React.Component<
   }
 
   public componentWillReceiveProps(nextProps) {
-    this.getListTitleById(nextProps.listIds);
+    this.getListTitleById(nextProps);
   }
 
   public render(): React.ReactElement<IActionItemSliderProps> {
@@ -90,11 +99,7 @@ export default class ActionItemSlider extends React.Component<
     return (
       <div className={styles.actionItemSlider}>
         <div className={styles.container}>
-          <p>{this.props.listIds}</p>
-          <p>{this.state.listTitle}</p>
-          <div>{this.props.selectedKeys}</div>
           <Carousel>
-            {/* {this.renderImages} */}
             {this.state.imageMetaData.map((image, index) => {
               return (
                 <div>

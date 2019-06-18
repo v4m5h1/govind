@@ -62,11 +62,9 @@ export default class ActionItemSliderWebPart extends BaseClientSideWebPart<
   public getListFields() {
     let options: { key: any; text: any }[];
     const filter2 = `Hidden eq false and CanBeDeleted eq true`;
-    const select = this.properties.multiSelect;
-    console.log(select);
     sp.web.lists
       .getById(this.properties.lists)
-      .fields.select(...select)
+      .fields.select("InternalName", "Title")
       .filter(filter2)
       .get()
       .then(selectedFields => {

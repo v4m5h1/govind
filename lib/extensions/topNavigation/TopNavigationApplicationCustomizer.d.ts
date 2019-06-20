@@ -5,10 +5,15 @@ import { BaseApplicationCustomizer } from "@microsoft/sp-application-base";
  * You can define an interface to describe it.
  */
 export interface ITopNavigationApplicationCustomizerProperties {
-    testMessage: string;
+    TopMenuTermSet?: string;
 }
 /** A Custom Action which can be run during execution of a Client Side Application */
 export default class TopNavigationApplicationCustomizer extends BaseApplicationCustomizer<ITopNavigationApplicationCustomizerProperties> {
+    private _topPlaceholder;
+    private _topMenuItems;
     onInit(): Promise<void>;
+    private _renderPlaceHolders;
+    private _onDispose;
+    private generateMegaMenuLevel;
 }
 //# sourceMappingURL=TopNavigationApplicationCustomizer.d.ts.map

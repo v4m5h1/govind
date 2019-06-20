@@ -66,15 +66,15 @@
         "version": "1.8.2",
         "id": "974a7777-0990-4136-8fa6-95d80114c2e0"
       },
-      "@microsoft/sp-property-pane": {
-        "type": "component",
-        "version": "1.8.2",
-        "id": "f9e737b7-f0df-4597-ba8c-3060f82380db"
-      },
       "@microsoft/sp-http": {
         "type": "component",
         "version": "1.8.2",
         "id": "c07208f0-ea3b-4c1a-9965-ac1b825211a6"
+      },
+      "@microsoft/sp-property-pane": {
+        "type": "component",
+        "version": "1.8.2",
+        "id": "f9e737b7-f0df-4597-ba8c-3060f82380db"
       }
     }
   }

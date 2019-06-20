@@ -94,7 +94,7 @@ export default class ActionItemSlider extends React.Component<
     let images;
     if (this.state.imageMetaData.length > 0) {
       images = (
-        <Carousel autoPlay={true}>
+        <Carousel autoPlay={true} infiniteLoop>
           {this.state.imageMetaData.map((image, index) => {
             return (
               <div>

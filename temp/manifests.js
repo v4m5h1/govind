@@ -1000,6 +1000,11 @@ function getManifests() {
           "version": "1.8.2",
           "id": "7263c7d0-1d6a-45ec-8d85-d4d1d234171b"
         },
+        "@microsoft/sp-http": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "c07208f0-ea3b-4c1a-9965-ac1b825211a6"
+        },
         "@microsoft/decorators": {
           "type": "component",
           "version": "1.8.2",
@@ -1009,11 +1014,6 @@ function getManifests() {
           "type": "component",
           "version": "1.8.2",
           "id": "4df9bb86-ab0a-4aab-ab5f-48bf167048fb"
-        },
-        "@microsoft/sp-dialog": {
-          "type": "component",
-          "version": "1.8.2",
-          "id": "c0c518b8-701b-4f6f-956d-5782772bb731"
         }
       }
     }
@@ -1086,15 +1086,15 @@ function getManifests() {
           "version": "1.8.2",
           "id": "974a7777-0990-4136-8fa6-95d80114c2e0"
         },
-        "@microsoft/sp-property-pane": {
-          "type": "component",
-          "version": "1.8.2",
-          "id": "f9e737b7-f0df-4597-ba8c-3060f82380db"
-        },
         "@microsoft/sp-http": {
           "type": "component",
           "version": "1.8.2",
           "id": "c07208f0-ea3b-4c1a-9965-ac1b825211a6"
+        },
+        "@microsoft/sp-property-pane": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "f9e737b7-f0df-4597-ba8c-3060f82380db"
         }
       }
     }

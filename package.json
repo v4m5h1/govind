@@ -35,7 +35,7 @@
     "office-ui-fabric-react": "6.143.0",
     "react": "16.7.0",
     "react-dom": "16.7.0",
-    "react-responsive-carousel": "^3.1.49"
+    "react-responsive-carousel": "^3.1.33"
   },
   "resolutions": {
     "@types/react": "16.7.22"

@@ -17251,9 +17251,9 @@
       "integrity": "sha1-63cFxNs2+1AbOqOP91lhaqD/luA="
     },
     "react-easy-swipe": {
-      "version": "0.0.16",
-      "resolved": "https://registry.npmjs.org/react-easy-swipe/-/react-easy-swipe-0.0.16.tgz",
-      "integrity": "sha1-Wj2Umo+XXQW+kqgYJUMV0TGKgeo=",
+      "version": "0.0.13",
+      "resolved": "https://registry.npmjs.org/react-easy-swipe/-/react-easy-swipe-0.0.13.tgz",
+      "integrity": "sha1-wA6Q2r7Y0IeOjIMTuGfgFDXw9jc=",
       "requires": {
         "prop-types": "^15.5.8"
       }
@@ -17278,13 +17278,13 @@
       }
     },
     "react-responsive-carousel": {
-      "version": "3.1.49",
-      "resolved": "https://registry.npmjs.org/react-responsive-carousel/-/react-responsive-carousel-3.1.49.tgz",
-      "integrity": "sha512-mudzwtDUWY4Apl00V6ycYJxVdiggXF46GegGFdeR72FL9Km8RDyFPQFBqsaKWCX5uTxWkLEw5qgn2uHsn2gnJA==",
+      "version": "3.1.33",
+      "resolved": "https://registry.npmjs.org/react-responsive-carousel/-/react-responsive-carousel-3.1.33.tgz",
+      "integrity": "sha1-cC1RqJDiUk+jFXJnox9LP8IVdSw=",
       "requires": {
         "classnames": "^2.2.5",
         "prop-types": "^15.5.8",
-        "react-easy-swipe": "^0.0.16"
+        "react-easy-swipe": "^0.0.13"
       }
     },
     "react-test-renderer": {

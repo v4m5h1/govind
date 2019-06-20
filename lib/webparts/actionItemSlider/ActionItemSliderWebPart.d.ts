@@ -11,6 +11,7 @@ export interface IActionItemSliderWebPartProps {
         key: any;
         text: any;
     }[];
+    helloworld: string;
 }
 export default class ActionItemSliderWebPart extends BaseClientSideWebPart<IActionItemSliderWebPartProps> {
     onInit(): Promise<void>;

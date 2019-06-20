@@ -24,6 +24,7 @@ export interface IActionItemSliderWebPartProps {
   multiSelect: string[];
   fieldsFetched: boolean;
   fieldsArray: { key: any; text: any }[];
+  helloworld: string;
 }
 
 export default class ActionItemSliderWebPart extends BaseClientSideWebPart<
@@ -124,6 +125,9 @@ export default class ActionItemSliderWebPart extends BaseClientSideWebPart<
                   label: "Multi select field",
                   options: this.properties.fieldsArray,
                   selectedKeys: this.properties.multiSelect
+                }),
+                PropertyPaneTextField("helloworld", {
+                  label: strings.HelloWorldFieldLabel
                 })
               ]
             }

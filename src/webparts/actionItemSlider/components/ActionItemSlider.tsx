@@ -73,17 +73,12 @@ export default class ActionItemSlider extends React.Component<
   };
 
   public renderImages = () => {
-    // if(this.state.imageMetaData.count>0){
-
-    this.state.imageMetaData.map(image => {
-      return (
-        <div>
-          <img src={image.imageUrl} />
-          <p className="legend">{image.title}</p>
-        </div>
-      );
+    return this.state.imageMetaData.map(image => {
+      <div>
+        <img src={image.imageUrl} />
+        <p className="legend">{image.title}</p>
+      </div>;
     });
-    // return slides;
   };
 
   public componentWillMount() {
@@ -96,28 +91,26 @@ export default class ActionItemSlider extends React.Component<
 
   public render(): React.ReactElement<IActionItemSliderProps> {
     console.log(this.props.selectedKeys);
-    let imageSlides = this.state.imageMetaData.map((image, index) => {
-      return (
-        <div>
-          <img src={image.imageUrl} />
-          <p className="legend">{image.title}</p>
-        </div>
-      );
-    });
-    let carousel;
+    let images;
     if (this.state.imageMetaData.length > 0) {
-      carousel = (
-        <Carousel autoPlay interval={1000} infiniteLoop>
-          {imageSlides}
+      images = (
+        <Carousel autoPlay={true}>
+          {this.state.imageMetaData.map((image, index) => {
+            return (
+              <div>
+                <img src={image.imageUrl} />
+                <p className="legend">{image.title}</p>
+              </div>
+            );
+          })}
         </Carousel>
       );
     } else {
-      carousel = <span>There are no Images</span>;
+      images = <span> No Images Found </span>;
     }
-
     return (
       <div className={styles.actionItemSlider}>
-        <div className={styles.container}>{carousel}</div>
+        <div className={styles.container}>{images}</div>
       </div>
     );
   }

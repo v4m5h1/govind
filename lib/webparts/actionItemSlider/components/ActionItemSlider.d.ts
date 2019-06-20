@@ -5,7 +5,7 @@ export default class ActionItemSlider extends React.Component<IActionItemSliderP
     getPageDetails: () => void;
     isEmpty(obj: any): boolean;
     getListTitleById: (nxtProps: any) => void;
-    renderImages: () => void;
+    renderImages: () => any;
     componentWillMount(): void;
     componentWillReceiveProps(nextProps: any): void;
     render(): React.ReactElement<IActionItemSliderProps>;

@@ -183,9 +183,10 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
     for (let i: number = 0; i < levels.length; i++) {
       let levelItem: SPTermStore.ISPTermObject = levels[i];
       let url: string =
-        typeof levelItem.localCustomProperties.url === "undefined"
+        typeof levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl ===
+        "undefined"
           ? "#"
-          : levelItem.localCustomProperties.url;
+          : levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl;
       menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
       if (levelItem.terms.length != 0) {
         menuString += "<ul>";

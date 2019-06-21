@@ -15682,9 +15682,10 @@ var TopNavigationApplicationCustomizer_TopNavigationApplicationCustomizer = /** 
         var menuString = "";
         for (var i = 0; i < levels.length; i++) {
             var levelItem = levels[i];
-            var url = typeof levelItem.localCustomProperties.url === "undefined"
+            var url = typeof levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl ===
+                "undefined"
                 ? "#"
-                : levelItem.localCustomProperties.url;
+                : levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl;
             menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
             if (levelItem.terms.length != 0) {
                 menuString += "<ul>";

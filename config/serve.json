@@ -9,23 +9,23 @@
   },
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://csharpsharepoint.sharepoint.com/sites/ModernTeamSite/SitePages/Home.aspx",
+      "pageUrl": "https://mjsp2019.sharepoint.com/sites/etrade/SitePages/Home.aspx",
       "customActions": {
         "26bf477a-157d-4ec2-a018-07cb707b6431": {
           "location": "ClientSideExtension.ApplicationCustomizer",
           "properties": {
-            "TopMenuTermSet": "Test message"
+            "TopMenuTermSet": "TopNav"
           }
         }
       }
     },
     "topNavigation": {
-      "pageUrl": "https://csharpsharepoint.sharepoint.com/sites/ModernTeamSite/SitePages/Home.aspx",
+      "pageUrl": "https://mjsp2019.sharepoint.com/sites/etrade/SitePages/Home.aspx",
       "customActions": {
         "26bf477a-157d-4ec2-a018-07cb707b6431": {
           "location": "ClientSideExtension.ApplicationCustomizer",
           "properties": {
-            "TopMenuTermSet": "Test message"
+            "TopMenuTermSet": "TopNav"
           }
         }
       }

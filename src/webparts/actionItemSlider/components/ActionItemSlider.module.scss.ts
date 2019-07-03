@@ -1,6 +1,7 @@
 /* tslint:disable */
 require("./ActionItemSlider.module.css");
 const styles = {
+<<<<<<< HEAD
   actionItemSlider: 'actionItemSlider_373d78d8',
   container: 'container_373d78d8',
   row: 'row_373d78d8',
@@ -11,6 +12,18 @@ const styles = {
   description: 'description_373d78d8',
   button: 'button_373d78d8',
   label: 'label_373d78d8',
+=======
+  actionItemSlider: 'actionItemSlider_ef07d2b7',
+  container: 'container_ef07d2b7',
+  row: 'row_ef07d2b7',
+  column: 'column_ef07d2b7',
+  'ms-Grid': 'ms-Grid_ef07d2b7',
+  title: 'title_ef07d2b7',
+  subTitle: 'subTitle_ef07d2b7',
+  description: 'description_ef07d2b7',
+  button: 'button_ef07d2b7',
+  label: 'label_ef07d2b7',
+>>>>>>> 630ed31903528c1cc2347f30886251b454a7fef9
 };
 
 export default styles;

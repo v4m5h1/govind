@@ -24262,7 +24262,6 @@ var external__ActionItemSliderWebPartStrings_ = __webpack_require__(102);
 var external__ActionItemSliderWebPartStrings__default = /*#__PURE__*/__webpack_require__.n(external__ActionItemSliderWebPartStrings_);
 
 // CONCATENATED MODULE: ./lib/webparts/actionItemSlider/components/ActionItemSlider.module.scss.js
-<<<<<<< HEAD
 /* tslint:disable */
 __webpack_require__(103);
 var styles = {
@@ -24279,24 +24278,6 @@ var styles = {
 };
 /* harmony default export */ var ActionItemSlider_module_scss = (styles);
 /* tslint:enable */ 
-=======
-/* tslint:disable */
-__webpack_require__(103);
-var styles = {
-    actionItemSlider: 'actionItemSlider_ef07d2b7',
-    container: 'container_ef07d2b7',
-    row: 'row_ef07d2b7',
-    column: 'column_ef07d2b7',
-    'ms-Grid': 'ms-Grid_ef07d2b7',
-    title: 'title_ef07d2b7',
-    subTitle: 'subTitle_ef07d2b7',
-    description: 'description_ef07d2b7',
-    button: 'button_ef07d2b7',
-    label: 'label_ef07d2b7',
-};
-/* harmony default export */ var ActionItemSlider_module_scss = (styles);
-/* tslint:enable */ 
->>>>>>> 630ed31903528c1cc2347f30886251b454a7fef9
 
 // EXTERNAL MODULE: ./node_modules/react-responsive-carousel/lib/index.js
 var lib = __webpack_require__(105);

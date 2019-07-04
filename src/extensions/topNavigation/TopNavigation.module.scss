@@ -49,6 +49,17 @@
       background: #fff;
       color: #333;
     }
+    a {
+      display: inline-block;
+    }
+    i {
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+      border: solid #767676;
+      border-width: 0 3px 3px 0;
+      display: inline-block;
+      padding: 3px;
+    }
   }
 
   .menu > ul {
@@ -85,10 +96,20 @@
     text-decoration: none;
     padding: 0.75em 2em;
     display: block;
+    // display: inline-block;
   }
 
   .menu > ul > li a:hover {
     background: #f0f0f0;
+  }
+
+  // Show Arrows
+  .menu > ul > li > i {
+    // width: 0;
+    // height: 0;
+    // border-left: 5px solid transparent;
+    // border-right: 5px solid transparent;
+    // border-top: 5px solid #767676;
   }
 
   .menu > ul > li > ul {

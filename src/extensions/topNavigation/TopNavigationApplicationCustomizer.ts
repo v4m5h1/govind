@@ -187,7 +187,8 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
         "undefined"
           ? "#"
           : levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl;
-      menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
+      menuString +=
+        '<li><a href="' + url + '">' + levelItem.name + "</a><i></i>";
       if (levelItem.terms.length != 0) {
         menuString += "<ul>";
         menuString += this.generateMegaMenuLevel(levelItem.terms);

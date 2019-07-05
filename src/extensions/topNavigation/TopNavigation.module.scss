@@ -49,16 +49,33 @@
       background: #fff;
       color: #333;
     }
-    a {
-      display: inline-block !important;
+
+    // Get arrow same line
+    // a {
+    //   display: inline-block !important;
+    // }
+    a:not(:only-child):after {
+      color: #999999;
+      content: " ▾";
     }
-    i {
-      transform: rotate(45deg);
-      -webkit-transform: rotate(45deg);
-      border: solid #767676;
-      border-width: 0 3px 3px 0;
-      display: inline-block;
-      padding: 3px;
+
+    a:empty::after {
+      content: none;
+    }
+
+    // Adds Arrow
+    // i {
+    //   transform: rotate(45deg);
+    //   -webkit-transform: rotate(45deg);
+    //   border: solid #767676;
+    //   border-width: 0 3px 3px 0;
+    //   display: inline-block;
+    //   padding: 3px;
+    // }
+
+    // Hides Sub menu
+    li > ul {
+      display: none;
     }
   }
 
@@ -155,7 +172,7 @@
   }
 
   .menu > ul > li > ul > li > ul {
-    display: block;
+    // display: block;
     padding: 0;
     margin: 10px 0 0;
     list-style: none;

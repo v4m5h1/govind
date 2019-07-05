@@ -117,6 +117,18 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
         e.preventDefault();
       }
     });
+
+    // Added for second level of Navigation
+    jQuery("#menu > ul > li > ul > li").hover(function(e) {
+      if (jQuery(window).width() > 943) {
+        jQuery(this)
+          .children("ul")
+          .stop(true, false)
+          .fadeToggle(150);
+        e.preventDefault();
+      }
+    });
+
     //If width is more than 943px dropdowns are displayed on hover
 
     jQuery("#menu > ul > li").click(function() {
@@ -173,7 +185,7 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
 
   private _onDispose(): void {
     console.log(
-      "[HelloWorldApplicationCustomizer._onDispose] Disposed custom top and bottom placeholders."
+      "[TopNavigationApplicationCustomizer._onDispose] Disposed custom top and bottom placeholders."
     );
   }
 
@@ -187,8 +199,7 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
         "undefined"
           ? "#"
           : levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl;
-      menuString +=
-        '<li><a href="' + url + '">' + levelItem.name + "</a><i></i>";
+      menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
       if (levelItem.terms.length != 0) {
         menuString += "<ul>";
         menuString += this.generateMegaMenuLevel(levelItem.terms);

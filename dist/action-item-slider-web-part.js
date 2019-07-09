@@ -1,4 +1,4 @@
-define("cbb0f3a9-667f-4476-b520-341b0ed1d433_0.0.1", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-webpart-base","@microsoft/sp-http","@microsoft/sp-property-pane","ActionItemSliderWebPartStrings","PropertyControlStrings"], function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_30__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_101__, __WEBPACK_EXTERNAL_MODULE_102__, __WEBPACK_EXTERNAL_MODULE_263__) { return /******/ (function(modules) { // webpackBootstrap
+define("cbb0f3a9-667f-4476-b520-341b0ed1d433_0.0.1", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-webpart-base","@microsoft/sp-http","@microsoft/sp-property-pane","ActionItemSliderWebPartStrings","PropertyControlStrings"], function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_33__, __WEBPACK_EXTERNAL_MODULE_49__, __WEBPACK_EXTERNAL_MODULE_105__, __WEBPACK_EXTERNAL_MODULE_106__, __WEBPACK_EXTERNAL_MODULE_263__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -60,7 +60,7 @@ define("cbb0f3a9-667f-4476-b520-341b0ed1d433_0.0.1", ["react","react-dom","@micr
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 100);
+/******/ 	return __webpack_require__(__webpack_require__.s = 104);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -278,6 +278,12 @@ function __importDefault(mod) {
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -286,12 +292,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(124), exports);
 
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
 /***/ }),
 /* 3 */
@@ -306,6 +306,372 @@ tslib_1.__exportStar(__webpack_require__(167), exports);
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+/**
+ * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
+ * to use if that slot is not specified by the theme.
+ */
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+// IE needs to inject styles using cssText. However, we need to evaluate this lazily, so this
+// value will initialize as undefined, and later will be set once on first loadStyles injection.
+var _injectStylesWithCssText;
+// Store the theming state in __themeState__ global scope for reuse in the case of duplicate
+// load-themed-styles hosted on the page.
+var _root = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
+// Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
+var _styleNonce = _root && _root.CSPSettings && _root.CSPSettings.nonce;
+var _themeState = initializeThemeState();
+/**
+ * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
+ */
+// tslint:disable-next-line:max-line-length
+var _themeTokenRegex = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g;
+/** Maximum style text length, for supporting IE style restrictions. */
+var MAX_STYLE_CONTENT_SIZE = 10000;
+var now = function () { return (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now(); };
+function measure(func) {
+    var start = now();
+    func();
+    var end = now();
+    _themeState.perf.duration += end - start;
+}
+/**
+ * initialize global state object
+ */
+function initializeThemeState() {
+    var state = _root.__themeState__ || {
+        theme: undefined,
+        lastStyleElement: undefined,
+        registeredStyles: []
+    };
+    if (!state.runState) {
+        state = __assign({}, (state), { perf: {
+                count: 0,
+                duration: 0
+            }, runState: {
+                flushTimer: 0,
+                mode: 0 /* sync */,
+                buffer: []
+            } });
+    }
+    if (!state.registeredThemableStyles) {
+        state = __assign({}, (state), { registeredThemableStyles: [] });
+    }
+    _root.__themeState__ = state;
+    return state;
+}
+/**
+ * Loads a set of style text. If it is registered too early, we will register it when the window.load
+ * event is fired.
+ * @param {string | ThemableArray} styles Themable style text to register.
+ * @param {boolean} loadAsync When true, always load styles in async mode, irrespective of current sync mode.
+ */
+function loadStyles(styles, loadAsync) {
+    if (loadAsync === void 0) { loadAsync = false; }
+    measure(function () {
+        var styleParts = Array.isArray(styles) ? styles : splitStyles(styles);
+        if (_injectStylesWithCssText === undefined) {
+            _injectStylesWithCssText = shouldUseCssText();
+        }
+        var _a = _themeState.runState, mode = _a.mode, buffer = _a.buffer, flushTimer = _a.flushTimer;
+        if (loadAsync || mode === 1 /* async */) {
+            buffer.push(styleParts);
+            if (!flushTimer) {
+                _themeState.runState.flushTimer = asyncLoadStyles();
+            }
+        }
+        else {
+            applyThemableStyles(styleParts);
+        }
+    });
+}
+exports.loadStyles = loadStyles;
+/**
+ * Allows for customizable loadStyles logic. e.g. for server side rendering application
+ * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void}
+ * a loadStyles callback that gets called when styles are loaded or reloaded
+ */
+function configureLoadStyles(loadStylesFn) {
+    _themeState.loadStyles = loadStylesFn;
+}
+exports.configureLoadStyles = configureLoadStyles;
+/**
+ * Configure run mode of load-themable-styles
+ * @param mode load-themable-styles run mode, async or sync
+ */
+function configureRunMode(mode) {
+    _themeState.runState.mode = mode;
+}
+exports.configureRunMode = configureRunMode;
+/**
+ * external code can call flush to synchronously force processing of currently buffered styles
+ */
+function flush() {
+    measure(function () {
+        var styleArrays = _themeState.runState.buffer.slice();
+        _themeState.runState.buffer = [];
+        var mergedStyleArray = [].concat.apply([], styleArrays);
+        if (mergedStyleArray.length > 0) {
+            applyThemableStyles(mergedStyleArray);
+        }
+    });
+}
+exports.flush = flush;
+/**
+ * register async loadStyles
+ */
+function asyncLoadStyles() {
+    return setTimeout(function () {
+        _themeState.runState.flushTimer = 0;
+        flush();
+    }, 0);
+}
+/**
+ * Loads a set of style text. If it is registered too early, we will register it when the window.load event
+ * is fired.
+ * @param {string} styleText Style to register.
+ * @param {IStyleRecord} styleRecord Existing style record to re-apply.
+ */
+function applyThemableStyles(stylesArray, styleRecord) {
+    if (_themeState.loadStyles) {
+        _themeState.loadStyles(resolveThemableArray(stylesArray).styleString, stylesArray);
+    }
+    else {
+        _injectStylesWithCssText ?
+            registerStylesIE(stylesArray, styleRecord) :
+            registerStyles(stylesArray);
+    }
+}
+/**
+ * Registers a set theme tokens to find and replace. If styles were already registered, they will be
+ * replaced.
+ * @param {theme} theme JSON object of theme tokens to values.
+ */
+function loadTheme(theme) {
+    _themeState.theme = theme;
+    // reload styles.
+    reloadStyles();
+}
+exports.loadTheme = loadTheme;
+/**
+ * Clear already registered style elements and style records in theme_State object
+ * @param option - specify which group of registered styles should be cleared.
+ * Default to be both themable and non-themable styles will be cleared
+ */
+function clearStyles(option) {
+    if (option === void 0) { option = 3 /* all */; }
+    if (option === 3 /* all */ || option === 2 /* onlyNonThemable */) {
+        clearStylesInternal(_themeState.registeredStyles);
+        _themeState.registeredStyles = [];
+    }
+    if (option === 3 /* all */ || option === 1 /* onlyThemable */) {
+        clearStylesInternal(_themeState.registeredThemableStyles);
+        _themeState.registeredThemableStyles = [];
+    }
+}
+exports.clearStyles = clearStyles;
+function clearStylesInternal(records) {
+    records.forEach(function (styleRecord) {
+        var styleElement = styleRecord && styleRecord.styleElement;
+        if (styleElement && styleElement.parentElement) {
+            styleElement.parentElement.removeChild(styleElement);
+        }
+    });
+}
+/**
+ * Reloads styles.
+ */
+function reloadStyles() {
+    if (_themeState.theme) {
+        var themableStyles = [];
+        for (var _i = 0, _a = _themeState.registeredThemableStyles; _i < _a.length; _i++) {
+            var styleRecord = _a[_i];
+            themableStyles.push(styleRecord.themableStyle);
+        }
+        if (themableStyles.length > 0) {
+            clearStyles(1 /* onlyThemable */);
+            applyThemableStyles([].concat.apply([], themableStyles));
+        }
+    }
+}
+/**
+ * Find theme tokens and replaces them with provided theme values.
+ * @param {string} styles Tokenized styles to fix.
+ */
+function detokenize(styles) {
+    if (styles) {
+        styles = resolveThemableArray(splitStyles(styles)).styleString;
+    }
+    return styles;
+}
+exports.detokenize = detokenize;
+/**
+ * Resolves ThemingInstruction objects in an array and joins the result into a string.
+ * @param {ThemableArray} splitStyleArray ThemableArray to resolve and join.
+ */
+function resolveThemableArray(splitStyleArray) {
+    var theme = _themeState.theme;
+    var themable = false;
+    // Resolve the array of theming instructions to an array of strings.
+    // Then join the array to produce the final CSS string.
+    var resolvedArray = (splitStyleArray || []).map(function (currentValue) {
+        var themeSlot = currentValue.theme;
+        if (themeSlot) {
+            themable = true;
+            // A theming annotation. Resolve it.
+            var themedValue = theme ? theme[themeSlot] : undefined;
+            var defaultValue = currentValue.defaultValue || 'inherit';
+            // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
+            // Allow the themedValue to be undefined to explicitly request the default value.
+            if (theme && !themedValue && console && !(themeSlot in theme) && "boolean" !== 'undefined' && true) {
+                console.warn("Theming value not provided for \"" + themeSlot + "\". Falling back to \"" + defaultValue + "\".");
+            }
+            return themedValue || defaultValue;
+        }
+        else {
+            // A non-themable string. Preserve it.
+            return currentValue.rawString;
+        }
+    });
+    return {
+        styleString: resolvedArray.join(''),
+        themable: themable
+    };
+}
+/**
+ * Split tokenized CSS into an array of strings and theme specification objects
+ * @param {string} styles Tokenized styles to split.
+ */
+function splitStyles(styles) {
+    var result = [];
+    if (styles) {
+        var pos = 0; // Current position in styles.
+        var tokenMatch = void 0; // tslint:disable-line:no-null-keyword
+        while (tokenMatch = _themeTokenRegex.exec(styles)) {
+            var matchIndex = tokenMatch.index;
+            if (matchIndex > pos) {
+                result.push({
+                    rawString: styles.substring(pos, matchIndex)
+                });
+            }
+            result.push({
+                theme: tokenMatch[1],
+                defaultValue: tokenMatch[2] // May be undefined
+            });
+            // index of the first character after the current match
+            pos = _themeTokenRegex.lastIndex;
+        }
+        // Push the rest of the string after the last match.
+        result.push({
+            rawString: styles.substring(pos)
+        });
+    }
+    return result;
+}
+exports.splitStyles = splitStyles;
+/**
+ * Registers a set of style text. If it is registered too early, we will register it when the
+ * window.load event is fired.
+ * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
+ * @param {IStyleRecord} styleRecord May specify a style Element to update.
+ */
+function registerStyles(styleArray) {
+    if (typeof document === 'undefined') {
+        return;
+    }
+    var head = document.getElementsByTagName('head')[0];
+    var styleElement = document.createElement('style');
+    var _a = resolveThemableArray(styleArray), styleString = _a.styleString, themable = _a.themable;
+    styleElement.type = 'text/css';
+    if (_styleNonce) {
+        styleElement.setAttribute('nonce', _styleNonce);
+    }
+    styleElement.appendChild(document.createTextNode(styleString));
+    _themeState.perf.count++;
+    head.appendChild(styleElement);
+    var record = {
+        styleElement: styleElement,
+        themableStyle: styleArray
+    };
+    if (themable) {
+        _themeState.registeredThemableStyles.push(record);
+    }
+    else {
+        _themeState.registeredStyles.push(record);
+    }
+}
+/**
+ * Registers a set of style text, for IE 9 and below, which has a ~30 style element limit so we need
+ * to register slightly differently.
+ * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
+ * @param {IStyleRecord} styleRecord May specify a style Element to update.
+ */
+function registerStylesIE(styleArray, styleRecord) {
+    if (typeof document === 'undefined') {
+        return;
+    }
+    var head = document.getElementsByTagName('head')[0];
+    var registeredStyles = _themeState.registeredStyles;
+    var lastStyleElement = _themeState.lastStyleElement;
+    var stylesheet = lastStyleElement ? lastStyleElement.styleSheet : undefined;
+    var lastStyleContent = stylesheet ? stylesheet.cssText : '';
+    var lastRegisteredStyle = registeredStyles[registeredStyles.length - 1];
+    var resolvedStyleText = resolveThemableArray(styleArray).styleString;
+    if (!lastStyleElement || (lastStyleContent.length + resolvedStyleText.length) > MAX_STYLE_CONTENT_SIZE) {
+        lastStyleElement = document.createElement('style');
+        lastStyleElement.type = 'text/css';
+        if (styleRecord) {
+            head.replaceChild(lastStyleElement, styleRecord.styleElement);
+            styleRecord.styleElement = lastStyleElement;
+        }
+        else {
+            head.appendChild(lastStyleElement);
+        }
+        if (!styleRecord) {
+            lastRegisteredStyle = {
+                styleElement: lastStyleElement,
+                themableStyle: styleArray
+            };
+            registeredStyles.push(lastRegisteredStyle);
+        }
+    }
+    lastStyleElement.styleSheet.cssText += detokenize(resolvedStyleText);
+    Array.prototype.push.apply(lastRegisteredStyle.themableStyle, styleArray); // concat in-place
+    // Preserve the theme state.
+    _themeState.lastStyleElement = lastStyleElement;
+}
+/**
+ * Checks to see if styleSheet exists as a property off of a style element.
+ * This will determine if style registration should be done via cssText (<= IE9) or not
+ */
+function shouldUseCssText() {
+    var useCSSText = false;
+    if (typeof document !== 'undefined') {
+        var emptyStyle = document.createElement('style');
+        emptyStyle.type = 'text/css';
+        useCSSText = !!emptyStyle.styleSheet;
+    }
+    return useCSSText;
+}
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
+
+/***/ }),
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -338,7 +704,7 @@ tslib_1.__exportStar(__webpack_require__(167), exports);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return jsS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return hOP; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getHashCode; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js__ = __webpack_require__(38);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js__);
 /**
  * @license
@@ -1224,10 +1590,16 @@ var PnPClientStorage = /** @class */ (function () {
 
 
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(7)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(8)))
 
 /***/ }),
-/* 5 */
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
+
+/***/ }),
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1462,29 +1834,7 @@ var FunctionListener = /** @class */ (function () {
 
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var mergeStyles_1 = __webpack_require__(127);
-exports.mergeStyles = mergeStyles_1.mergeStyles;
-var mergeStyleSets_1 = __webpack_require__(132);
-exports.mergeStyleSets = mergeStyleSets_1.mergeStyleSets;
-var concatStyleSets_1 = __webpack_require__(61);
-exports.concatStyleSets = concatStyleSets_1.concatStyleSets;
-var fontFace_1 = __webpack_require__(133);
-exports.fontFace = fontFace_1.fontFace;
-var keyframes_1 = __webpack_require__(134);
-exports.keyframes = keyframes_1.keyframes;
-var Stylesheet_1 = __webpack_require__(12);
-exports.InjectionMode = Stylesheet_1.InjectionMode;
-exports.Stylesheet = Stylesheet_1.Stylesheet;
-
-
-/***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 var g;
@@ -1511,7 +1861,54 @@ module.exports = g;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var mergeStyles_1 = __webpack_require__(127);
+exports.mergeStyles = mergeStyles_1.mergeStyles;
+var mergeStyleSets_1 = __webpack_require__(132);
+exports.mergeStyleSets = mergeStyleSets_1.mergeStyleSets;
+var concatStyleSets_1 = __webpack_require__(65);
+exports.concatStyleSets = concatStyleSets_1.concatStyleSets;
+var fontFace_1 = __webpack_require__(133);
+exports.fontFace = fontFace_1.fontFace;
+var keyframes_1 = __webpack_require__(134);
+exports.keyframes = keyframes_1.keyframes;
+var Stylesheet_1 = __webpack_require__(14);
+exports.InjectionMode = Stylesheet_1.InjectionMode;
+exports.Stylesheet = Stylesheet_1.Stylesheet;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+if (true) {
+  var ReactIs = __webpack_require__(20);
+
+  // By explicitly using `prop-types` you are opting into new development behavior.
+  // http://fb.me/prop-types-in-prod
+  var throwOnDirectAccess = true;
+  module.exports = __webpack_require__(35)(ReactIs.isElement, throwOnDirectAccess);
+} else {
+  // By explicitly using `prop-types` you are opting into new production behavior.
+  // http://fb.me/prop-types-in-prod
+  module.exports = require('./factoryWithThrowingShims')();
+}
+
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1728,7 +2125,7 @@ function isVirtualElement(element) {
 
 
 /***/ }),
-/* 9 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1750,8 +2147,8 @@ function isVirtualElement(element) {
 /* unused harmony export Queryable */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return ODataQueryable; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return ODataBatch; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__pnp_common__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pnp_logging__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__pnp_common__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pnp_logging__ = __webpack_require__(7);
 /**
  * @license
  * v1.3.3
@@ -2594,19 +2991,13 @@ var ODataBatch = /** @class */ (function () {
 
 
 /***/ }),
-/* 10 */
+/* 13 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_10__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_13__;
 
 /***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_11__;
-
-/***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2798,7 +3189,7 @@ exports.Stylesheet = Stylesheet;
 
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2809,20 +3200,20 @@ tslib_1.__exportStar(__webpack_require__(183), exports);
 
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var Icon_1 = __webpack_require__(20);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var Icon_1 = __webpack_require__(24);
 var ContextualMenu_1 = __webpack_require__(209);
 var BaseButton_classNames_1 = __webpack_require__(224);
 var SplitButton_classNames_1 = __webpack_require__(225);
-var KeytipData_1 = __webpack_require__(13);
+var KeytipData_1 = __webpack_require__(15);
 var TouchIdleDelay = 500; /* ms */
 var BaseButton = /** @class */ (function (_super) {
     tslib_1.__extends(BaseButton, _super);
@@ -3253,13 +3644,13 @@ exports.BaseButton = BaseButton;
 
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 var noOutline = {
     outline: 0
@@ -3351,7 +3742,7 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme) {
 
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports) {
 
 /*
@@ -3433,7 +3824,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3791,12 +4182,27 @@ function shouldUseCssText() {
     return useCSSText;
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
+if (false) {
+  module.exports = require('./cjs/react-is.production.min.js');
+} else {
+  module.exports = __webpack_require__(34);
+}
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -3804,22 +4210,4604 @@ function shouldUseCssText() {
  * LICENSE file in the root directory of this source tree.
  */
 
-if (true) {
-  var ReactIs = __webpack_require__(46);
 
-  // By explicitly using `prop-types` you are opting into new development behavior.
-  // http://fb.me/prop-types-in-prod
-  var throwOnDirectAccess = true;
-  module.exports = __webpack_require__(108)(ReactIs.isElement, throwOnDirectAccess);
-} else {
-  // By explicitly using `prop-types` you are opting into new production behavior.
-  // http://fb.me/prop-types-in-prod
-  module.exports = require('./factoryWithThrowingShims')();
-}
+
+var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
+
+module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 19 */
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// EXTERNAL MODULE: ./node_modules/@pnp/common/dist/common.es5.js
+var common_es5 = __webpack_require__(5);
+
+// EXTERNAL MODULE: ./node_modules/@pnp/logging/dist/logging.es5.js
+var logging_es5 = __webpack_require__(7);
+
+// CONCATENATED MODULE: ./node_modules/@pnp/config-store/dist/config-store.es5.js
+/**
+ * @license
+ * v1.3.3
+ * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
+ * Copyright (c) 2019 Microsoft
+ * docs: https://pnp.github.io/pnpjs/
+ * source: https://github.com/pnp/pnpjs
+ * bugs: https://github.com/pnp/pnpjs/issues
+ */
+
+
+/**
+ * Class used to manage the current application settings
+ *
+ */
+var config_store_es5_Settings = /** @class */ (function () {
+    /**
+     * Creates a new instance of the settings class
+     *
+     * @constructor
+     */
+    function Settings(_settings) {
+        if (_settings === void 0) { _settings = new Map(); }
+        this._settings = _settings;
+    }
+    /**
+     * Adds a new single setting, or overwrites a previous setting with the same key
+     *
+     * @param {string} key The key used to store this setting
+     * @param {string} value The setting value to store
+     */
+    Settings.prototype.add = function (key, value) {
+        this._settings.set(key, value);
+    };
+    /**
+     * Adds a JSON value to the collection as a string, you must use getJSON to rehydrate the object when read
+     *
+     * @param {string} key The key used to store this setting
+     * @param {any} value The setting value to store
+     */
+    Settings.prototype.addJSON = function (key, value) {
+        this._settings.set(key, Object(common_es5["q" /* jsS */])(value));
+    };
+    /**
+     * Applies the supplied hash to the setting collection overwriting any existing value, or created new values
+     *
+     * @param {TypedHash<any>} hash The set of values to add
+     */
+    Settings.prototype.apply = function (hash) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            try {
+                _this._settings = Object(common_es5["s" /* mergeMaps */])(_this._settings, Object(common_es5["v" /* objectToMap */])(hash));
+                resolve();
+            }
+            catch (e) {
+                reject(e);
+            }
+        });
+    };
+    /**
+     * Loads configuration settings into the collection from the supplied provider and returns a Promise
+     *
+     * @param {IConfigurationProvider} provider The provider from which we will load the settings
+     */
+    Settings.prototype.load = function (provider) {
+        var _this = this;
+        return new Promise(function (resolve, reject) {
+            provider.getConfiguration().then(function (value) {
+                _this._settings = Object(common_es5["s" /* mergeMaps */])(_this._settings, Object(common_es5["v" /* objectToMap */])(value));
+                resolve();
+            }).catch(reject);
+        });
+    };
+    /**
+     * Gets a value from the configuration
+     *
+     * @param {string} key The key whose value we want to return. Returns null if the key does not exist
+     * @return {string} string value from the configuration
+     */
+    Settings.prototype.get = function (key) {
+        return this._settings.get(key) || null;
+    };
+    /**
+     * Gets a JSON value, rehydrating the stored string to the original object
+     *
+     * @param {string} key The key whose value we want to return. Returns null if the key does not exist
+     * @return {any} object from the configuration
+     */
+    Settings.prototype.getJSON = function (key) {
+        var o = this.get(key);
+        if (o === undefined || o === null) {
+            return o;
+        }
+        return JSON.parse(o);
+    };
+    return Settings;
+}());
+
+/**
+ * A caching provider which can wrap other non-caching providers
+ *
+ */
+var config_store_es5_CachingConfigurationProvider = /** @class */ (function () {
+    /**
+     * Creates a new caching configuration provider
+     * @constructor
+     * @param {IConfigurationProvider} wrappedProvider Provider which will be used to fetch the configuration
+     * @param {string} cacheKey Key that will be used to store cached items to the cache
+     * @param {IPnPClientStore} cacheStore OPTIONAL storage, which will be used to store cached settings.
+     */
+    function CachingConfigurationProvider(wrappedProvider, cacheKey, cacheStore) {
+        this.wrappedProvider = wrappedProvider;
+        this.cacheKey = cacheKey;
+        this.wrappedProvider = wrappedProvider;
+        this.store = (cacheStore) ? cacheStore : this.selectPnPCache();
+    }
+    /**
+     * Gets the wrapped configuration providers
+     *
+     * @return {IConfigurationProvider} Wrapped configuration provider
+     */
+    CachingConfigurationProvider.prototype.getWrappedProvider = function () {
+        return this.wrappedProvider;
+    };
+    /**
+     * Loads the configuration values either from the cache or from the wrapped provider
+     *
+     * @return {Promise<TypedHash<string>>} Promise of loaded configuration values
+     */
+    CachingConfigurationProvider.prototype.getConfiguration = function () {
+        var _this = this;
+        // Cache not available, pass control to the wrapped provider
+        if ((!this.store) || (!this.store.enabled)) {
+            return this.wrappedProvider.getConfiguration();
+        }
+        return this.store.getOrPut(this.cacheKey, function () {
+            return _this.wrappedProvider.getConfiguration().then(function (providedConfig) {
+                _this.store.put(_this.cacheKey, providedConfig);
+                return providedConfig;
+            });
+        });
+    };
+    CachingConfigurationProvider.prototype.selectPnPCache = function () {
+        var pnpCache = new common_es5["c" /* PnPClientStorage */]();
+        if ((pnpCache.local) && (pnpCache.local.enabled)) {
+            return pnpCache.local;
+        }
+        if ((pnpCache.session) && (pnpCache.session.enabled)) {
+            return pnpCache.session;
+        }
+        throw Error("Cannot create a caching configuration provider since cache is not available.");
+    };
+    return CachingConfigurationProvider;
+}());
+
+/**
+ * A configuration provider which loads configuration values from a SharePoint list
+ *
+ */
+var SPListConfigurationProvider = /** @class */ (function () {
+    /**
+     * Creates a new SharePoint list based configuration provider
+     * @constructor
+     * @param {string} webUrl Url of the SharePoint site, where the configuration list is located
+     * @param {string} listTitle Title of the SharePoint list, which contains the configuration settings (optional, default: "config")
+     * @param {string} keyFieldName The name of the field in the list to use as the setting key (optional, default: "Title")
+     * @param {string} valueFieldName The name of the field in the list to use as the setting value (optional, default: "Value")
+     */
+    function SPListConfigurationProvider(web, listTitle, keyFieldName, valueFieldName) {
+        if (listTitle === void 0) { listTitle = "config"; }
+        if (keyFieldName === void 0) { keyFieldName = "Title"; }
+        if (valueFieldName === void 0) { valueFieldName = "Value"; }
+        this.web = web;
+        this.listTitle = listTitle;
+        this.keyFieldName = keyFieldName;
+        this.valueFieldName = valueFieldName;
+    }
+    /**
+     * Loads the configuration values from the SharePoint list
+     *
+     * @return {Promise<TypedHash<string>>} Promise of loaded configuration values
+     */
+    SPListConfigurationProvider.prototype.getConfiguration = function () {
+        var _this = this;
+        return this.web.lists.getByTitle(this.listTitle).items.select(this.keyFieldName, this.valueFieldName).get()
+            .then(function (data) { return data.reduce(function (c, item) {
+            c[item[_this.keyFieldName]] = item[_this.valueFieldName];
+            return c;
+        }, {}); });
+    };
+    /**
+     * Wraps the current provider in a cache enabled provider
+     *
+     * @return {CachingConfigurationProvider} Caching providers which wraps the current provider
+     */
+    SPListConfigurationProvider.prototype.asCaching = function (cacheKey) {
+        if (cacheKey === void 0) { cacheKey = "pnp_configcache_splist_" + this.web.toUrl() + "+" + this.listTitle; }
+        return new config_store_es5_CachingConfigurationProvider(this, cacheKey);
+    };
+    return SPListConfigurationProvider;
+}());
+
+
+
+// EXTERNAL MODULE: ./node_modules/@pnp/odata/dist/odata.es5.js
+var odata_es5 = __webpack_require__(12);
+
+// CONCATENATED MODULE: ./node_modules/@pnp/graph/dist/graph.es5.js
+/**
+ * @license
+ * v1.3.3
+ * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
+ * Copyright (c) 2019 Microsoft
+ * docs: https://pnp.github.io/pnpjs/
+ * source: https://github.com/pnp/pnpjs
+ * bugs: https://github.com/pnp/pnpjs/issues
+ */
+
+
+
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function setup(config) {
+    common_es5["d" /* RuntimeConfig */].extend(config);
+}
+var graph_es5_GraphRuntimeConfigImpl = /** @class */ (function () {
+    function GraphRuntimeConfigImpl() {
+    }
+    Object.defineProperty(GraphRuntimeConfigImpl.prototype, "headers", {
+        get: function () {
+            var graphPart = common_es5["d" /* RuntimeConfig */].get("graph");
+            if (graphPart !== undefined && graphPart !== null && graphPart.headers !== undefined) {
+                return graphPart.headers;
+            }
+            return {};
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRuntimeConfigImpl.prototype, "fetchClientFactory", {
+        get: function () {
+            var graphPart = common_es5["d" /* RuntimeConfig */].get("graph");
+            // use a configured factory firt
+            if (graphPart !== undefined && graphPart !== null && graphPart.fetchClientFactory !== undefined) {
+                return graphPart.fetchClientFactory;
+            }
+            // then try and use spfx context if available
+            if (common_es5["d" /* RuntimeConfig */].spfxContext !== undefined) {
+                return function () { return common_es5["a" /* AdalClient */].fromSPFxContext(common_es5["d" /* RuntimeConfig */].spfxContext); };
+            }
+            throw Error("There is no Graph Client available, either set one using configuraiton or provide a valid SPFx Context using setup.");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return GraphRuntimeConfigImpl;
+}());
+var GraphRuntimeConfig = new graph_es5_GraphRuntimeConfigImpl();
+
+var graph_es5_GraphHttpClient = /** @class */ (function () {
+    function GraphHttpClient() {
+        this._impl = GraphRuntimeConfig.fetchClientFactory();
+    }
+    GraphHttpClient.prototype.fetch = function (url, options) {
+        if (options === void 0) { options = {}; }
+        var headers = new Headers();
+        // first we add the global headers so they can be overwritten by any passed in locally to this call
+        Object(common_es5["r" /* mergeHeaders */])(headers, GraphRuntimeConfig.headers);
+        // second we add the local options so we can overwrite the globals
+        Object(common_es5["r" /* mergeHeaders */])(headers, options.headers);
+        if (!headers.has("Content-Type")) {
+            headers.append("Content-Type", "application/json");
+        }
+        var opts = Object(common_es5["g" /* extend */])(options, { headers: headers });
+        return this.fetchRaw(url, opts);
+    };
+    GraphHttpClient.prototype.fetchRaw = function (url, options) {
+        var _this = this;
+        if (options === void 0) { options = {}; }
+        // here we need to normalize the headers
+        var rawHeaders = new Headers();
+        Object(common_es5["r" /* mergeHeaders */])(rawHeaders, options.headers);
+        options = Object(common_es5["g" /* extend */])(options, { headers: rawHeaders });
+        var retry = function (ctx) {
+            _this._impl.fetch(url, options).then(function (response) { return ctx.resolve(response); }).catch(function (response) {
+                // Check if request was throttled - http status code 429
+                // Check if request failed due to server unavailable - http status code 503
+                if (response.status !== 429 && response.status !== 503) {
+                    ctx.reject(response);
+                }
+                // grab our current delay
+                var delay = ctx.delay;
+                // Increment our counters.
+                ctx.delay *= 2;
+                ctx.attempts++;
+                // If we have exceeded the retry count, reject.
+                if (ctx.retryCount <= ctx.attempts) {
+                    ctx.reject(response);
+                }
+                // Set our retry timeout for {delay} milliseconds.
+                setTimeout(Object(common_es5["i" /* getCtxCallback */])(_this, retry, ctx), delay);
+            });
+        };
+        return new Promise(function (resolve, reject) {
+            var retryContext = {
+                attempts: 0,
+                delay: 100,
+                reject: reject,
+                resolve: resolve,
+                retryCount: 7,
+            };
+            retry.call(_this, retryContext);
+        });
+    };
+    GraphHttpClient.prototype.get = function (url, options) {
+        if (options === void 0) { options = {}; }
+        var opts = Object(common_es5["g" /* extend */])(options, { method: "GET" });
+        return this.fetch(url, opts);
+    };
+    GraphHttpClient.prototype.post = function (url, options) {
+        if (options === void 0) { options = {}; }
+        var opts = Object(common_es5["g" /* extend */])(options, { method: "POST" });
+        return this.fetch(url, opts);
+    };
+    GraphHttpClient.prototype.patch = function (url, options) {
+        if (options === void 0) { options = {}; }
+        var opts = Object(common_es5["g" /* extend */])(options, { method: "PATCH" });
+        return this.fetch(url, opts);
+    };
+    GraphHttpClient.prototype.delete = function (url, options) {
+        if (options === void 0) { options = {}; }
+        var opts = Object(common_es5["g" /* extend */])(options, { method: "DELETE" });
+        return this.fetch(url, opts);
+    };
+    return GraphHttpClient;
+}());
+
+var GraphEndpoints = /** @class */ (function () {
+    function GraphEndpoints() {
+    }
+    /**
+     *
+     * @param url The url to set the endpoint
+     */
+    GraphEndpoints.ensure = function (url, endpoint) {
+        var all = [GraphEndpoints.Beta, GraphEndpoints.V1];
+        var regex = new RegExp(endpoint, "i");
+        var replaces = all.filter(function (s) { return !regex.test(s); }).map(function (s) { return s.replace(".", "\\."); });
+        regex = new RegExp("/?(" + replaces.join("|") + ")/", "ig");
+        return url.replace(regex, "/" + endpoint + "/");
+    };
+    GraphEndpoints.Beta = "beta";
+    GraphEndpoints.V1 = "v1.0";
+    return GraphEndpoints;
+}());
+
+/**
+ * Queryable Base Class
+ *
+ */
+var graph_es5_GraphQueryable = /** @class */ (function (_super) {
+    __extends(GraphQueryable, _super);
+    /**
+     * Creates a new instance of the Queryable class
+     *
+     * @constructor
+     * @param baseUrl A string or Queryable that should form the base part of the url
+     *
+     */
+    function GraphQueryable(baseUrl, path) {
+        var _this = _super.call(this) || this;
+        if (typeof baseUrl === "string") {
+            var urlStr = baseUrl;
+            _this._parentUrl = urlStr;
+            _this._url = Object(common_es5["e" /* combine */])(urlStr, path);
+        }
+        else {
+            _this.extend(baseUrl, path);
+        }
+        return _this;
+    }
+    /**
+     * Choose which fields to return
+     *
+     * @param selects One or more fields to return
+     */
+    GraphQueryable.prototype.select = function () {
+        var selects = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            selects[_i] = arguments[_i];
+        }
+        if (selects.length > 0) {
+            this.query.set("$select", selects.join(","));
+        }
+        return this;
+    };
+    /**
+     * Expands fields such as lookups to get additional data
+     *
+     * @param expands The Fields for which to expand the values
+     */
+    GraphQueryable.prototype.expand = function () {
+        var expands = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            expands[_i] = arguments[_i];
+        }
+        if (expands.length > 0) {
+            this.query.set("$expand", expands.join(","));
+        }
+        return this;
+    };
+    /**
+     * Creates a new instance of the supplied factory and extends this into that new instance
+     *
+     * @param factory constructor for the new queryable
+     */
+    GraphQueryable.prototype.as = function (factory) {
+        var o = new factory(this._url, null);
+        return Object(common_es5["g" /* extend */])(o, this, true);
+    };
+    /**
+     * Gets the full url with query information
+     *
+     */
+    GraphQueryable.prototype.toUrlAndQuery = function () {
+        var url = this.toUrl();
+        if (!Object(common_es5["p" /* isUrlAbsolute */])(url)) {
+            url = Object(common_es5["e" /* combine */])("https://graph.microsoft.com", url);
+        }
+        if (this.query.size > 0) {
+            var char = url.indexOf("?") > -1 ? "&" : "?";
+            url += "" + char + Array.from(this.query).map(function (v) { return v[0] + "=" + v[1]; }).join("&");
+        }
+        return url;
+    };
+    /**
+     * Gets a parent for this instance as specified
+     *
+     * @param factory The contructor for the class to create
+     */
+    GraphQueryable.prototype.getParent = function (factory, baseUrl, path) {
+        if (baseUrl === void 0) { baseUrl = this.parentUrl; }
+        return new factory(baseUrl, path);
+    };
+    /**
+     * Clones this queryable into a new queryable instance of T
+     * @param factory Constructor used to create the new instance
+     * @param additionalPath Any additional path to include in the clone
+     * @param includeBatch If true this instance's batch will be added to the cloned instance
+     */
+    GraphQueryable.prototype.clone = function (factory, additionalPath, includeBatch) {
+        if (includeBatch === void 0) { includeBatch = true; }
+        return _super.prototype._clone.call(this, new factory(this, additionalPath), { includeBatch: includeBatch });
+    };
+    GraphQueryable.prototype.setEndpoint = function (endpoint) {
+        this._url = GraphEndpoints.ensure(this._url, endpoint);
+        return this;
+    };
+    /**
+     * Converts the current instance to a request context
+     *
+     * @param verb The request verb
+     * @param options The set of supplied request options
+     * @param parser The supplied ODataParser instance
+     * @param pipeline Optional request processing pipeline
+     */
+    GraphQueryable.prototype.toRequestContext = function (verb, options, parser, pipeline) {
+        if (options === void 0) { options = {}; }
+        var dependencyDispose = this.hasBatch ? this._batchDependency : function () { return; };
+        return Promise.resolve({
+            batch: this.batch,
+            batchDependency: dependencyDispose,
+            cachingOptions: this._cachingOptions,
+            clientFactory: function () { return new graph_es5_GraphHttpClient(); },
+            isBatched: this.hasBatch,
+            isCached: /^get$/i.test(verb) && this._useCaching,
+            options: options,
+            parser: parser,
+            pipeline: pipeline,
+            requestAbsoluteUrl: this.toUrlAndQuery(),
+            requestId: Object(common_es5["j" /* getGUID */])(),
+            verb: verb,
+        });
+    };
+    return GraphQueryable;
+}(odata_es5["h" /* ODataQueryable */]));
+/**
+ * Represents a REST collection which can be filtered, paged, and selected
+ *
+ */
+var GraphQueryableCollection = /** @class */ (function (_super) {
+    __extends(GraphQueryableCollection, _super);
+    function GraphQueryableCollection() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     *
+     * @param filter The string representing the filter query
+     */
+    GraphQueryableCollection.prototype.filter = function (filter) {
+        this.query.set("$filter", filter);
+        return this;
+    };
+    /**
+     * Orders based on the supplied fields
+     *
+     * @param orderby The name of the field on which to sort
+     * @param ascending If false DESC is appended, otherwise ASC (default)
+     */
+    GraphQueryableCollection.prototype.orderBy = function (orderBy, ascending) {
+        if (ascending === void 0) { ascending = true; }
+        var o = "$orderby";
+        var query = this.query.has(o) ? this.query.get(o).split(",") : [];
+        query.push(orderBy + " " + (ascending ? "asc" : "desc"));
+        this.query.set(o, query.join(","));
+        return this;
+    };
+    /**
+     * Limits the query to only return the specified number of items
+     *
+     * @param top The query row limit
+     */
+    GraphQueryableCollection.prototype.top = function (top) {
+        this.query.set("$top", top.toString());
+        return this;
+    };
+    /**
+     * Skips a set number of items in the return set
+     *
+     * @param num Number of items to skip
+     */
+    GraphQueryableCollection.prototype.skip = function (num) {
+        this.query.set("$skip", num.toString());
+        return this;
+    };
+    /**
+     * 	To request second and subsequent pages of Graph data
+     */
+    GraphQueryableCollection.prototype.skipToken = function (token) {
+        this.query.set("$skiptoken", token);
+        return this;
+    };
+    Object.defineProperty(GraphQueryableCollection.prototype, "count", {
+        /**
+         * 	Retrieves the total count of matching resources
+         */
+        get: function () {
+            this.query.set("$count", "true");
+            return this;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return GraphQueryableCollection;
+}(graph_es5_GraphQueryable));
+var GraphQueryableSearchableCollection = /** @class */ (function (_super) {
+    __extends(GraphQueryableSearchableCollection, _super);
+    function GraphQueryableSearchableCollection() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * 	To request second and subsequent pages of Graph data
+     */
+    GraphQueryableSearchableCollection.prototype.search = function (query) {
+        this.query.set("$search", query);
+        return this;
+    };
+    return GraphQueryableSearchableCollection;
+}(GraphQueryableCollection));
+/**
+ * Represents an instance that can be selected
+ *
+ */
+var GraphQueryableInstance = /** @class */ (function (_super) {
+    __extends(GraphQueryableInstance, _super);
+    function GraphQueryableInstance() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return GraphQueryableInstance;
+}(graph_es5_GraphQueryable));
+/**
+ * Decorator used to specify the default path for Queryable objects
+ *
+ * @param path
+ */
+function defaultPath(path) {
+    return function (target) {
+        return /** @class */ (function (_super) {
+            __extends(class_1, _super);
+            function class_1() {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                return _super.call(this, args[0], args.length > 1 && args[1] !== undefined ? args[1] : path) || this;
+            }
+            return class_1;
+        }(target));
+    };
+}
+
+var graph_es5_Members = /** @class */ (function (_super) {
+    __extends(Members, _super);
+    function Members() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Members_1 = Members;
+    /**
+     * Use this API to add a member to an Office 365 group, a security group or a mail-enabled security group through
+     * the members navigation property. You can add users or other groups.
+     * Important: You can add only users to Office 365 groups.
+     *
+     * @param id Full @odata.id of the directoryObject, user, or group object you want to add (ex: https://graph.microsoft.com/v1.0/directoryObjects/${id})
+     */
+    Members.prototype.add = function (id) {
+        return this.clone(Members_1, "$ref").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                "@odata.id": id,
+            }),
+        });
+    };
+    /**
+     * Gets a member of the group by id
+     *
+     * @param id Group member's id
+     */
+    Members.prototype.getById = function (id) {
+        return new Member(this, id);
+    };
+    var Members_1;
+    Members = Members_1 = __decorate([
+        defaultPath("members")
+    ], Members);
+    return Members;
+}(GraphQueryableCollection));
+var Member = /** @class */ (function (_super) {
+    __extends(Member, _super);
+    function Member() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Removes this Member
+     */
+    Member.prototype.remove = function () {
+        return this.clone(Member, "$ref").deleteCore();
+    };
+    return Member;
+}(GraphQueryableInstance));
+var Owners = /** @class */ (function (_super) {
+    __extends(Owners, _super);
+    function Owners() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Owners = __decorate([
+        defaultPath("owners")
+    ], Owners);
+    return Owners;
+}(graph_es5_Members));
+
+// import { Attachments } from "./attachments";
+var Calendars = /** @class */ (function (_super) {
+    __extends(Calendars, _super);
+    function Calendars() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Calendars = __decorate([
+        defaultPath("calendars")
+    ], Calendars);
+    return Calendars;
+}(GraphQueryableCollection));
+var Calendar = /** @class */ (function (_super) {
+    __extends(Calendar, _super);
+    function Calendar() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Calendar.prototype, "events", {
+        get: function () {
+            return new graph_es5_Events(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Calendar;
+}(GraphQueryableInstance));
+var graph_es5_Events = /** @class */ (function (_super) {
+    __extends(Events, _super);
+    function Events() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Events.prototype.getById = function (id) {
+        return new graph_es5_Event(this, id);
+    };
+    /**
+     * Adds a new event to the collection
+     *
+     * @param properties The set of properties used to create the event
+     */
+    Events.prototype.add = function (properties) {
+        var _this = this;
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        }).then(function (r) {
+            return {
+                data: r,
+                event: _this.getById(r.id),
+            };
+        });
+    };
+    Events = __decorate([
+        defaultPath("events")
+    ], Events);
+    return Events;
+}(GraphQueryableCollection));
+var graph_es5_Event = /** @class */ (function (_super) {
+    __extends(Event, _super);
+    function Event() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    // TODO:: when supported
+    // /**
+    //  * Gets the collection of attachments for this event
+    //  */
+    // public get attachments(): Attachments {
+    //     return new Attachments(this);
+    // }
+    /**
+     * Update the properties of an event object
+     *
+     * @param properties Set of properties of this event to update
+     */
+    Event.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    /**
+     * Deletes this event
+     */
+    Event.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    return Event;
+}(GraphQueryableInstance));
+
+var graph_es5_Attachments = /** @class */ (function (_super) {
+    __extends(Attachments, _super);
+    function Attachments() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a member of the group by id
+     *
+     * @param id Attachment id
+     */
+    Attachments.prototype.getById = function (id) {
+        return new Attachment(this, id);
+    };
+    /**
+     * Add attachment to this collection
+     *
+     * @param name Name given to the attachment file
+     * @param bytes File content
+     */
+    Attachments.prototype.addFile = function (name, bytes) {
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                "@odata.type": "#microsoft.graph.fileAttachment",
+                contentBytes: bytes,
+                name: name,
+            }),
+        });
+    };
+    Attachments = __decorate([
+        defaultPath("attachments")
+    ], Attachments);
+    return Attachments;
+}(GraphQueryableCollection));
+var Attachment = /** @class */ (function (_super) {
+    __extends(Attachment, _super);
+    function Attachment() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return Attachment;
+}(GraphQueryableInstance));
+
+var graph_es5_Conversations = /** @class */ (function (_super) {
+    __extends(Conversations, _super);
+    function Conversations() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Create a new conversation by including a thread and a post.
+     *
+     * @param properties Properties used to create the new conversation
+     */
+    Conversations.prototype.add = function (properties) {
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    /**
+     * Gets a conversation from this collection by id
+     *
+     * @param id Group member's id
+     */
+    Conversations.prototype.getById = function (id) {
+        return new graph_es5_Conversation(this, id);
+    };
+    Conversations = __decorate([
+        defaultPath("conversations")
+    ], Conversations);
+    return Conversations;
+}(GraphQueryableCollection));
+var graph_es5_Threads = /** @class */ (function (_super) {
+    __extends(Threads, _super);
+    function Threads() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a thread from this collection by id
+     *
+     * @param id Group member's id
+     */
+    Threads.prototype.getById = function (id) {
+        return new graph_es5_Thread(this, id);
+    };
+    /**
+     * Adds a new thread to this collection
+     *
+     * @param properties properties used to create the new thread
+     * @returns Id of the new thread
+     */
+    Threads.prototype.add = function (properties) {
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    Threads = __decorate([
+        defaultPath("threads")
+    ], Threads);
+    return Threads;
+}(GraphQueryableCollection));
+var graph_es5_Posts = /** @class */ (function (_super) {
+    __extends(Posts, _super);
+    function Posts() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a thread from this collection by id
+     *
+     * @param id Group member's id
+     */
+    Posts.prototype.getById = function (id) {
+        return new graph_es5_Post(this, id);
+    };
+    /**
+     * Adds a new thread to this collection
+     *
+     * @param properties properties used to create the new thread
+     * @returns Id of the new thread
+     */
+    Posts.prototype.add = function (properties) {
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    Posts = __decorate([
+        defaultPath("posts")
+    ], Posts);
+    return Posts;
+}(GraphQueryableCollection));
+var graph_es5_Conversation = /** @class */ (function (_super) {
+    __extends(Conversation, _super);
+    function Conversation() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Conversation.prototype, "threads", {
+        /**
+         * Get all the threads in a group conversation.
+         */
+        get: function () {
+            return new graph_es5_Threads(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Updates this conversation
+     */
+    Conversation.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    /**
+     * Deletes this member from the group
+     */
+    Conversation.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    return Conversation;
+}(GraphQueryableInstance));
+var graph_es5_Thread = /** @class */ (function (_super) {
+    __extends(Thread, _super);
+    function Thread() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Thread.prototype, "posts", {
+        /**
+         * Get all the threads in a group conversation.
+         */
+        get: function () {
+            return new graph_es5_Posts(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Reply to a thread in a group conversation and add a new post to it
+     *
+     * @param post Contents of the post
+     */
+    Thread.prototype.reply = function (post) {
+        return this.clone(Thread, "reply").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                post: post,
+            }),
+        });
+    };
+    /**
+     * Deletes this member from the group
+     */
+    Thread.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    return Thread;
+}(GraphQueryableInstance));
+var graph_es5_Post = /** @class */ (function (_super) {
+    __extends(Post, _super);
+    function Post() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Post.prototype, "attachments", {
+        get: function () {
+            return new graph_es5_Attachments(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Deletes this post
+     */
+    Post.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Forward a post to a recipient
+     */
+    Post.prototype.forward = function (info) {
+        return this.clone(Post, "forward").postCore({
+            body: Object(common_es5["q" /* jsS */])(info),
+        });
+    };
+    /**
+     * Reply to a thread in a group conversation and add a new post to it
+     *
+     * @param post Contents of the post
+     */
+    Post.prototype.reply = function (post) {
+        return this.clone(Post, "reply").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                post: post,
+            }),
+        });
+    };
+    return Post;
+}(GraphQueryableInstance));
+var graph_es5_Senders = /** @class */ (function (_super) {
+    __extends(Senders, _super);
+    function Senders(baseUrl, path) {
+        return _super.call(this, baseUrl, path) || this;
+    }
+    /**
+     * Add a new user or group to this senders collection
+     * @param id The full @odata.id value to add (ex: https://graph.microsoft.com/v1.0/users/user@contoso.com)
+     */
+    Senders.prototype.add = function (id) {
+        return this.clone(Senders, "$ref").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                "@odata.id": id,
+            }),
+        });
+    };
+    /**
+     * Removes the entity from the collection
+     *
+     * @param id The full @odata.id value to remove (ex: https://graph.microsoft.com/v1.0/users/user@contoso.com)
+     */
+    Senders.prototype.remove = function (id) {
+        var remover = this.clone(Senders, "$ref");
+        remover.query.set("$id", id);
+        return remover.deleteCore();
+    };
+    return Senders;
+}(GraphQueryableCollection));
+
+var Planner = /** @class */ (function (_super) {
+    __extends(Planner, _super);
+    function Planner() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Planner.prototype, "plans", {
+        // Should Only be able to get by id, or else error occur
+        get: function () {
+            return new graph_es5_Plans(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Planner.prototype, "tasks", {
+        // Should Only be able to get by id, or else error occur
+        get: function () {
+            return new graph_es5_Tasks(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Planner.prototype, "buckets", {
+        // Should Only be able to get by id, or else error occur
+        get: function () {
+            return new graph_es5_Buckets(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Planner = __decorate([
+        defaultPath("planner")
+    ], Planner);
+    return Planner;
+}(GraphQueryableInstance));
+var graph_es5_Plans = /** @class */ (function (_super) {
+    __extends(Plans, _super);
+    function Plans() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Plans.prototype.getById = function (id) {
+        return new graph_es5_Plan(this, id);
+    };
+    /**
+     * Create a new Planner Plan.
+     *
+     * @param owner Id of Group object.
+     * @param title The Title of the Plan.
+     */
+    Plans.prototype.add = function (owner, title) {
+        var _this = this;
+        var postBody = {
+            owner: owner,
+            title: title,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                plan: _this.getById(r.id),
+            };
+        });
+    };
+    Plans = __decorate([
+        defaultPath("plans")
+    ], Plans);
+    return Plans;
+}(GraphQueryableCollection));
+/**
+ * Should not be able to get by Id
+ */
+var graph_es5_Plan = /** @class */ (function (_super) {
+    __extends(Plan, _super);
+    function Plan() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Plan.prototype, "tasks", {
+        get: function () {
+            return new graph_es5_Tasks(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Plan.prototype, "buckets", {
+        get: function () {
+            return new graph_es5_Buckets(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Plan.prototype, "details", {
+        get: function () {
+            return new Details(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Deletes this Plan
+     */
+    Plan.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a Plan
+     *
+     * @param properties Set of properties of this Plan to update
+     */
+    Plan.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    return Plan;
+}(GraphQueryableInstance));
+var graph_es5_Tasks = /** @class */ (function (_super) {
+    __extends(Tasks, _super);
+    function Tasks() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Tasks.prototype.getById = function (id) {
+        return new graph_es5_Task(this, id);
+    };
+    /**
+     * Create a new Planner Task.
+     *
+     * @param planId Id of Plan.
+     * @param title The Title of the Task.
+     * @param assignments Assign the task
+     * @param bucketId Id of Bucket
+     */
+    Tasks.prototype.add = function (planId, title, assignments, bucketId) {
+        var _this = this;
+        var postBody = Object(common_es5["g" /* extend */])({
+            planId: planId,
+            title: title,
+        }, assignments);
+        if (bucketId) {
+            postBody = Object(common_es5["g" /* extend */])(postBody, {
+                bucketId: bucketId,
+            });
+        }
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                task: _this.getById(r.id),
+            };
+        });
+    };
+    Tasks = __decorate([
+        defaultPath("tasks")
+    ], Tasks);
+    return Tasks;
+}(GraphQueryableCollection));
+var graph_es5_Task = /** @class */ (function (_super) {
+    __extends(Task, _super);
+    function Task() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Deletes this Task
+     */
+    Task.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a Task
+     *
+     * @param properties Set of properties of this Task to update
+     */
+    Task.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    Object.defineProperty(Task.prototype, "details", {
+        get: function () {
+            return new Details(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Task;
+}(GraphQueryableInstance));
+var graph_es5_Buckets = /** @class */ (function (_super) {
+    __extends(Buckets, _super);
+    function Buckets() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Create a new Bucket.
+     *
+     * @param name Name of Bucket object.
+     * @param planId The Id of the Plan.
+     * @param oderHint Hint used to order items of this type in a list view.
+     */
+    Buckets.prototype.add = function (name, planId, orderHint) {
+        var _this = this;
+        var postBody = {
+            name: name,
+            orderHint: orderHint ? orderHint : "",
+            planId: planId,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                bucket: _this.getById(r.id),
+                data: r,
+            };
+        });
+    };
+    Buckets.prototype.getById = function (id) {
+        return new graph_es5_Bucket(this, id);
+    };
+    Buckets = __decorate([
+        defaultPath("buckets")
+    ], Buckets);
+    return Buckets;
+}(GraphQueryableCollection));
+var graph_es5_Bucket = /** @class */ (function (_super) {
+    __extends(Bucket, _super);
+    function Bucket() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Deletes this Bucket
+     */
+    Bucket.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a Bucket
+     *
+     * @param properties Set of properties of this Bucket to update
+     */
+    Bucket.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    Object.defineProperty(Bucket.prototype, "tasks", {
+        get: function () {
+            return new graph_es5_Tasks(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Bucket;
+}(GraphQueryableInstance));
+var Details = /** @class */ (function (_super) {
+    __extends(Details, _super);
+    function Details() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Details = __decorate([
+        defaultPath("details")
+    ], Details);
+    return Details;
+}(GraphQueryableCollection));
+
+var graph_es5_Photo = /** @class */ (function (_super) {
+    __extends(Photo, _super);
+    function Photo() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Photo_1 = Photo;
+    /**
+     * Gets the image bytes as a blob (browser)
+     */
+    Photo.prototype.getBlob = function () {
+        return this.clone(Photo_1, "$value", false).get(new odata_es5["a" /* BlobParser */]());
+    };
+    /**
+     * Gets the image file byets as a Buffer (node.js)
+     */
+    Photo.prototype.getBuffer = function () {
+        return this.clone(Photo_1, "$value", false).get(new odata_es5["b" /* BufferParser */]());
+    };
+    /**
+     * Sets the file bytes
+     *
+     * @param content Image file contents, max 4 MB
+     */
+    Photo.prototype.setContent = function (content) {
+        return this.clone(Photo_1, "$value", false).patchCore({
+            body: content,
+        });
+    };
+    var Photo_1;
+    Photo = Photo_1 = __decorate([
+        defaultPath("photo")
+    ], Photo);
+    return Photo;
+}(GraphQueryableInstance));
+
+var Teams = /** @class */ (function (_super) {
+    __extends(Teams, _super);
+    function Teams() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Creates a new team and associated Group with the given information
+     * @param name The name of the new Group
+     * @param description Optional description of the group
+     * @param ownerId Add an owner with a user id from the graph
+     */
+    Teams.prototype.create = function (name, description, ownerId, teamProperties) {
+        if (description === void 0) { description = ""; }
+        if (teamProperties === void 0) { teamProperties = {}; }
+        var groupProps = {
+            "description": description && description.length > 0 ? description : "",
+            "owners@odata.bind": [
+                "https://graph.microsoft.com/v1.0/users/" + ownerId,
+            ],
+        };
+        return graph.groups.add(name, name, GroupType.Office365, groupProps).then(function (gar) {
+            return gar.group.createTeam(teamProperties).then(function (data) {
+                return {
+                    data: data,
+                    group: gar.group,
+                    team: new graph_es5_Team(gar.group),
+                };
+            });
+        });
+    };
+    Teams.prototype.getById = function (id) {
+        return new graph_es5_Team(this, id);
+    };
+    Teams = __decorate([
+        defaultPath("teams")
+    ], Teams);
+    return Teams;
+}(GraphQueryableCollection));
+/**
+ * Represents a Microsoft Team
+ */
+var graph_es5_Team = /** @class */ (function (_super) {
+    __extends(Team, _super);
+    function Team() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Team_1 = Team;
+    Object.defineProperty(Team.prototype, "channels", {
+        get: function () {
+            return new graph_es5_Channels(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Team.prototype, "installedApps", {
+        get: function () {
+            return new graph_es5_Apps(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Updates this team instance's properties
+     *
+     * @param properties The set of properties to update
+     */
+    // TODO:: update properties to be typed once type is available in graph-types
+    Team.prototype.update = function (properties) {
+        var _this = this;
+        return this.clone(Team_1, "").patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        }).then(function (data) {
+            return {
+                data: data,
+                team: _this,
+            };
+        });
+    };
+    /**
+     * Archives this Team
+     *
+     * @param shouldSetSpoSiteReadOnlyForMembers Should members have Read-only in associated Team Site
+     */
+    // TODO:: update properties to be typed once type is available in graph-types
+    Team.prototype.archive = function (shouldSetSpoSiteReadOnlyForMembers) {
+        var _this = this;
+        var postBody;
+        if (shouldSetSpoSiteReadOnlyForMembers != null) {
+            postBody = Object(common_es5["g" /* extend */])(postBody, {
+                shouldSetSpoSiteReadOnlyForMembers: shouldSetSpoSiteReadOnlyForMembers,
+            });
+        }
+        return this.clone(Team_1, "archive").postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (data) {
+            return {
+                data: data,
+                team: _this,
+            };
+        });
+    };
+    /**
+    * Unarchives this Team
+    *
+    */
+    // TODO:: update properties to be typed once type is available in graph-types
+    Team.prototype.unarchive = function () {
+        var _this = this;
+        return this.clone(Team_1, "unarchive").postCore({}).then(function (data) {
+            return {
+                data: data,
+                team: _this,
+            };
+        });
+    };
+    /**
+     * Clones this Team
+     * @param name The name of the new Group
+     * @param description Optional description of the group
+     * @param partsToClone Parts to clone ex: apps,tabs,settings,channels,members
+     * @param visibility Set visibility to public or private
+     */
+    // TODO:: update properties to be typed once type is available in graph-types
+    Team.prototype.cloneTeam = function (name, description, partsToClone, visibility) {
+        var _this = this;
+        if (description === void 0) { description = ""; }
+        var postBody = {
+            description: description ? description : "",
+            displayName: name,
+            mailNickname: name,
+            partsToClone: partsToClone,
+            visibility: visibility,
+        };
+        return this.clone(Team_1, "clone").postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (data) {
+            return {
+                data: data,
+                team: _this,
+            };
+        });
+    };
+    /**
+     * Executes the currently built request
+     *
+     * @param parser Allows you to specify a parser to handle the result
+     * @param getOptions The options used for this request
+     */
+    Team.prototype.get = function (parser, options) {
+        if (parser === void 0) { parser = new odata_es5["f" /* ODataDefaultParser */](); }
+        if (options === void 0) { options = {}; }
+        return this.clone(Team_1, "").getCore(parser, options);
+    };
+    var Team_1;
+    Team = Team_1 = __decorate([
+        defaultPath("team")
+    ], Team);
+    return Team;
+}(GraphQueryableInstance));
+var graph_es5_Channels = /** @class */ (function (_super) {
+    __extends(Channels, _super);
+    function Channels() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Creates a new Channel in the Team
+     * @param name The display name of the new channel
+     * @param description Optional description of the channel
+     *
+     */
+    Channels.prototype.create = function (name, description) {
+        var _this = this;
+        if (description === void 0) { description = ""; }
+        var postBody = {
+            description: description && description.length > 0 ? description : "",
+            displayName: name,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                channel: _this.getById(r.id),
+                data: r,
+            };
+        });
+    };
+    Channels.prototype.getById = function (id) {
+        return new Channel(this, id);
+    };
+    Channels = __decorate([
+        defaultPath("channels")
+    ], Channels);
+    return Channels;
+}(GraphQueryableCollection));
+var Channel = /** @class */ (function (_super) {
+    __extends(Channel, _super);
+    function Channel() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Channel.prototype, "tabs", {
+        get: function () {
+            return new graph_es5_Tabs(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Channel;
+}(GraphQueryableInstance));
+var graph_es5_Apps = /** @class */ (function (_super) {
+    __extends(Apps, _super);
+    function Apps() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Creates a new App in the Team
+     * @param appUrl The url to an app ex: https://graph.microsoft.com/beta/appCatalogs/teamsApps/12345678-9abc-def0-123456789a
+     *
+     */
+    Apps.prototype.add = function (appUrl) {
+        var postBody = {
+            "teamsApp@odata.bind": appUrl,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+            };
+        });
+    };
+    /**
+     * Deletes this app
+     */
+    Apps.prototype.remove = function () {
+        return this.deleteCore();
+    };
+    Apps = __decorate([
+        defaultPath("installedApps")
+    ], Apps);
+    return Apps;
+}(GraphQueryableCollection));
+var graph_es5_Tabs = /** @class */ (function (_super) {
+    __extends(Tabs, _super);
+    function Tabs() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Adds a tab to the cahnnel
+     * @param name The name of the new Tab
+     * @param appUrl The url to an app ex: https://graph.microsoft.com/beta/appCatalogs/teamsApps/12345678-9abc-def0-123456789a
+     * @param tabsConfiguration visit https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/teamstab_add for reference
+     */
+    Tabs.prototype.add = function (name, appUrl, properties) {
+        var _this = this;
+        var postBody = Object(common_es5["g" /* extend */])({
+            name: name,
+            "teamsApp@odata.bind": appUrl,
+        }, properties);
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                tab: _this.getById(r.id),
+            };
+        });
+    };
+    Tabs.prototype.getById = function (id) {
+        return new graph_es5_Tab(this, id);
+    };
+    Tabs = __decorate([
+        defaultPath("tabs")
+    ], Tabs);
+    return Tabs;
+}(GraphQueryableCollection));
+/**
+ * Represents a Microsoft Team
+ */
+var graph_es5_Tab = /** @class */ (function (_super) {
+    __extends(Tab, _super);
+    function Tab() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Tab_1 = Tab;
+    /**
+     * Updates this tab
+     *
+     * @param properties The set of properties to update
+     */
+    // TODO:: update properties to be typed once type is available in graph-types
+    Tab.prototype.update = function (properties) {
+        var _this = this;
+        return this.clone(Tab_1, "").patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        }).then(function (data) {
+            return {
+                data: data,
+                tab: _this,
+            };
+        });
+    };
+    /**
+     * Deletes this tab
+     */
+    Tab.prototype.remove = function () {
+        return this.deleteCore();
+    };
+    var Tab_1;
+    Tab = Tab_1 = __decorate([
+        defaultPath("tab")
+    ], Tab);
+    return Tab;
+}(GraphQueryableInstance));
+
+var GroupType;
+(function (GroupType) {
+    /**
+     * Office 365 (aka unified group)
+     */
+    GroupType[GroupType["Office365"] = 0] = "Office365";
+    /**
+     * Dynamic membership
+     */
+    GroupType[GroupType["Dynamic"] = 1] = "Dynamic";
+    /**
+     * Security
+     */
+    GroupType[GroupType["Security"] = 2] = "Security";
+})(GroupType || (GroupType = {}));
+/**
+ * Describes a collection of Field objects
+ *
+ */
+var graph_es5_Groups = /** @class */ (function (_super) {
+    __extends(Groups, _super);
+    function Groups() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a group from the collection using the specified id
+     *
+     * @param id Id of the group to get from this collection
+     */
+    Groups.prototype.getById = function (id) {
+        return new graph_es5_Group(this, id);
+    };
+    /**
+     * Create a new group as specified in the request body.
+     *
+     * @param name Name to display in the address book for the group
+     * @param mailNickname Mail alias for the group
+     * @param groupType Type of group being created
+     * @param additionalProperties A plain object collection of additional properties you want to set on the new group
+     */
+    Groups.prototype.add = function (name, mailNickname, groupType, additionalProperties) {
+        var _this = this;
+        if (additionalProperties === void 0) { additionalProperties = {}; }
+        var postBody = Object(common_es5["g" /* extend */])({
+            displayName: name,
+            mailEnabled: groupType === GroupType.Office365,
+            mailNickname: mailNickname,
+            securityEnabled: groupType !== GroupType.Office365,
+        }, additionalProperties);
+        // include a group type if required
+        if (groupType !== GroupType.Security) {
+            postBody = Object(common_es5["g" /* extend */])(postBody, {
+                groupTypes: groupType === GroupType.Office365 ? ["Unified"] : ["DynamicMembership"],
+            });
+        }
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                group: _this.getById(r.id),
+            };
+        });
+    };
+    Groups = __decorate([
+        defaultPath("groups")
+    ], Groups);
+    return Groups;
+}(GraphQueryableCollection));
+/**
+ * Represents a group entity
+ */
+var graph_es5_Group = /** @class */ (function (_super) {
+    __extends(Group, _super);
+    function Group() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Group.prototype, "calendar", {
+        /**
+         * The calendar associated with this group
+         */
+        get: function () {
+            return new Calendar(this, "calendar");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "events", {
+        /**
+         * Retrieve a list of event objects
+         */
+        get: function () {
+            return new graph_es5_Events(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "owners", {
+        /**
+         * Gets the collection of owners for this group
+         */
+        get: function () {
+            return new Owners(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "plans", {
+        /**
+         * The collection of plans for this group
+         */
+        get: function () {
+            return new graph_es5_Plans(this, "planner/plans");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "members", {
+        /**
+         * Gets the collection of members for this group
+         */
+        get: function () {
+            return new graph_es5_Members(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "conversations", {
+        /**
+         * Gets the conversations collection for this group
+         */
+        get: function () {
+            return new graph_es5_Conversations(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "acceptedSenders", {
+        /**
+         * Gets the collection of accepted senders for this group
+         */
+        get: function () {
+            return new graph_es5_Senders(this, "acceptedsenders");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "rejectedSenders", {
+        /**
+         * Gets the collection of rejected senders for this group
+         */
+        get: function () {
+            return new graph_es5_Senders(this, "rejectedsenders");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "photo", {
+        /**
+         * The photo associated with the group
+         */
+        get: function () {
+            return new graph_es5_Photo(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Group.prototype, "team", {
+        /**
+         * Gets the team associated with this group, if it exists
+         */
+        get: function () {
+            return new graph_es5_Team(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Add the group to the list of the current user's favorite groups. Supported for only Office 365 groups
+     */
+    Group.prototype.addFavorite = function () {
+        return this.clone(Group, "addFavorite").postCore();
+    };
+    /**
+     * Creates a Microsoft Team associated with this group
+     *
+     * @param properties Initial properties for the new Team
+     */
+    Group.prototype.createTeam = function (properties) {
+        return this.clone(Group, "team").putCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    /**
+     * Returns all the groups and directory roles that the specified group is a member of. The check is transitive
+     *
+     * @param securityEnabledOnly
+     */
+    Group.prototype.getMemberObjects = function (securityEnabledOnly) {
+        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
+        return this.clone(Group, "getMemberObjects").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                securityEnabledOnly: securityEnabledOnly,
+            }),
+        });
+    };
+    /**
+     * Return all the groups that the specified group is a member of. The check is transitive
+     *
+     * @param securityEnabledOnly
+     */
+    Group.prototype.getMemberGroups = function (securityEnabledOnly) {
+        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
+        return this.clone(Group, "getMemberGroups").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                securityEnabledOnly: securityEnabledOnly,
+            }),
+        });
+    };
+    /**
+     * Check for membership in a specified list of groups, and returns from that list those groups of which the specified user, group, or directory object is a member.
+     * This function is transitive.
+     * @param groupIds A collection that contains the object IDs of the groups in which to check membership. Up to 20 groups may be specified.
+     */
+    Group.prototype.checkMemberGroups = function (groupIds) {
+        return this.clone(Group, "checkMemberGroups").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                groupIds: groupIds,
+            }),
+        });
+    };
+    /**
+     * Deletes this group
+     */
+    Group.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a group object
+     *
+     * @param properties Set of properties of this group to update
+     */
+    Group.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    /**
+     * Remove the group from the list of the current user's favorite groups. Supported for only Office 365 groups
+     */
+    Group.prototype.removeFavorite = function () {
+        return this.clone(Group, "removeFavorite").postCore();
+    };
+    /**
+     * Reset the unseenCount of all the posts that the current user has not seen since their last visit
+     */
+    Group.prototype.resetUnseenCount = function () {
+        return this.clone(Group, "resetUnseenCount").postCore();
+    };
+    /**
+     * Calling this method will enable the current user to receive email notifications for this group,
+     * about new posts, events, and files in that group. Supported for only Office 365 groups
+     */
+    Group.prototype.subscribeByMail = function () {
+        return this.clone(Group, "subscribeByMail").postCore();
+    };
+    /**
+     * Calling this method will prevent the current user from receiving email notifications for this group
+     * about new posts, events, and files in that group. Supported for only Office 365 groups
+     */
+    Group.prototype.unsubscribeByMail = function () {
+        return this.clone(Group, "unsubscribeByMail").postCore();
+    };
+    /**
+     * Get the occurrences, exceptions, and single instances of events in a calendar view defined by a time range, from the default calendar of a group
+     *
+     * @param start Start date and time of the time range
+     * @param end End date and time of the time range
+     */
+    Group.prototype.getCalendarView = function (start, end) {
+        var view = this.clone(Group, "calendarView");
+        view.query.set("startDateTime", start.toISOString());
+        view.query.set("endDateTime", end.toISOString());
+        return view.get();
+    };
+    return Group;
+}(GraphQueryableInstance));
+
+var graph_es5_Contacts = /** @class */ (function (_super) {
+    __extends(Contacts, _super);
+    function Contacts() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Contacts.prototype.getById = function (id) {
+        return new graph_es5_Contact(this, id);
+    };
+    /**
+    * Create a new Contact for the user.
+    *
+    * @param givenName The contact's given name.
+    * @param surName The contact's surname.
+    * @param emailAddresses The contact's email addresses.
+    * @param businessPhones The contact's business phone numbers.
+    * @param additionalProperties A plain object collection of additional properties you want to set on the new contact
+    */
+    Contacts.prototype.add = function (givenName, surName, emailAddresses, businessPhones, additionalProperties) {
+        var _this = this;
+        if (additionalProperties === void 0) { additionalProperties = {}; }
+        var postBody = Object(common_es5["g" /* extend */])({
+            businessPhones: businessPhones,
+            emailAddresses: emailAddresses,
+            givenName: givenName,
+            surName: surName,
+        }, additionalProperties);
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                contact: _this.getById(r.id),
+                data: r,
+            };
+        });
+    };
+    Contacts = __decorate([
+        defaultPath("contacts")
+    ], Contacts);
+    return Contacts;
+}(GraphQueryableCollection));
+var graph_es5_Contact = /** @class */ (function (_super) {
+    __extends(Contact, _super);
+    function Contact() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Deletes this contact
+     */
+    Contact.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a contact object
+     *
+     * @param properties Set of properties of this contact to update
+     */
+    Contact.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    return Contact;
+}(GraphQueryableInstance));
+var graph_es5_ContactFolders = /** @class */ (function (_super) {
+    __extends(ContactFolders, _super);
+    function ContactFolders() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    ContactFolders.prototype.getById = function (id) {
+        return new graph_es5_ContactFolder(this, id);
+    };
+    /**
+     * Create a new Contact Folder for the user.
+     *
+     * @param displayName The folder's display name.
+     * @param parentFolderId The ID of the folder's parent folder.
+     */
+    ContactFolders.prototype.add = function (displayName, parentFolderId) {
+        var _this = this;
+        var postBody = {
+            displayName: displayName,
+            parentFolderId: parentFolderId,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                contactFolder: _this.getById(r.id),
+                data: r,
+            };
+        });
+    };
+    ContactFolders = __decorate([
+        defaultPath("contactFolders")
+    ], ContactFolders);
+    return ContactFolders;
+}(GraphQueryableCollection));
+var graph_es5_ContactFolder = /** @class */ (function (_super) {
+    __extends(ContactFolder, _super);
+    function ContactFolder() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(ContactFolder.prototype, "contacts", {
+        /**
+         * Gets the contacts in this contact folder
+         */
+        get: function () {
+            return new graph_es5_Contacts(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(ContactFolder.prototype, "childFolders", {
+        /**
+        * Gets the contacts in this contact folder
+        */
+        get: function () {
+            return new graph_es5_ContactFolders(this, "childFolders");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Deletes this contact folder
+     */
+    ContactFolder.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a contact folder
+     *
+     * @param properties Set of properties of this contact folder to update
+     */
+    ContactFolder.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    return ContactFolder;
+}(GraphQueryableInstance));
+
+/**
+ * Represents a onenote entity
+ */
+var OneNote = /** @class */ (function (_super) {
+    __extends(OneNote, _super);
+    function OneNote() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(OneNote.prototype, "notebooks", {
+        get: function () {
+            return new graph_es5_Notebooks(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(OneNote.prototype, "sections", {
+        get: function () {
+            return new graph_es5_Sections(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(OneNote.prototype, "pages", {
+        get: function () {
+            return new Pages(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    OneNote = __decorate([
+        defaultPath("onenote")
+    ], OneNote);
+    return OneNote;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Notebook objects
+ *
+ */
+var graph_es5_Notebooks = /** @class */ (function (_super) {
+    __extends(Notebooks, _super);
+    function Notebooks() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a notebook instance by id
+     *
+     * @param id Notebook id
+     */
+    Notebooks.prototype.getById = function (id) {
+        return new Notebook(this, id);
+    };
+    /**
+     * Create a new notebook as specified in the request body.
+     *
+     * @param displayName Notebook display name
+     */
+    Notebooks.prototype.add = function (displayName) {
+        var _this = this;
+        var postBody = {
+            displayName: displayName,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                notebook: _this.getById(r.id),
+            };
+        });
+    };
+    Notebooks = __decorate([
+        defaultPath("notebooks")
+    ], Notebooks);
+    return Notebooks;
+}(GraphQueryableCollection));
+/**
+ * Describes a notebook instance
+ *
+ */
+var Notebook = /** @class */ (function (_super) {
+    __extends(Notebook, _super);
+    function Notebook(baseUrl, path) {
+        return _super.call(this, baseUrl, path) || this;
+    }
+    Object.defineProperty(Notebook.prototype, "sections", {
+        get: function () {
+            return new graph_es5_Sections(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Notebook;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Sections objects
+ *
+ */
+var graph_es5_Sections = /** @class */ (function (_super) {
+    __extends(Sections, _super);
+    function Sections() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a section instance by id
+     *
+     * @param id Section id
+     */
+    Sections.prototype.getById = function (id) {
+        return new Section(this, id);
+    };
+    /**
+     * Adds a new section
+     *
+     * @param displayName New section display name
+     */
+    Sections.prototype.add = function (displayName) {
+        var _this = this;
+        var postBody = {
+            displayName: displayName,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                section: _this.getById(r.id),
+            };
+        });
+    };
+    Sections = __decorate([
+        defaultPath("sections")
+    ], Sections);
+    return Sections;
+}(GraphQueryableCollection));
+/**
+ * Describes a sections instance
+ *
+ */
+var Section = /** @class */ (function (_super) {
+    __extends(Section, _super);
+    function Section(baseUrl, path) {
+        return _super.call(this, baseUrl, path) || this;
+    }
+    return Section;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Pages objects
+ *
+ */
+var Pages = /** @class */ (function (_super) {
+    __extends(Pages, _super);
+    function Pages() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Pages = __decorate([
+        defaultPath("pages")
+    ], Pages);
+    return Pages;
+}(GraphQueryableCollection));
+
+/**
+ * Describes a collection of Drive objects
+ *
+ */
+var Drives = /** @class */ (function (_super) {
+    __extends(Drives, _super);
+    function Drives() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a Drive instance by id
+     *
+     * @param id Drive id
+     */
+    Drives.prototype.getById = function (id) {
+        return new Drive(this, id);
+    };
+    Drives = __decorate([
+        defaultPath("drives")
+    ], Drives);
+    return Drives;
+}(GraphQueryableCollection));
+/**
+ * Describes a Drive instance
+ *
+ */
+var Drive = /** @class */ (function (_super) {
+    __extends(Drive, _super);
+    function Drive() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Drive.prototype, "root", {
+        get: function () {
+            return new Root(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Drive.prototype, "items", {
+        get: function () {
+            return new DriveItems(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Drive.prototype, "list", {
+        get: function () {
+            return new DriveList(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Drive.prototype, "recent", {
+        get: function () {
+            return new Recent(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Drive.prototype, "sharedWithMe", {
+        get: function () {
+            return new SharedWithMe(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Drive = __decorate([
+        defaultPath("drive")
+    ], Drive);
+    return Drive;
+}(GraphQueryableInstance));
+/**
+ * Describes a Root instance
+ *
+ */
+var Root = /** @class */ (function (_super) {
+    __extends(Root, _super);
+    function Root() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Root.prototype, "children", {
+        get: function () {
+            return new graph_es5_Children(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Root.prototype.search = function (query) {
+        return new DriveSearch(this, "search(q='" + query + "')");
+    };
+    Root = __decorate([
+        defaultPath("root")
+    ], Root);
+    return Root;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Drive Item objects
+ *
+ */
+var DriveItems = /** @class */ (function (_super) {
+    __extends(DriveItems, _super);
+    function DriveItems() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a Drive Item instance by id
+     *
+     * @param id Drive Item id
+     */
+    DriveItems.prototype.getById = function (id) {
+        return new graph_es5_DriveItem(this, id);
+    };
+    DriveItems = __decorate([
+        defaultPath("items")
+    ], DriveItems);
+    return DriveItems;
+}(GraphQueryableCollection));
+/**
+ * Describes a Drive Item instance
+ *
+ */
+var graph_es5_DriveItem = /** @class */ (function (_super) {
+    __extends(DriveItem, _super);
+    function DriveItem() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(DriveItem.prototype, "children", {
+        get: function () {
+            return new graph_es5_Children(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(DriveItem.prototype, "thumbnails", {
+        get: function () {
+            return new Thumbnails(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Deletes this Drive Item
+     */
+    DriveItem.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a Drive item
+     *
+     * @param properties Set of properties of this Drive Item to update
+     */
+    DriveItem.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    /**
+     * Move the Drive item and optionally update the properties
+     *
+     * @param parentReference Should contain Id of new parent folder
+     * @param properties Optional set of properties of this Drive Item to update
+     */
+    DriveItem.prototype.move = function (parentReference, properties) {
+        var patchBody = Object(common_es5["g" /* extend */])({}, parentReference);
+        if (properties) {
+            patchBody = Object(common_es5["g" /* extend */])({}, properties);
+        }
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(patchBody),
+        });
+    };
+    return DriveItem;
+}(GraphQueryableInstance));
+/**
+ * Return a collection of DriveItems in the children relationship of a DriveItem
+ *
+ */
+var graph_es5_Children = /** @class */ (function (_super) {
+    __extends(Children, _super);
+    function Children() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+    * Create a new folder or DriveItem in a Drive with a specified parent item or path
+    * Currently only Folder or File works
+    * @param name The name of the Drive Item.
+    * @param properties Type of Drive Item to create.
+    * */
+    Children.prototype.add = function (name, driveItemType) {
+        var _this = this;
+        var postBody = Object(common_es5["g" /* extend */])({
+            name: name,
+        }, driveItemType);
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                driveItem: new graph_es5_DriveItem(_this, r.id),
+            };
+        });
+    };
+    Children = __decorate([
+        defaultPath("children")
+    ], Children);
+    return Children;
+}(GraphQueryableCollection));
+var DriveList = /** @class */ (function (_super) {
+    __extends(DriveList, _super);
+    function DriveList() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DriveList = __decorate([
+        defaultPath("list")
+    ], DriveList);
+    return DriveList;
+}(GraphQueryableCollection));
+var Recent = /** @class */ (function (_super) {
+    __extends(Recent, _super);
+    function Recent() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Recent = __decorate([
+        defaultPath("recent")
+    ], Recent);
+    return Recent;
+}(GraphQueryableInstance));
+var SharedWithMe = /** @class */ (function (_super) {
+    __extends(SharedWithMe, _super);
+    function SharedWithMe() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    SharedWithMe = __decorate([
+        defaultPath("sharedWithMe")
+    ], SharedWithMe);
+    return SharedWithMe;
+}(GraphQueryableInstance));
+var DriveSearch = /** @class */ (function (_super) {
+    __extends(DriveSearch, _super);
+    function DriveSearch() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DriveSearch = __decorate([
+        defaultPath("search")
+    ], DriveSearch);
+    return DriveSearch;
+}(GraphQueryableInstance));
+var Thumbnails = /** @class */ (function (_super) {
+    __extends(Thumbnails, _super);
+    function Thumbnails() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Thumbnails = __decorate([
+        defaultPath("thumbnails")
+    ], Thumbnails);
+    return Thumbnails;
+}(GraphQueryableInstance));
+
+var graph_es5_Messages = /** @class */ (function (_super) {
+    __extends(Messages, _super);
+    function Messages() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a member of the group by id
+     *
+     * @param id Attachment id
+     */
+    Messages.prototype.getById = function (id) {
+        return new Message(this, id);
+    };
+    /**
+     * Add a message to this collection
+     *
+     * @param message The message details
+     */
+    Messages.prototype.add = function (message) {
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(message),
+        });
+    };
+    Messages = __decorate([
+        defaultPath("messages")
+    ], Messages);
+    return Messages;
+}(GraphQueryableCollection));
+var Message = /** @class */ (function (_super) {
+    __extends(Message, _super);
+    function Message() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return Message;
+}(GraphQueryableInstance));
+var graph_es5_MailFolders = /** @class */ (function (_super) {
+    __extends(MailFolders, _super);
+    function MailFolders() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a member of the group by id
+     *
+     * @param id Attachment id
+     */
+    MailFolders.prototype.getById = function (id) {
+        return new MailFolder(this, id);
+    };
+    /**
+     * Add a mail folder to this collection
+     *
+     * @param message The message details
+     */
+    MailFolders.prototype.add = function (mailFolder) {
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(mailFolder),
+        });
+    };
+    MailFolders = __decorate([
+        defaultPath("mailFolders")
+    ], MailFolders);
+    return MailFolders;
+}(GraphQueryableCollection));
+var MailFolder = /** @class */ (function (_super) {
+    __extends(MailFolder, _super);
+    function MailFolder() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return MailFolder;
+}(GraphQueryableInstance));
+var graph_es5_MailboxSettings = /** @class */ (function (_super) {
+    __extends(MailboxSettings, _super);
+    function MailboxSettings() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    MailboxSettings.prototype.update = function (settings) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(settings),
+        });
+    };
+    MailboxSettings = __decorate([
+        defaultPath("mailboxSettings")
+    ], MailboxSettings);
+    return MailboxSettings;
+}(GraphQueryableInstance));
+
+var DirectoryObjectType;
+(function (DirectoryObjectType) {
+    /**
+     * Directory Objects
+     */
+    DirectoryObjectType[DirectoryObjectType["directoryObject"] = 0] = "directoryObject";
+    /**
+     * User
+     */
+    DirectoryObjectType[DirectoryObjectType["user"] = 1] = "user";
+    /**
+     * Group
+     */
+    DirectoryObjectType[DirectoryObjectType["group"] = 2] = "group";
+    /**
+     * Device
+     */
+    DirectoryObjectType[DirectoryObjectType["device"] = 3] = "device";
+})(DirectoryObjectType || (DirectoryObjectType = {}));
+/**
+ * Describes a collection of Directory Objects
+ *
+ */
+var graph_es5_DirectoryObjects = /** @class */ (function (_super) {
+    __extends(DirectoryObjects, _super);
+    function DirectoryObjects() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DirectoryObjects_1 = DirectoryObjects;
+    /**
+     * Gets a directoryObject from the collection using the specified id
+     *
+     * @param id Id of the Directory Object to get from this collection
+     */
+    DirectoryObjects.prototype.getById = function (id) {
+        return new graph_es5_DirectoryObject(this, id);
+    };
+    /**
+    * Returns the directory objects specified in a list of ids. NOTE: The directory objects returned are the full objects containing all their properties.
+    * The $select query option is not available for this operation.
+    *
+    * @param ids A collection of ids for which to return objects. You can specify up to 1000 ids.
+    * @param type A collection of resource types that specifies the set of resource collections to search. Default is directoryObject.
+    */
+    DirectoryObjects.prototype.getByIds = function (ids, type) {
+        if (type === void 0) { type = DirectoryObjectType.directoryObject; }
+        return this.clone(DirectoryObjects_1, "getByIds").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                ids: ids,
+                type: type,
+            }),
+        });
+    };
+    var DirectoryObjects_1;
+    DirectoryObjects = DirectoryObjects_1 = __decorate([
+        defaultPath("directoryObjects")
+    ], DirectoryObjects);
+    return DirectoryObjects;
+}(GraphQueryableCollection));
+/**
+ * Represents a Directory Object entity
+ */
+var graph_es5_DirectoryObject = /** @class */ (function (_super) {
+    __extends(DirectoryObject, _super);
+    function DirectoryObject() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Deletes this group
+     */
+    DirectoryObject.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Returns all the groups and directory roles that the specified Directory Object is a member of. The check is transitive
+     *
+     * @param securityEnabledOnly
+     */
+    DirectoryObject.prototype.getMemberObjects = function (securityEnabledOnly) {
+        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
+        return this.clone(DirectoryObject, "getMemberObjects").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                securityEnabledOnly: securityEnabledOnly,
+            }),
+        });
+    };
+    /**
+     * Returns all the groups that the specified Directory Object is a member of. The check is transitive
+     *
+     * @param securityEnabledOnly
+     */
+    DirectoryObject.prototype.getMemberGroups = function (securityEnabledOnly) {
+        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
+        return this.clone(DirectoryObject, "getMemberGroups").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                securityEnabledOnly: securityEnabledOnly,
+            }),
+        });
+    };
+    /**
+     * Check for membership in a specified list of groups, and returns from that list those groups of which the specified user, group, or directory object is a member.
+     * This function is transitive.
+     * @param groupIds A collection that contains the object IDs of the groups in which to check membership. Up to 20 groups may be specified.
+     */
+    DirectoryObject.prototype.checkMemberGroups = function (groupIds) {
+        return this.clone(DirectoryObject, "checkMemberGroups").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                groupIds: groupIds,
+            }),
+        });
+    };
+    return DirectoryObject;
+}(GraphQueryableInstance));
+
+var People = /** @class */ (function (_super) {
+    __extends(People, _super);
+    function People() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    People = __decorate([
+        defaultPath("people")
+    ], People);
+    return People;
+}(GraphQueryableCollection));
+
+/**
+ * Represents a Insights entity
+ */
+var Insights = /** @class */ (function (_super) {
+    __extends(Insights, _super);
+    function Insights() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Insights.prototype, "trending", {
+        get: function () {
+            return new Trending(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Insights.prototype, "used", {
+        get: function () {
+            return new Used(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Insights.prototype, "shared", {
+        get: function () {
+            return new Shared(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Insights = __decorate([
+        defaultPath("insights")
+    ], Insights);
+    return Insights;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Trending objects
+ *
+ */
+var Trending = /** @class */ (function (_super) {
+    __extends(Trending, _super);
+    function Trending() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Trending = __decorate([
+        defaultPath("trending")
+    ], Trending);
+    return Trending;
+}(GraphQueryableCollection));
+/**
+ * Describes a collection of Used objects
+ *
+ */
+var Used = /** @class */ (function (_super) {
+    __extends(Used, _super);
+    function Used() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Used = __decorate([
+        defaultPath("used")
+    ], Used);
+    return Used;
+}(GraphQueryableCollection));
+/**
+ * Describes a collection of Shared objects
+ *
+ */
+var Shared = /** @class */ (function (_super) {
+    __extends(Shared, _super);
+    function Shared() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Shared = __decorate([
+        defaultPath("shared")
+    ], Shared);
+    return Shared;
+}(GraphQueryableCollection));
+
+/**
+ * Describes a collection of Users objects
+ *
+ */
+var Users = /** @class */ (function (_super) {
+    __extends(Users, _super);
+    function Users() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a user from the collection using the specified id
+     *
+     * @param id Id of the user to get from this collection
+     */
+    Users.prototype.getById = function (id) {
+        return new graph_es5_User(this, id);
+    };
+    Users = __decorate([
+        defaultPath("users")
+    ], Users);
+    return Users;
+}(GraphQueryableCollection));
+/**
+ * Represents a user entity
+ */
+var graph_es5_User = /** @class */ (function (_super) {
+    __extends(User, _super);
+    function User() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(User.prototype, "onenote", {
+        /**
+        * The onenote associated with me
+        */
+        get: function () {
+            return new OneNote(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "contacts", {
+        /**
+        * The Contacts associated with the user
+        */
+        get: function () {
+            return new graph_es5_Contacts(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "joinedTeams", {
+        /**
+        * The Teams associated with the user
+        */
+        get: function () {
+            return new Teams(this, "joinedTeams");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "memberOf", {
+        /**
+        * The groups and directory roles associated with the user
+        */
+        get: function () {
+            return new graph_es5_DirectoryObjects(this, "memberOf");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Returns all the groups and directory roles that the specified useris a member of. The check is transitive
+     *
+     * @param securityEnabledOnly
+     */
+    User.prototype.getMemberObjects = function (securityEnabledOnly) {
+        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
+        return this.clone(User, "getMemberObjects").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                securityEnabledOnly: securityEnabledOnly,
+            }),
+        });
+    };
+    /**
+     * Return all the groups that the specified user is a member of. The check is transitive
+     *
+     * @param securityEnabledOnly
+     */
+    User.prototype.getMemberGroups = function (securityEnabledOnly) {
+        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
+        return this.clone(User, "getMemberGroups").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                securityEnabledOnly: securityEnabledOnly,
+            }),
+        });
+    };
+    /**
+     * Check for membership in a specified list of groups, and returns from that list those groups of which the specified user, group, or directory object is a member.
+     * This function is transitive.
+     * @param groupIds A collection that contains the object IDs of the groups in which to check membership. Up to 20 groups may be specified.
+     */
+    User.prototype.checkMemberGroups = function (groupIds) {
+        return this.clone(User, "checkMemberGroups").postCore({
+            body: Object(common_es5["q" /* jsS */])({
+                groupIds: groupIds,
+            }),
+        });
+    };
+    Object.defineProperty(User.prototype, "contactFolders", {
+        /**
+        * The Contact Folders associated with the user
+        */
+        get: function () {
+            return new graph_es5_ContactFolders(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "drive", {
+        /**
+        * The default Drive associated with the user
+        */
+        get: function () {
+            return new Drive(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "drives", {
+        /**
+        * The Drives the user has available
+        */
+        get: function () {
+            return new Drives(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "tasks", {
+        /**
+        * The Tasks the user has available
+        */
+        get: function () {
+            return new graph_es5_Tasks(this, "planner/tasks");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "messages", {
+        /**
+         * Get the messages in the signed-in user's mailbox
+         */
+        get: function () {
+            return new graph_es5_Messages(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "mailboxSettings", {
+        /**
+         * Get the MailboxSettings in the signed-in user's mailbox
+         */
+        get: function () {
+            return new graph_es5_MailboxSettings(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "mailFolders", {
+        /**
+         * Get the MailboxSettings in the signed-in user's mailbox
+         */
+        get: function () {
+            return new graph_es5_MailFolders(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Updates this user
+     *
+     * @param properties Properties used to update this user
+     */
+    User.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    /**
+     * Deletes this user
+     */
+    User.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Send the message specified in the request body. The message is saved in the Sent Items folder by default.
+     */
+    User.prototype.sendMail = function (message) {
+        return this.clone(User, "sendMail").postCore({
+            body: Object(common_es5["q" /* jsS */])(message),
+        });
+    };
+    Object.defineProperty(User.prototype, "people", {
+        /**
+        * People ordered by their relevance to the user
+        */
+        get: function () {
+            return new People(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "directReports", {
+        /**
+        * People that have direct reports to the user
+        */
+        get: function () {
+            return new People(this, "directReports");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(User.prototype, "insights", {
+        /**
+        * The Insights associated with me
+        */
+        get: function () {
+            return new Insights(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return User;
+}(GraphQueryableInstance));
+
+var graph_es5_GraphBatch = /** @class */ (function (_super) {
+    __extends(GraphBatch, _super);
+    function GraphBatch(batchUrl, maxRequests) {
+        if (batchUrl === void 0) { batchUrl = "https://graph.microsoft.com/v1.0/$batch"; }
+        if (maxRequests === void 0) { maxRequests = 20; }
+        var _this = _super.call(this) || this;
+        _this.batchUrl = batchUrl;
+        _this.maxRequests = maxRequests;
+        return _this;
+    }
+    /**
+     * Urls come to the batch absolute, but the processor expects relative
+     * @param url Url to ensure is relative
+     */
+    GraphBatch.makeUrlRelative = function (url) {
+        if (!Object(common_es5["p" /* isUrlAbsolute */])(url)) {
+            // already not absolute, just give it back
+            return url;
+        }
+        var index = url.indexOf(".com/v1.0/");
+        if (index < 0) {
+            index = url.indexOf(".com/beta/");
+            if (index > -1) {
+                // beta url
+                return url.substr(index + 10);
+            }
+        }
+        else {
+            // v1.0 url
+            return url.substr(index + 9);
+        }
+        // no idea
+        return url;
+    };
+    GraphBatch.formatRequests = function (requests) {
+        var _this = this;
+        return requests.map(function (reqInfo, index) {
+            var requestFragment = {
+                id: "" + ++index,
+                method: reqInfo.method,
+                url: _this.makeUrlRelative(reqInfo.url),
+            };
+            var headers = {};
+            // merge global config headers
+            if (GraphRuntimeConfig.headers !== undefined && GraphRuntimeConfig.headers !== null) {
+                headers = Object(common_es5["g" /* extend */])(headers, GraphRuntimeConfig.headers);
+            }
+            if (reqInfo.options !== undefined) {
+                // merge per request headers
+                if (reqInfo.options.headers !== undefined && reqInfo.options.headers !== null) {
+                    headers = Object(common_es5["g" /* extend */])(headers, reqInfo.options.headers);
+                }
+                // add a request body
+                if (reqInfo.options.body !== undefined && reqInfo.options.body !== null) {
+                    requestFragment = Object(common_es5["g" /* extend */])(requestFragment, {
+                        body: reqInfo.options.body,
+                    });
+                }
+            }
+            requestFragment = Object(common_es5["g" /* extend */])(requestFragment, {
+                headers: headers,
+            });
+            return requestFragment;
+        });
+    };
+    GraphBatch.parseResponse = function (requests, graphResponse) {
+        return new Promise(function (resolve) {
+            var parsedResponses = new Array(requests.length).fill(null);
+            for (var i = 0; i < graphResponse.responses.length; ++i) {
+                var response = graphResponse.responses[i];
+                // we create the request id by adding 1 to the index, so we place the response by subtracting one to match
+                // the array of requests and make it easier to map them by index
+                var responseId = parseInt(response.id, 10) - 1;
+                if (response.status === 204) {
+                    parsedResponses[responseId] = new Response();
+                }
+                else {
+                    parsedResponses[responseId] = new Response(JSON.stringify(response.body), response);
+                }
+            }
+            resolve({
+                nextLink: graphResponse.nextLink,
+                responses: parsedResponses,
+            });
+        });
+    };
+    GraphBatch.prototype.executeImpl = function () {
+        var _this = this;
+        logging_es5["a" /* Logger */].write("[" + this.batchId + "] (" + (new Date()).getTime() + ") Executing batch with " + this.requests.length + " requests.", 1 /* Info */);
+        if (this.requests.length < 1) {
+            logging_es5["a" /* Logger */].write("Resolving empty batch.", 1 /* Info */);
+            return Promise.resolve();
+        }
+        var client = new graph_es5_GraphHttpClient();
+        // create a working copy of our requests
+        var requests = this.requests.slice();
+        // this is the root of our promise chain
+        var promise = Promise.resolve();
+        var _loop_1 = function () {
+            var requestsChunk = requests.splice(0, this_1.maxRequests);
+            var batchRequest = {
+                requests: GraphBatch.formatRequests(requestsChunk),
+            };
+            var batchOptions = {
+                body: Object(common_es5["q" /* jsS */])(batchRequest),
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+            };
+            logging_es5["a" /* Logger */].write("[" + this_1.batchId + "] (" + (new Date()).getTime() + ") Sending batch request.", 1 /* Info */);
+            client.fetch(this_1.batchUrl, batchOptions)
+                .then(function (r) { return r.json(); })
+                .then(function (j) { return GraphBatch.parseResponse(requestsChunk, j); })
+                .then(function (parsedResponse) {
+                logging_es5["a" /* Logger */].write("[" + _this.batchId + "] (" + (new Date()).getTime() + ") Resolving batched requests.", 1 /* Info */);
+                parsedResponse.responses.reduce(function (chain, response, index) {
+                    var request = requestsChunk[index];
+                    logging_es5["a" /* Logger */].write("[" + _this.batchId + "] (" + (new Date()).getTime() + ") Resolving batched request " + request.method + " " + request.url + ".", 0 /* Verbose */);
+                    return chain.then(function (_) { return request.parser.parse(response).then(request.resolve).catch(request.reject); });
+                }, promise);
+            });
+        };
+        var this_1 = this;
+        while (requests.length > 0) {
+            _loop_1();
+        }
+        return promise;
+    };
+    return GraphBatch;
+}(odata_es5["e" /* ODataBatch */]));
+
+var graph_es5_Invitations = /** @class */ (function (_super) {
+    __extends(Invitations, _super);
+    function Invitations() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Create a new Invitation via invitation manager.
+     *
+     * @param invitedUserEmailAddress The email address of the user being invited.
+     * @param inviteRedirectUrl The URL user should be redirected to once the invitation is redeemed.
+     * @param additionalProperties A plain object collection of additional properties you want to set in the invitation
+     */
+    Invitations.prototype.create = function (invitedUserEmailAddress, inviteRedirectUrl, additionalProperties) {
+        if (additionalProperties === void 0) { additionalProperties = {}; }
+        var postBody = Object(common_es5["g" /* extend */])({
+            inviteRedirectUrl: inviteRedirectUrl,
+            invitedUserEmailAddress: invitedUserEmailAddress,
+        }, additionalProperties);
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+            };
+        });
+    };
+    Invitations = __decorate([
+        defaultPath("invitations")
+    ], Invitations);
+    return Invitations;
+}(GraphQueryableCollection));
+
+var graph_es5_Subscriptions = /** @class */ (function (_super) {
+    __extends(Subscriptions, _super);
+    function Subscriptions() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Subscriptions.prototype.getById = function (id) {
+        return new graph_es5_Subscription(this, id);
+    };
+    /**
+     * Create a new Subscription.
+     *
+     * @param changeType Indicates the type of change in the subscribed resource that will raise a notification. The supported values are: created, updated, deleted.
+     * @param notificationUrl The URL of the endpoint that will receive the notifications. This URL must make use of the HTTPS protocol.
+     * @param resource Specifies the resource that will be monitored for changes. Do not include the base URL (https://graph.microsoft.com/v1.0/).
+     * @param expirationDateTime Specifies the date and time when the webhook subscription expires. The time is in UTC.
+     * @param additionalProperties A plain object collection of additional properties you want to set on the new subscription
+     *
+     */
+    Subscriptions.prototype.add = function (changeType, notificationUrl, resource, expirationDateTime, additionalProperties) {
+        var _this = this;
+        if (additionalProperties === void 0) { additionalProperties = {}; }
+        var postBody = Object(common_es5["g" /* extend */])({
+            changeType: changeType,
+            expirationDateTime: expirationDateTime,
+            notificationUrl: notificationUrl,
+            resource: resource,
+        }, additionalProperties);
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                subscription: _this.getById(r.id),
+            };
+        });
+    };
+    Subscriptions = __decorate([
+        defaultPath("subscriptions")
+    ], Subscriptions);
+    return Subscriptions;
+}(GraphQueryableCollection));
+var graph_es5_Subscription = /** @class */ (function (_super) {
+    __extends(Subscription, _super);
+    function Subscription() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Deletes this Subscription
+     */
+    Subscription.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a Subscription
+     *
+     * @param properties Set of properties of this Subscription to update
+     */
+    Subscription.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    return Subscription;
+}(GraphQueryableInstance));
+
+var Security = /** @class */ (function (_super) {
+    __extends(Security, _super);
+    function Security() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Security.prototype, "alerts", {
+        get: function () {
+            return new Alerts(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Security = __decorate([
+        defaultPath("security")
+    ], Security);
+    return Security;
+}(GraphQueryableInstance));
+var Alerts = /** @class */ (function (_super) {
+    __extends(Alerts, _super);
+    function Alerts() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Alerts.prototype.getById = function (id) {
+        return new graph_es5_Alert(this, id);
+    };
+    Alerts = __decorate([
+        defaultPath("alerts")
+    ], Alerts);
+    return Alerts;
+}(GraphQueryableCollection));
+var graph_es5_Alert = /** @class */ (function (_super) {
+    __extends(Alert, _super);
+    function Alert() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+    * Update the properties of an Alert
+    *
+    * @param properties Set of properties of this Alert to update
+    */
+    Alert.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    return Alert;
+}(GraphQueryableInstance));
+
+/**
+ * Represents a Sites entity
+ */
+var Sites = /** @class */ (function (_super) {
+    __extends(Sites, _super);
+    function Sites() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(Sites.prototype, "root", {
+        /**
+         * Gets the root site collection of the tenant
+         */
+        get: function () {
+            return new GraphSite(this, "root");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Gets a Site instance by id
+     *
+     * @param baseUrl Base url ex: contoso.sharepoint.com
+     * @param relativeUrl Optional relative url ex: /sites/site
+     */
+    Sites.prototype.getById = function (baseUrl, relativeUrl) {
+        var siteUrl = baseUrl;
+        // If a relative URL combine url with : at the right places
+        if (relativeUrl) {
+            siteUrl = this._urlCombine(baseUrl, relativeUrl);
+        }
+        return new GraphSite(this, siteUrl);
+    };
+    /**
+     * Method to make sure the url is encoded as it should with :
+     *
+     */
+    Sites.prototype._urlCombine = function (baseUrl, relativeUrl) {
+        // remove last '/' of base if exists
+        if (baseUrl.lastIndexOf("/") === baseUrl.length - 1) {
+            baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+        }
+        // remove '/' at 0
+        if (relativeUrl.charAt(0) === "/") {
+            relativeUrl = relativeUrl.substring(1, relativeUrl.length);
+        }
+        // remove last '/' of next if exists
+        if (relativeUrl.lastIndexOf("/") === relativeUrl.length - 1) {
+            relativeUrl = relativeUrl.substring(0, relativeUrl.length - 1);
+        }
+        return baseUrl + ":/" + relativeUrl + ":";
+    };
+    Sites = __decorate([
+        defaultPath("sites")
+    ], Sites);
+    return Sites;
+}(GraphQueryableInstance));
+/**
+ * Describes a Site object
+ *
+ */
+var GraphSite = /** @class */ (function (_super) {
+    __extends(GraphSite, _super);
+    function GraphSite() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(GraphSite.prototype, "columns", {
+        get: function () {
+            return new GraphColumns(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphSite.prototype, "contentTypes", {
+        get: function () {
+            return new GraphContentTypes(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphSite.prototype, "drive", {
+        get: function () {
+            return new Drive(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphSite.prototype, "drives", {
+        get: function () {
+            return new Drives(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphSite.prototype, "lists", {
+        get: function () {
+            return new graph_es5_GraphLists(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphSite.prototype, "sites", {
+        get: function () {
+            return new Sites(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return GraphSite;
+}(GraphQueryableInstance));
+/**
+* Describes a collection of Content Type objects
+*
+*/
+var GraphContentTypes = /** @class */ (function (_super) {
+    __extends(GraphContentTypes, _super);
+    function GraphContentTypes() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a Content Type instance by id
+     *
+     * @param id Content Type id
+     */
+    GraphContentTypes.prototype.getById = function (id) {
+        return new GraphContentType(this, id);
+    };
+    GraphContentTypes = __decorate([
+        defaultPath("contenttypes")
+    ], GraphContentTypes);
+    return GraphContentTypes;
+}(GraphQueryableCollection));
+/**
+ * Describes a Content Type object
+ *
+ */
+var GraphContentType = /** @class */ (function (_super) {
+    __extends(GraphContentType, _super);
+    function GraphContentType() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return GraphContentType;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Column Definition objects
+ *
+ */
+var GraphColumns = /** @class */ (function (_super) {
+    __extends(GraphColumns, _super);
+    function GraphColumns() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a Column instance by id
+     *
+     * @param id Column id
+     */
+    GraphColumns.prototype.getById = function (id) {
+        return new GraphColumn(this, id);
+    };
+    GraphColumns = __decorate([
+        defaultPath("columns")
+    ], GraphColumns);
+    return GraphColumns;
+}(GraphQueryableCollection));
+/**
+ * Describes a Column Definition object
+ *
+ */
+var GraphColumn = /** @class */ (function (_super) {
+    __extends(GraphColumn, _super);
+    function GraphColumn() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(GraphColumn.prototype, "columnLinks", {
+        get: function () {
+            return new GraphColumnLinks(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return GraphColumn;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Column Link objects
+ *
+ */
+var GraphColumnLinks = /** @class */ (function (_super) {
+    __extends(GraphColumnLinks, _super);
+    function GraphColumnLinks() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a Column Link instance by id
+     *
+     * @param id Column link id
+     */
+    GraphColumnLinks.prototype.getById = function (id) {
+        return new GraphColumnLink(this, id);
+    };
+    GraphColumnLinks = __decorate([
+        defaultPath("columnlinks")
+    ], GraphColumnLinks);
+    return GraphColumnLinks;
+}(GraphQueryableCollection));
+/**
+ * Describes a Column Link object
+ *
+ */
+var GraphColumnLink = /** @class */ (function (_super) {
+    __extends(GraphColumnLink, _super);
+    function GraphColumnLink() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return GraphColumnLink;
+}(GraphQueryableInstance));
+/**
+* Describes a collection of Column definitions objects
+*/
+var graph_es5_GraphLists = /** @class */ (function (_super) {
+    __extends(GraphLists, _super);
+    function GraphLists() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a List instance by id
+     *
+     * @param id List id
+     */
+    GraphLists.prototype.getById = function (id) {
+        return new GraphList(this, id);
+    };
+    /**
+    * Create a new List
+    * @param displayName The display name of the List
+    * @param list List information. Which template, if hidden, and contentTypesEnabled.
+    * @param additionalProperties A plain object collection of additional properties you want to set in list
+    *
+    * */
+    GraphLists.prototype.create = function (displayName, list, additionalProperties) {
+        var _this = this;
+        if (additionalProperties === void 0) { additionalProperties = {}; }
+        var postBody = Object(common_es5["g" /* extend */])({
+            displayName: displayName,
+            list: list,
+        }, additionalProperties);
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                list: new GraphList(_this, r.id),
+            };
+        });
+    };
+    GraphLists = __decorate([
+        defaultPath("lists")
+    ], GraphLists);
+    return GraphLists;
+}(GraphQueryableCollection));
+/**
+ * Describes a List object
+ *
+ */
+var GraphList = /** @class */ (function (_super) {
+    __extends(GraphList, _super);
+    function GraphList() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(GraphList.prototype, "columns", {
+        get: function () {
+            return new GraphColumns(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphList.prototype, "contentTypes", {
+        get: function () {
+            return new GraphContentTypes(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphList.prototype, "drive", {
+        get: function () {
+            return new Drive(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphList.prototype, "items", {
+        get: function () {
+            return new graph_es5_GraphItems(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return GraphList;
+}(GraphQueryableInstance));
+/**
+* Describes a collection of Item objects
+*/
+var graph_es5_GraphItems = /** @class */ (function (_super) {
+    __extends(GraphItems, _super);
+    function GraphItems() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Gets a List Item instance by id
+     *
+     * @param id List item id
+     */
+    GraphItems.prototype.getById = function (id) {
+        return new graph_es5_GraphItem(this, id);
+    };
+    /**
+    * Create a new Item
+    * @param displayName The display name of the List
+    * @param list List information. Which template, if hidden, and contentTypesEnabled.
+    * @param additionalProperties A plain object collection of additional properties you want to set in list
+    *
+    * */
+    GraphItems.prototype.create = function (fields) {
+        var _this = this;
+        var postBody = {
+            fields: fields,
+        };
+        return this.postCore({
+            body: Object(common_es5["q" /* jsS */])(postBody),
+        }).then(function (r) {
+            return {
+                data: r,
+                item: new graph_es5_GraphItem(_this, r.id),
+            };
+        });
+    };
+    GraphItems = __decorate([
+        defaultPath("items")
+    ], GraphItems);
+    return GraphItems;
+}(GraphQueryableCollection));
+/**
+ * Describes an Item object
+ *
+ */
+var graph_es5_GraphItem = /** @class */ (function (_super) {
+    __extends(GraphItem, _super);
+    function GraphItem() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(GraphItem.prototype, "driveItem", {
+        get: function () {
+            return new graph_es5_DriveItem(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphItem.prototype, "fields", {
+        get: function () {
+            return new GraphFields(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphItem.prototype, "versions", {
+        get: function () {
+            return new GraphVersions(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    /**
+     * Deletes this item
+     */
+    GraphItem.prototype.delete = function () {
+        return this.deleteCore();
+    };
+    /**
+     * Update the properties of a item object
+     *
+     * @param properties Set of properties of this item to update
+     */
+    GraphItem.prototype.update = function (properties) {
+        return this.patchCore({
+            body: Object(common_es5["q" /* jsS */])(properties),
+        });
+    };
+    return GraphItem;
+}(GraphQueryableInstance));
+/**
+ * Describes a collection of Field objects
+ *
+ */
+var GraphFields = /** @class */ (function (_super) {
+    __extends(GraphFields, _super);
+    function GraphFields() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    GraphFields = __decorate([
+        defaultPath("fields")
+    ], GraphFields);
+    return GraphFields;
+}(GraphQueryableCollection));
+/**
+ * Describes a collection of Version objects
+ *
+ */
+var GraphVersions = /** @class */ (function (_super) {
+    __extends(GraphVersions, _super);
+    function GraphVersions() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+    * Gets a Version instance by id
+    *
+    * @param id Version id
+    */
+    GraphVersions.prototype.getById = function (id) {
+        return new Version(this, id);
+    };
+    GraphVersions = __decorate([
+        defaultPath("versions")
+    ], GraphVersions);
+    return GraphVersions;
+}(GraphQueryableCollection));
+/**
+ * Describes a Version object
+ *
+ */
+var Version = /** @class */ (function (_super) {
+    __extends(Version, _super);
+    function Version() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return Version;
+}(GraphQueryableInstance));
+
+var GraphRest = /** @class */ (function (_super) {
+    __extends(GraphRest, _super);
+    function GraphRest(baseUrl, path) {
+        return _super.call(this, baseUrl, path) || this;
+    }
+    Object.defineProperty(GraphRest.prototype, "directoryObjects", {
+        get: function () {
+            return new graph_es5_DirectoryObjects(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "groups", {
+        get: function () {
+            return new graph_es5_Groups(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "teams", {
+        get: function () {
+            return new Teams(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "me", {
+        get: function () {
+            return new graph_es5_User(this, "me");
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "planner", {
+        get: function () {
+            return new Planner(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "users", {
+        get: function () {
+            return new Users(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "invitations", {
+        get: function () {
+            return new graph_es5_Invitations(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "subscriptions", {
+        get: function () {
+            return new graph_es5_Subscriptions(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    GraphRest.prototype.createBatch = function () {
+        return new graph_es5_GraphBatch();
+    };
+    GraphRest.prototype.setup = function (config) {
+        setup(config);
+    };
+    Object.defineProperty(GraphRest.prototype, "security", {
+        get: function () {
+            return new Security(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(GraphRest.prototype, "sites", {
+        get: function () {
+            return new Sites(this);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return GraphRest;
+}(graph_es5_GraphQueryable));
+var graph = new GraphRest("v1.0");
+
+
+
+// EXTERNAL MODULE: ./node_modules/@pnp/sp/dist/sp.es5.js
+var sp_es5 = __webpack_require__(23);
+
+// CONCATENATED MODULE: ./node_modules/@pnp/sp-addinhelpers/dist/sp-addinhelpers.es5.js
+/**
+ * @license
+ * v1.3.3
+ * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
+ * Copyright (c) 2019 Microsoft
+ * docs: https://pnp.github.io/pnpjs/
+ * source: https://github.com/pnp/pnpjs
+ * bugs: https://github.com/pnp/pnpjs/issues
+ */
+
+
+
+/**
+ * Makes requests using the SP.RequestExecutor library.
+ */
+var sp_addinhelpers_es5_SPRequestExecutorClient = /** @class */ (function () {
+    function SPRequestExecutorClient() {
+        /**
+         * Converts a SharePoint REST API response to a fetch API response.
+         */
+        this.convertToResponse = function (spResponse) {
+            var responseHeaders = new Headers();
+            if (spResponse.headers !== undefined) {
+                for (var h in spResponse.headers) {
+                    if (spResponse.headers[h]) {
+                        responseHeaders.append(h, spResponse.headers[h]);
+                    }
+                }
+            }
+            // Cannot have an empty string body when creating a Response with status 204
+            var body = spResponse.statusCode === 204 ? null : spResponse.body;
+            return new Response(body, {
+                headers: responseHeaders,
+                status: spResponse.statusCode,
+                statusText: spResponse.statusText,
+            });
+        };
+    }
+    /**
+     * Fetches a URL using the SP.RequestExecutor library.
+     */
+    SPRequestExecutorClient.prototype.fetch = function (url, options) {
+        var _this = this;
+        if (SP === undefined || SP.RequestExecutor === undefined) {
+            throw Error("SP.RequestExecutor is undefined. Load the SP.RequestExecutor.js library (/_layouts/15/SP.RequestExecutor.js) before loading the PnP JS Core library.");
+        }
+        var addinWebUrl = url.substring(0, url.indexOf("/_api")), executor = new SP.RequestExecutor(addinWebUrl);
+        var headers = {}, iterator, temp;
+        if (options.headers && options.headers instanceof Headers) {
+            iterator = options.headers.entries();
+            temp = iterator.next();
+            while (!temp.done) {
+                headers[temp.value[0]] = temp.value[1];
+                temp = iterator.next();
+            }
+        }
+        else {
+            headers = options.headers;
+        }
+        return new Promise(function (resolve, reject) {
+            var requestOptions = {
+                error: function (error) {
+                    reject(_this.convertToResponse(error));
+                },
+                headers: headers,
+                method: options.method,
+                success: function (response) {
+                    resolve(_this.convertToResponse(response));
+                },
+                url: url,
+            };
+            if (options.body) {
+                requestOptions = Object(common_es5["g" /* extend */])(requestOptions, { body: options.body });
+            }
+            else {
+                requestOptions = Object(common_es5["g" /* extend */])(requestOptions, { binaryStringRequestBody: true });
+            }
+            executor.executeAsync(requestOptions);
+        });
+    };
+    return SPRequestExecutorClient;
+}());
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var sp_addinhelpers_es5_extendStatics = function(d, b) {
+    sp_addinhelpers_es5_extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return sp_addinhelpers_es5_extendStatics(d, b);
+};
+
+function sp_addinhelpers_es5___extends(d, b) {
+    sp_addinhelpers_es5_extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var sp_addinhelpers_es5_SPRestAddIn = /** @class */ (function (_super) {
+    sp_addinhelpers_es5___extends(SPRestAddIn, _super);
+    function SPRestAddIn() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    /**
+     * Begins a cross-domain, host site scoped REST request, for use in add-in webs
+     *
+     * @param addInWebUrl The absolute url of the add-in web
+     * @param hostWebUrl The absolute url of the host web
+     */
+    SPRestAddIn.prototype.crossDomainSite = function (addInWebUrl, hostWebUrl) {
+        return this._cdImpl(sp_es5["b" /* Site */], addInWebUrl, hostWebUrl, "site");
+    };
+    /**
+     * Begins a cross-domain, host web scoped REST request, for use in add-in webs
+     *
+     * @param addInWebUrl The absolute url of the add-in web
+     * @param hostWebUrl The absolute url of the host web
+     */
+    SPRestAddIn.prototype.crossDomainWeb = function (addInWebUrl, hostWebUrl) {
+        return this._cdImpl(sp_es5["c" /* Web */], addInWebUrl, hostWebUrl, "web");
+    };
+    /**
+     * Implements the creation of cross domain REST urls
+     *
+     * @param factory The constructor of the object to create Site | Web
+     * @param addInWebUrl The absolute url of the add-in web
+     * @param hostWebUrl The absolute url of the host web
+     * @param urlPart String part to append to the url "site" | "web"
+     */
+    SPRestAddIn.prototype._cdImpl = function (factory, addInWebUrl, hostWebUrl, urlPart) {
+        if (!Object(common_es5["p" /* isUrlAbsolute */])(addInWebUrl)) {
+            throw Error("The addInWebUrl parameter must be an absolute url.");
+        }
+        if (!Object(common_es5["p" /* isUrlAbsolute */])(hostWebUrl)) {
+            throw Error("The hostWebUrl parameter must be an absolute url.");
+        }
+        var url = Object(common_es5["e" /* combine */])(addInWebUrl, "_api/SP.AppContextSite(@target)");
+        var instance = new factory(url, urlPart);
+        instance.query.set("@target", "'" + encodeURIComponent(hostWebUrl) + "'");
+        return instance.configure(this._options);
+    };
+    return SPRestAddIn;
+}(sp_es5["a" /* SPRest */]));
+var sp = new sp_addinhelpers_es5_SPRestAddIn();
+
+
+
+// CONCATENATED MODULE: ./node_modules/@pnp/pnpjs/dist/pnpjs.es5.js
+/* unused harmony export util */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return sp$1; });
+/* unused harmony export graph */
+/* unused harmony export storage */
+/* unused harmony export config */
+/* unused harmony export log */
+/* unused harmony export setup */
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["a" /* AdalClient */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["v" /* objectToMap */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["s" /* mergeMaps */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["d" /* RuntimeConfig */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["r" /* mergeHeaders */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["t" /* mergeOptions */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["b" /* FetchClient */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["c" /* PnPClientStorage */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["i" /* getCtxCallback */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["f" /* dateAdd */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["e" /* combine */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["l" /* getRandomString */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["j" /* getGUID */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["o" /* isFunc */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["u" /* objectDefinedNotNull */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["n" /* isArray */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["g" /* extend */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["p" /* isUrlAbsolute */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["x" /* stringIsNullOrEmpty */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["h" /* getAttrValueFromString */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["w" /* sanitizeGuid */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["q" /* jsS */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["m" /* hOP */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["k" /* getHashCode */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return logging_es5["a" /* Logger */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return config_store_es5_Settings; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return config_store_es5_CachingConfigurationProvider; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return SPListConfigurationProvider; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphRest; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GroupType; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Group; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Groups; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphBatch; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphQueryable; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphQueryableCollection; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphQueryableInstance; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphQueryableSearchableCollection; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Teams; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Team; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Channels; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Channel; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Apps; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Tabs; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Tab; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphEndpoints; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return OneNote; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Notebooks; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Notebook; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Sections; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Section; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Pages; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Contacts; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Contact; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_ContactFolders; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_ContactFolder; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Drives; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Drive; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Root; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DriveItems; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_DriveItem; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Children; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DriveList; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Recent; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return SharedWithMe; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DriveSearch; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Thumbnails; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Planner; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Plans; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Plan; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Tasks; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Task; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Buckets; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Bucket; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Details; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DirectoryObjectType; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_DirectoryObjects; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_DirectoryObject; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Invitations; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Subscriptions; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Subscription; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Security; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Alerts; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Alert; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return People; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Sites; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphSite; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphContentTypes; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphContentType; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumns; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumn; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumnLinks; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumnLink; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphLists; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphList; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphItems; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphItem; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphFields; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphVersions; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Version; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Insights; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Trending; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Used; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Shared; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["a" /* SPRest */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["b" /* Site */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["c" /* Web */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["c" /* CachingOptions */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["g" /* ODataParserBase */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["f" /* ODataDefaultParser */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["i" /* TextParser */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["a" /* BlobParser */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["d" /* JSONParser */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["b" /* BufferParser */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["h" /* ODataQueryable */]; });
+/* unused concated harmony import null */
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["e" /* ODataBatch */]; });
+/**
+ * @license
+ * v1.3.3
+ * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
+ * Copyright (c) 2019 Microsoft
+ * docs: https://pnp.github.io/pnpjs/
+ * source: https://github.com/pnp/pnpjs
+ * bugs: https://github.com/pnp/pnpjs/issues
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+function pnpjs_es5_setup(config) {
+    common_es5["d" /* RuntimeConfig */].extend(config);
+}
+
+/**
+ * Utility methods
+ */
+var util = {
+    combine: common_es5["e" /* combine */],
+    dateAdd: common_es5["f" /* dateAdd */],
+    extend: common_es5["g" /* extend */],
+    getAttrValueFromString: common_es5["h" /* getAttrValueFromString */],
+    getCtxCallback: common_es5["i" /* getCtxCallback */],
+    getGUID: common_es5["j" /* getGUID */],
+    getRandomString: common_es5["l" /* getRandomString */],
+    isArray: common_es5["n" /* isArray */],
+    isFunc: common_es5["o" /* isFunc */],
+    isUrlAbsolute: common_es5["p" /* isUrlAbsolute */],
+    objectDefinedNotNull: common_es5["u" /* objectDefinedNotNull */],
+    sanitizeGuid: common_es5["w" /* sanitizeGuid */],
+    stringIsNullOrEmpty: common_es5["x" /* stringIsNullOrEmpty */],
+};
+/**
+ * Provides access to the SharePoint REST interface
+ */
+var sp$1 = sp;
+/**
+ * Provides access to the Microsoft Graph REST interface
+ */
+var graph$1 = graph;
+/**
+ * Provides access to local and session storage
+ */
+var storage = new common_es5["c" /* PnPClientStorage */]();
+/**
+ * Global configuration instance to which providers can be added
+ */
+var pnpjs_es5_config = new config_store_es5_Settings();
+/**
+ * Global logging instance to which subscribers can be registered and messages written
+ */
+var log = logging_es5["a" /* Logger */];
+/**
+ * Allows for the configuration of the library
+ */
+var setup$1 = pnpjs_es5_setup;
+// /**
+//  * Expose a subset of classes from the library for public consumption
+//  */
+// creating this class instead of directly assigning to default fixes issue #116
+var Def = {
+    /**
+     * Global configuration instance to which providers can be added
+     */
+    config: pnpjs_es5_config,
+    /**
+     * Provides access to the Microsoft Graph REST interface
+     */
+    graph: graph$1,
+    /**
+     * Global logging instance to which subscribers can be registered and messages written
+     */
+    log: log,
+    /**
+     * Provides access to local and session storage
+     */
+    setup: setup$1,
+    /**
+     * Provides access to the REST interface
+     */
+    sp: sp$1,
+    /**
+     * Provides access to local and session storage
+     */
+    storage: storage,
+    /**
+     * Utility methods
+     */
+    util: util,
+};
+
+/* harmony default export */ var pnpjs_es5 = __webpack_exports__["a"] = (Def);
+
+
+
+/***/ }),
+/* 23 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3932,9 +8920,9 @@ if (true) {
 /* unused harmony export FieldUserSelectionMode */
 /* unused harmony export ChoiceFieldFormatType */
 /* unused harmony export UrlZone */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__pnp_common__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pnp_logging__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pnp_odata__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__pnp_common__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pnp_logging__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pnp_odata__ = __webpack_require__(12);
 /**
  * @license
  * v1.3.3
@@ -13920,10 +18908,10 @@ var sp = new SPRest();
 
 
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(7)))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(8)))
 
 /***/ }),
-/* 20 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13934,7 +18922,7 @@ tslib_1.__exportStar(__webpack_require__(162), exports);
 
 
 /***/ }),
-/* 21 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13945,17 +18933,17 @@ tslib_1.__exportStar(__webpack_require__(215), exports);
 
 
 /***/ }),
-/* 22 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var index_1 = __webpack_require__(21);
-var Utilities_1 = __webpack_require__(1);
-var Icon_1 = __webpack_require__(20);
+var React = __webpack_require__(1);
+var index_1 = __webpack_require__(25);
+var Utilities_1 = __webpack_require__(2);
+var Icon_1 = __webpack_require__(24);
 var renderItemIcon = function (props) {
     var item = props.item, hasIcons = props.hasIcons, classNames = props.classNames;
     // Only present to allow continued use of item.icon which is deprecated.
@@ -14043,4603 +19031,14 @@ exports.ContextualMenuItem = ContextualMenuItem;
 
 
 /***/ }),
-/* 23 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-// EXTERNAL MODULE: ./node_modules/@pnp/common/dist/common.es5.js
-var common_es5 = __webpack_require__(4);
-
-// EXTERNAL MODULE: ./node_modules/@pnp/logging/dist/logging.es5.js
-var logging_es5 = __webpack_require__(5);
-
-// CONCATENATED MODULE: ./node_modules/@pnp/config-store/dist/config-store.es5.js
-/**
- * @license
- * v1.3.3
- * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
- * Copyright (c) 2019 Microsoft
- * docs: https://pnp.github.io/pnpjs/
- * source: https://github.com/pnp/pnpjs
- * bugs: https://github.com/pnp/pnpjs/issues
- */
-
-
-/**
- * Class used to manage the current application settings
- *
- */
-var config_store_es5_Settings = /** @class */ (function () {
-    /**
-     * Creates a new instance of the settings class
-     *
-     * @constructor
-     */
-    function Settings(_settings) {
-        if (_settings === void 0) { _settings = new Map(); }
-        this._settings = _settings;
-    }
-    /**
-     * Adds a new single setting, or overwrites a previous setting with the same key
-     *
-     * @param {string} key The key used to store this setting
-     * @param {string} value The setting value to store
-     */
-    Settings.prototype.add = function (key, value) {
-        this._settings.set(key, value);
-    };
-    /**
-     * Adds a JSON value to the collection as a string, you must use getJSON to rehydrate the object when read
-     *
-     * @param {string} key The key used to store this setting
-     * @param {any} value The setting value to store
-     */
-    Settings.prototype.addJSON = function (key, value) {
-        this._settings.set(key, Object(common_es5["q" /* jsS */])(value));
-    };
-    /**
-     * Applies the supplied hash to the setting collection overwriting any existing value, or created new values
-     *
-     * @param {TypedHash<any>} hash The set of values to add
-     */
-    Settings.prototype.apply = function (hash) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            try {
-                _this._settings = Object(common_es5["s" /* mergeMaps */])(_this._settings, Object(common_es5["v" /* objectToMap */])(hash));
-                resolve();
-            }
-            catch (e) {
-                reject(e);
-            }
-        });
-    };
-    /**
-     * Loads configuration settings into the collection from the supplied provider and returns a Promise
-     *
-     * @param {IConfigurationProvider} provider The provider from which we will load the settings
-     */
-    Settings.prototype.load = function (provider) {
-        var _this = this;
-        return new Promise(function (resolve, reject) {
-            provider.getConfiguration().then(function (value) {
-                _this._settings = Object(common_es5["s" /* mergeMaps */])(_this._settings, Object(common_es5["v" /* objectToMap */])(value));
-                resolve();
-            }).catch(reject);
-        });
-    };
-    /**
-     * Gets a value from the configuration
-     *
-     * @param {string} key The key whose value we want to return. Returns null if the key does not exist
-     * @return {string} string value from the configuration
-     */
-    Settings.prototype.get = function (key) {
-        return this._settings.get(key) || null;
-    };
-    /**
-     * Gets a JSON value, rehydrating the stored string to the original object
-     *
-     * @param {string} key The key whose value we want to return. Returns null if the key does not exist
-     * @return {any} object from the configuration
-     */
-    Settings.prototype.getJSON = function (key) {
-        var o = this.get(key);
-        if (o === undefined || o === null) {
-            return o;
-        }
-        return JSON.parse(o);
-    };
-    return Settings;
-}());
-
-/**
- * A caching provider which can wrap other non-caching providers
- *
- */
-var config_store_es5_CachingConfigurationProvider = /** @class */ (function () {
-    /**
-     * Creates a new caching configuration provider
-     * @constructor
-     * @param {IConfigurationProvider} wrappedProvider Provider which will be used to fetch the configuration
-     * @param {string} cacheKey Key that will be used to store cached items to the cache
-     * @param {IPnPClientStore} cacheStore OPTIONAL storage, which will be used to store cached settings.
-     */
-    function CachingConfigurationProvider(wrappedProvider, cacheKey, cacheStore) {
-        this.wrappedProvider = wrappedProvider;
-        this.cacheKey = cacheKey;
-        this.wrappedProvider = wrappedProvider;
-        this.store = (cacheStore) ? cacheStore : this.selectPnPCache();
-    }
-    /**
-     * Gets the wrapped configuration providers
-     *
-     * @return {IConfigurationProvider} Wrapped configuration provider
-     */
-    CachingConfigurationProvider.prototype.getWrappedProvider = function () {
-        return this.wrappedProvider;
-    };
-    /**
-     * Loads the configuration values either from the cache or from the wrapped provider
-     *
-     * @return {Promise<TypedHash<string>>} Promise of loaded configuration values
-     */
-    CachingConfigurationProvider.prototype.getConfiguration = function () {
-        var _this = this;
-        // Cache not available, pass control to the wrapped provider
-        if ((!this.store) || (!this.store.enabled)) {
-            return this.wrappedProvider.getConfiguration();
-        }
-        return this.store.getOrPut(this.cacheKey, function () {
-            return _this.wrappedProvider.getConfiguration().then(function (providedConfig) {
-                _this.store.put(_this.cacheKey, providedConfig);
-                return providedConfig;
-            });
-        });
-    };
-    CachingConfigurationProvider.prototype.selectPnPCache = function () {
-        var pnpCache = new common_es5["c" /* PnPClientStorage */]();
-        if ((pnpCache.local) && (pnpCache.local.enabled)) {
-            return pnpCache.local;
-        }
-        if ((pnpCache.session) && (pnpCache.session.enabled)) {
-            return pnpCache.session;
-        }
-        throw Error("Cannot create a caching configuration provider since cache is not available.");
-    };
-    return CachingConfigurationProvider;
-}());
-
-/**
- * A configuration provider which loads configuration values from a SharePoint list
- *
- */
-var SPListConfigurationProvider = /** @class */ (function () {
-    /**
-     * Creates a new SharePoint list based configuration provider
-     * @constructor
-     * @param {string} webUrl Url of the SharePoint site, where the configuration list is located
-     * @param {string} listTitle Title of the SharePoint list, which contains the configuration settings (optional, default: "config")
-     * @param {string} keyFieldName The name of the field in the list to use as the setting key (optional, default: "Title")
-     * @param {string} valueFieldName The name of the field in the list to use as the setting value (optional, default: "Value")
-     */
-    function SPListConfigurationProvider(web, listTitle, keyFieldName, valueFieldName) {
-        if (listTitle === void 0) { listTitle = "config"; }
-        if (keyFieldName === void 0) { keyFieldName = "Title"; }
-        if (valueFieldName === void 0) { valueFieldName = "Value"; }
-        this.web = web;
-        this.listTitle = listTitle;
-        this.keyFieldName = keyFieldName;
-        this.valueFieldName = valueFieldName;
-    }
-    /**
-     * Loads the configuration values from the SharePoint list
-     *
-     * @return {Promise<TypedHash<string>>} Promise of loaded configuration values
-     */
-    SPListConfigurationProvider.prototype.getConfiguration = function () {
-        var _this = this;
-        return this.web.lists.getByTitle(this.listTitle).items.select(this.keyFieldName, this.valueFieldName).get()
-            .then(function (data) { return data.reduce(function (c, item) {
-            c[item[_this.keyFieldName]] = item[_this.valueFieldName];
-            return c;
-        }, {}); });
-    };
-    /**
-     * Wraps the current provider in a cache enabled provider
-     *
-     * @return {CachingConfigurationProvider} Caching providers which wraps the current provider
-     */
-    SPListConfigurationProvider.prototype.asCaching = function (cacheKey) {
-        if (cacheKey === void 0) { cacheKey = "pnp_configcache_splist_" + this.web.toUrl() + "+" + this.listTitle; }
-        return new config_store_es5_CachingConfigurationProvider(this, cacheKey);
-    };
-    return SPListConfigurationProvider;
-}());
-
-
-
-// EXTERNAL MODULE: ./node_modules/@pnp/odata/dist/odata.es5.js
-var odata_es5 = __webpack_require__(9);
-
-// CONCATENATED MODULE: ./node_modules/@pnp/graph/dist/graph.es5.js
-/**
- * @license
- * v1.3.3
- * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
- * Copyright (c) 2019 Microsoft
- * docs: https://pnp.github.io/pnpjs/
- * source: https://github.com/pnp/pnpjs
- * bugs: https://github.com/pnp/pnpjs/issues
- */
-
-
-
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var extendStatics = function(d, b) {
-    extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return extendStatics(d, b);
-};
-
-function __extends(d, b) {
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-
-function setup(config) {
-    common_es5["d" /* RuntimeConfig */].extend(config);
-}
-var graph_es5_GraphRuntimeConfigImpl = /** @class */ (function () {
-    function GraphRuntimeConfigImpl() {
-    }
-    Object.defineProperty(GraphRuntimeConfigImpl.prototype, "headers", {
-        get: function () {
-            var graphPart = common_es5["d" /* RuntimeConfig */].get("graph");
-            if (graphPart !== undefined && graphPart !== null && graphPart.headers !== undefined) {
-                return graphPart.headers;
-            }
-            return {};
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRuntimeConfigImpl.prototype, "fetchClientFactory", {
-        get: function () {
-            var graphPart = common_es5["d" /* RuntimeConfig */].get("graph");
-            // use a configured factory firt
-            if (graphPart !== undefined && graphPart !== null && graphPart.fetchClientFactory !== undefined) {
-                return graphPart.fetchClientFactory;
-            }
-            // then try and use spfx context if available
-            if (common_es5["d" /* RuntimeConfig */].spfxContext !== undefined) {
-                return function () { return common_es5["a" /* AdalClient */].fromSPFxContext(common_es5["d" /* RuntimeConfig */].spfxContext); };
-            }
-            throw Error("There is no Graph Client available, either set one using configuraiton or provide a valid SPFx Context using setup.");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return GraphRuntimeConfigImpl;
-}());
-var GraphRuntimeConfig = new graph_es5_GraphRuntimeConfigImpl();
-
-var graph_es5_GraphHttpClient = /** @class */ (function () {
-    function GraphHttpClient() {
-        this._impl = GraphRuntimeConfig.fetchClientFactory();
-    }
-    GraphHttpClient.prototype.fetch = function (url, options) {
-        if (options === void 0) { options = {}; }
-        var headers = new Headers();
-        // first we add the global headers so they can be overwritten by any passed in locally to this call
-        Object(common_es5["r" /* mergeHeaders */])(headers, GraphRuntimeConfig.headers);
-        // second we add the local options so we can overwrite the globals
-        Object(common_es5["r" /* mergeHeaders */])(headers, options.headers);
-        if (!headers.has("Content-Type")) {
-            headers.append("Content-Type", "application/json");
-        }
-        var opts = Object(common_es5["g" /* extend */])(options, { headers: headers });
-        return this.fetchRaw(url, opts);
-    };
-    GraphHttpClient.prototype.fetchRaw = function (url, options) {
-        var _this = this;
-        if (options === void 0) { options = {}; }
-        // here we need to normalize the headers
-        var rawHeaders = new Headers();
-        Object(common_es5["r" /* mergeHeaders */])(rawHeaders, options.headers);
-        options = Object(common_es5["g" /* extend */])(options, { headers: rawHeaders });
-        var retry = function (ctx) {
-            _this._impl.fetch(url, options).then(function (response) { return ctx.resolve(response); }).catch(function (response) {
-                // Check if request was throttled - http status code 429
-                // Check if request failed due to server unavailable - http status code 503
-                if (response.status !== 429 && response.status !== 503) {
-                    ctx.reject(response);
-                }
-                // grab our current delay
-                var delay = ctx.delay;
-                // Increment our counters.
-                ctx.delay *= 2;
-                ctx.attempts++;
-                // If we have exceeded the retry count, reject.
-                if (ctx.retryCount <= ctx.attempts) {
-                    ctx.reject(response);
-                }
-                // Set our retry timeout for {delay} milliseconds.
-                setTimeout(Object(common_es5["i" /* getCtxCallback */])(_this, retry, ctx), delay);
-            });
-        };
-        return new Promise(function (resolve, reject) {
-            var retryContext = {
-                attempts: 0,
-                delay: 100,
-                reject: reject,
-                resolve: resolve,
-                retryCount: 7,
-            };
-            retry.call(_this, retryContext);
-        });
-    };
-    GraphHttpClient.prototype.get = function (url, options) {
-        if (options === void 0) { options = {}; }
-        var opts = Object(common_es5["g" /* extend */])(options, { method: "GET" });
-        return this.fetch(url, opts);
-    };
-    GraphHttpClient.prototype.post = function (url, options) {
-        if (options === void 0) { options = {}; }
-        var opts = Object(common_es5["g" /* extend */])(options, { method: "POST" });
-        return this.fetch(url, opts);
-    };
-    GraphHttpClient.prototype.patch = function (url, options) {
-        if (options === void 0) { options = {}; }
-        var opts = Object(common_es5["g" /* extend */])(options, { method: "PATCH" });
-        return this.fetch(url, opts);
-    };
-    GraphHttpClient.prototype.delete = function (url, options) {
-        if (options === void 0) { options = {}; }
-        var opts = Object(common_es5["g" /* extend */])(options, { method: "DELETE" });
-        return this.fetch(url, opts);
-    };
-    return GraphHttpClient;
-}());
-
-var GraphEndpoints = /** @class */ (function () {
-    function GraphEndpoints() {
-    }
-    /**
-     *
-     * @param url The url to set the endpoint
-     */
-    GraphEndpoints.ensure = function (url, endpoint) {
-        var all = [GraphEndpoints.Beta, GraphEndpoints.V1];
-        var regex = new RegExp(endpoint, "i");
-        var replaces = all.filter(function (s) { return !regex.test(s); }).map(function (s) { return s.replace(".", "\\."); });
-        regex = new RegExp("/?(" + replaces.join("|") + ")/", "ig");
-        return url.replace(regex, "/" + endpoint + "/");
-    };
-    GraphEndpoints.Beta = "beta";
-    GraphEndpoints.V1 = "v1.0";
-    return GraphEndpoints;
-}());
-
-/**
- * Queryable Base Class
- *
- */
-var graph_es5_GraphQueryable = /** @class */ (function (_super) {
-    __extends(GraphQueryable, _super);
-    /**
-     * Creates a new instance of the Queryable class
-     *
-     * @constructor
-     * @param baseUrl A string or Queryable that should form the base part of the url
-     *
-     */
-    function GraphQueryable(baseUrl, path) {
-        var _this = _super.call(this) || this;
-        if (typeof baseUrl === "string") {
-            var urlStr = baseUrl;
-            _this._parentUrl = urlStr;
-            _this._url = Object(common_es5["e" /* combine */])(urlStr, path);
-        }
-        else {
-            _this.extend(baseUrl, path);
-        }
-        return _this;
-    }
-    /**
-     * Choose which fields to return
-     *
-     * @param selects One or more fields to return
-     */
-    GraphQueryable.prototype.select = function () {
-        var selects = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            selects[_i] = arguments[_i];
-        }
-        if (selects.length > 0) {
-            this.query.set("$select", selects.join(","));
-        }
-        return this;
-    };
-    /**
-     * Expands fields such as lookups to get additional data
-     *
-     * @param expands The Fields for which to expand the values
-     */
-    GraphQueryable.prototype.expand = function () {
-        var expands = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            expands[_i] = arguments[_i];
-        }
-        if (expands.length > 0) {
-            this.query.set("$expand", expands.join(","));
-        }
-        return this;
-    };
-    /**
-     * Creates a new instance of the supplied factory and extends this into that new instance
-     *
-     * @param factory constructor for the new queryable
-     */
-    GraphQueryable.prototype.as = function (factory) {
-        var o = new factory(this._url, null);
-        return Object(common_es5["g" /* extend */])(o, this, true);
-    };
-    /**
-     * Gets the full url with query information
-     *
-     */
-    GraphQueryable.prototype.toUrlAndQuery = function () {
-        var url = this.toUrl();
-        if (!Object(common_es5["p" /* isUrlAbsolute */])(url)) {
-            url = Object(common_es5["e" /* combine */])("https://graph.microsoft.com", url);
-        }
-        if (this.query.size > 0) {
-            var char = url.indexOf("?") > -1 ? "&" : "?";
-            url += "" + char + Array.from(this.query).map(function (v) { return v[0] + "=" + v[1]; }).join("&");
-        }
-        return url;
-    };
-    /**
-     * Gets a parent for this instance as specified
-     *
-     * @param factory The contructor for the class to create
-     */
-    GraphQueryable.prototype.getParent = function (factory, baseUrl, path) {
-        if (baseUrl === void 0) { baseUrl = this.parentUrl; }
-        return new factory(baseUrl, path);
-    };
-    /**
-     * Clones this queryable into a new queryable instance of T
-     * @param factory Constructor used to create the new instance
-     * @param additionalPath Any additional path to include in the clone
-     * @param includeBatch If true this instance's batch will be added to the cloned instance
-     */
-    GraphQueryable.prototype.clone = function (factory, additionalPath, includeBatch) {
-        if (includeBatch === void 0) { includeBatch = true; }
-        return _super.prototype._clone.call(this, new factory(this, additionalPath), { includeBatch: includeBatch });
-    };
-    GraphQueryable.prototype.setEndpoint = function (endpoint) {
-        this._url = GraphEndpoints.ensure(this._url, endpoint);
-        return this;
-    };
-    /**
-     * Converts the current instance to a request context
-     *
-     * @param verb The request verb
-     * @param options The set of supplied request options
-     * @param parser The supplied ODataParser instance
-     * @param pipeline Optional request processing pipeline
-     */
-    GraphQueryable.prototype.toRequestContext = function (verb, options, parser, pipeline) {
-        if (options === void 0) { options = {}; }
-        var dependencyDispose = this.hasBatch ? this._batchDependency : function () { return; };
-        return Promise.resolve({
-            batch: this.batch,
-            batchDependency: dependencyDispose,
-            cachingOptions: this._cachingOptions,
-            clientFactory: function () { return new graph_es5_GraphHttpClient(); },
-            isBatched: this.hasBatch,
-            isCached: /^get$/i.test(verb) && this._useCaching,
-            options: options,
-            parser: parser,
-            pipeline: pipeline,
-            requestAbsoluteUrl: this.toUrlAndQuery(),
-            requestId: Object(common_es5["j" /* getGUID */])(),
-            verb: verb,
-        });
-    };
-    return GraphQueryable;
-}(odata_es5["h" /* ODataQueryable */]));
-/**
- * Represents a REST collection which can be filtered, paged, and selected
- *
- */
-var GraphQueryableCollection = /** @class */ (function (_super) {
-    __extends(GraphQueryableCollection, _super);
-    function GraphQueryableCollection() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     *
-     * @param filter The string representing the filter query
-     */
-    GraphQueryableCollection.prototype.filter = function (filter) {
-        this.query.set("$filter", filter);
-        return this;
-    };
-    /**
-     * Orders based on the supplied fields
-     *
-     * @param orderby The name of the field on which to sort
-     * @param ascending If false DESC is appended, otherwise ASC (default)
-     */
-    GraphQueryableCollection.prototype.orderBy = function (orderBy, ascending) {
-        if (ascending === void 0) { ascending = true; }
-        var o = "$orderby";
-        var query = this.query.has(o) ? this.query.get(o).split(",") : [];
-        query.push(orderBy + " " + (ascending ? "asc" : "desc"));
-        this.query.set(o, query.join(","));
-        return this;
-    };
-    /**
-     * Limits the query to only return the specified number of items
-     *
-     * @param top The query row limit
-     */
-    GraphQueryableCollection.prototype.top = function (top) {
-        this.query.set("$top", top.toString());
-        return this;
-    };
-    /**
-     * Skips a set number of items in the return set
-     *
-     * @param num Number of items to skip
-     */
-    GraphQueryableCollection.prototype.skip = function (num) {
-        this.query.set("$skip", num.toString());
-        return this;
-    };
-    /**
-     * 	To request second and subsequent pages of Graph data
-     */
-    GraphQueryableCollection.prototype.skipToken = function (token) {
-        this.query.set("$skiptoken", token);
-        return this;
-    };
-    Object.defineProperty(GraphQueryableCollection.prototype, "count", {
-        /**
-         * 	Retrieves the total count of matching resources
-         */
-        get: function () {
-            this.query.set("$count", "true");
-            return this;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return GraphQueryableCollection;
-}(graph_es5_GraphQueryable));
-var GraphQueryableSearchableCollection = /** @class */ (function (_super) {
-    __extends(GraphQueryableSearchableCollection, _super);
-    function GraphQueryableSearchableCollection() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * 	To request second and subsequent pages of Graph data
-     */
-    GraphQueryableSearchableCollection.prototype.search = function (query) {
-        this.query.set("$search", query);
-        return this;
-    };
-    return GraphQueryableSearchableCollection;
-}(GraphQueryableCollection));
-/**
- * Represents an instance that can be selected
- *
- */
-var GraphQueryableInstance = /** @class */ (function (_super) {
-    __extends(GraphQueryableInstance, _super);
-    function GraphQueryableInstance() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return GraphQueryableInstance;
-}(graph_es5_GraphQueryable));
-/**
- * Decorator used to specify the default path for Queryable objects
- *
- * @param path
- */
-function defaultPath(path) {
-    return function (target) {
-        return /** @class */ (function (_super) {
-            __extends(class_1, _super);
-            function class_1() {
-                var args = [];
-                for (var _i = 0; _i < arguments.length; _i++) {
-                    args[_i] = arguments[_i];
-                }
-                return _super.call(this, args[0], args.length > 1 && args[1] !== undefined ? args[1] : path) || this;
-            }
-            return class_1;
-        }(target));
-    };
-}
-
-var graph_es5_Members = /** @class */ (function (_super) {
-    __extends(Members, _super);
-    function Members() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Members_1 = Members;
-    /**
-     * Use this API to add a member to an Office 365 group, a security group or a mail-enabled security group through
-     * the members navigation property. You can add users or other groups.
-     * Important: You can add only users to Office 365 groups.
-     *
-     * @param id Full @odata.id of the directoryObject, user, or group object you want to add (ex: https://graph.microsoft.com/v1.0/directoryObjects/${id})
-     */
-    Members.prototype.add = function (id) {
-        return this.clone(Members_1, "$ref").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                "@odata.id": id,
-            }),
-        });
-    };
-    /**
-     * Gets a member of the group by id
-     *
-     * @param id Group member's id
-     */
-    Members.prototype.getById = function (id) {
-        return new Member(this, id);
-    };
-    var Members_1;
-    Members = Members_1 = __decorate([
-        defaultPath("members")
-    ], Members);
-    return Members;
-}(GraphQueryableCollection));
-var Member = /** @class */ (function (_super) {
-    __extends(Member, _super);
-    function Member() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Removes this Member
-     */
-    Member.prototype.remove = function () {
-        return this.clone(Member, "$ref").deleteCore();
-    };
-    return Member;
-}(GraphQueryableInstance));
-var Owners = /** @class */ (function (_super) {
-    __extends(Owners, _super);
-    function Owners() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Owners = __decorate([
-        defaultPath("owners")
-    ], Owners);
-    return Owners;
-}(graph_es5_Members));
-
-// import { Attachments } from "./attachments";
-var Calendars = /** @class */ (function (_super) {
-    __extends(Calendars, _super);
-    function Calendars() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Calendars = __decorate([
-        defaultPath("calendars")
-    ], Calendars);
-    return Calendars;
-}(GraphQueryableCollection));
-var Calendar = /** @class */ (function (_super) {
-    __extends(Calendar, _super);
-    function Calendar() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Calendar.prototype, "events", {
-        get: function () {
-            return new graph_es5_Events(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Calendar;
-}(GraphQueryableInstance));
-var graph_es5_Events = /** @class */ (function (_super) {
-    __extends(Events, _super);
-    function Events() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Events.prototype.getById = function (id) {
-        return new graph_es5_Event(this, id);
-    };
-    /**
-     * Adds a new event to the collection
-     *
-     * @param properties The set of properties used to create the event
-     */
-    Events.prototype.add = function (properties) {
-        var _this = this;
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        }).then(function (r) {
-            return {
-                data: r,
-                event: _this.getById(r.id),
-            };
-        });
-    };
-    Events = __decorate([
-        defaultPath("events")
-    ], Events);
-    return Events;
-}(GraphQueryableCollection));
-var graph_es5_Event = /** @class */ (function (_super) {
-    __extends(Event, _super);
-    function Event() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    // TODO:: when supported
-    // /**
-    //  * Gets the collection of attachments for this event
-    //  */
-    // public get attachments(): Attachments {
-    //     return new Attachments(this);
-    // }
-    /**
-     * Update the properties of an event object
-     *
-     * @param properties Set of properties of this event to update
-     */
-    Event.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    /**
-     * Deletes this event
-     */
-    Event.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    return Event;
-}(GraphQueryableInstance));
-
-var graph_es5_Attachments = /** @class */ (function (_super) {
-    __extends(Attachments, _super);
-    function Attachments() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a member of the group by id
-     *
-     * @param id Attachment id
-     */
-    Attachments.prototype.getById = function (id) {
-        return new Attachment(this, id);
-    };
-    /**
-     * Add attachment to this collection
-     *
-     * @param name Name given to the attachment file
-     * @param bytes File content
-     */
-    Attachments.prototype.addFile = function (name, bytes) {
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                "@odata.type": "#microsoft.graph.fileAttachment",
-                contentBytes: bytes,
-                name: name,
-            }),
-        });
-    };
-    Attachments = __decorate([
-        defaultPath("attachments")
-    ], Attachments);
-    return Attachments;
-}(GraphQueryableCollection));
-var Attachment = /** @class */ (function (_super) {
-    __extends(Attachment, _super);
-    function Attachment() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return Attachment;
-}(GraphQueryableInstance));
-
-var graph_es5_Conversations = /** @class */ (function (_super) {
-    __extends(Conversations, _super);
-    function Conversations() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Create a new conversation by including a thread and a post.
-     *
-     * @param properties Properties used to create the new conversation
-     */
-    Conversations.prototype.add = function (properties) {
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    /**
-     * Gets a conversation from this collection by id
-     *
-     * @param id Group member's id
-     */
-    Conversations.prototype.getById = function (id) {
-        return new graph_es5_Conversation(this, id);
-    };
-    Conversations = __decorate([
-        defaultPath("conversations")
-    ], Conversations);
-    return Conversations;
-}(GraphQueryableCollection));
-var graph_es5_Threads = /** @class */ (function (_super) {
-    __extends(Threads, _super);
-    function Threads() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a thread from this collection by id
-     *
-     * @param id Group member's id
-     */
-    Threads.prototype.getById = function (id) {
-        return new graph_es5_Thread(this, id);
-    };
-    /**
-     * Adds a new thread to this collection
-     *
-     * @param properties properties used to create the new thread
-     * @returns Id of the new thread
-     */
-    Threads.prototype.add = function (properties) {
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    Threads = __decorate([
-        defaultPath("threads")
-    ], Threads);
-    return Threads;
-}(GraphQueryableCollection));
-var graph_es5_Posts = /** @class */ (function (_super) {
-    __extends(Posts, _super);
-    function Posts() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a thread from this collection by id
-     *
-     * @param id Group member's id
-     */
-    Posts.prototype.getById = function (id) {
-        return new graph_es5_Post(this, id);
-    };
-    /**
-     * Adds a new thread to this collection
-     *
-     * @param properties properties used to create the new thread
-     * @returns Id of the new thread
-     */
-    Posts.prototype.add = function (properties) {
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    Posts = __decorate([
-        defaultPath("posts")
-    ], Posts);
-    return Posts;
-}(GraphQueryableCollection));
-var graph_es5_Conversation = /** @class */ (function (_super) {
-    __extends(Conversation, _super);
-    function Conversation() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Conversation.prototype, "threads", {
-        /**
-         * Get all the threads in a group conversation.
-         */
-        get: function () {
-            return new graph_es5_Threads(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Updates this conversation
-     */
-    Conversation.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    /**
-     * Deletes this member from the group
-     */
-    Conversation.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    return Conversation;
-}(GraphQueryableInstance));
-var graph_es5_Thread = /** @class */ (function (_super) {
-    __extends(Thread, _super);
-    function Thread() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Thread.prototype, "posts", {
-        /**
-         * Get all the threads in a group conversation.
-         */
-        get: function () {
-            return new graph_es5_Posts(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Reply to a thread in a group conversation and add a new post to it
-     *
-     * @param post Contents of the post
-     */
-    Thread.prototype.reply = function (post) {
-        return this.clone(Thread, "reply").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                post: post,
-            }),
-        });
-    };
-    /**
-     * Deletes this member from the group
-     */
-    Thread.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    return Thread;
-}(GraphQueryableInstance));
-var graph_es5_Post = /** @class */ (function (_super) {
-    __extends(Post, _super);
-    function Post() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Post.prototype, "attachments", {
-        get: function () {
-            return new graph_es5_Attachments(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Deletes this post
-     */
-    Post.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Forward a post to a recipient
-     */
-    Post.prototype.forward = function (info) {
-        return this.clone(Post, "forward").postCore({
-            body: Object(common_es5["q" /* jsS */])(info),
-        });
-    };
-    /**
-     * Reply to a thread in a group conversation and add a new post to it
-     *
-     * @param post Contents of the post
-     */
-    Post.prototype.reply = function (post) {
-        return this.clone(Post, "reply").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                post: post,
-            }),
-        });
-    };
-    return Post;
-}(GraphQueryableInstance));
-var graph_es5_Senders = /** @class */ (function (_super) {
-    __extends(Senders, _super);
-    function Senders(baseUrl, path) {
-        return _super.call(this, baseUrl, path) || this;
-    }
-    /**
-     * Add a new user or group to this senders collection
-     * @param id The full @odata.id value to add (ex: https://graph.microsoft.com/v1.0/users/user@contoso.com)
-     */
-    Senders.prototype.add = function (id) {
-        return this.clone(Senders, "$ref").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                "@odata.id": id,
-            }),
-        });
-    };
-    /**
-     * Removes the entity from the collection
-     *
-     * @param id The full @odata.id value to remove (ex: https://graph.microsoft.com/v1.0/users/user@contoso.com)
-     */
-    Senders.prototype.remove = function (id) {
-        var remover = this.clone(Senders, "$ref");
-        remover.query.set("$id", id);
-        return remover.deleteCore();
-    };
-    return Senders;
-}(GraphQueryableCollection));
-
-var Planner = /** @class */ (function (_super) {
-    __extends(Planner, _super);
-    function Planner() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Planner.prototype, "plans", {
-        // Should Only be able to get by id, or else error occur
-        get: function () {
-            return new graph_es5_Plans(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Planner.prototype, "tasks", {
-        // Should Only be able to get by id, or else error occur
-        get: function () {
-            return new graph_es5_Tasks(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Planner.prototype, "buckets", {
-        // Should Only be able to get by id, or else error occur
-        get: function () {
-            return new graph_es5_Buckets(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Planner = __decorate([
-        defaultPath("planner")
-    ], Planner);
-    return Planner;
-}(GraphQueryableInstance));
-var graph_es5_Plans = /** @class */ (function (_super) {
-    __extends(Plans, _super);
-    function Plans() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Plans.prototype.getById = function (id) {
-        return new graph_es5_Plan(this, id);
-    };
-    /**
-     * Create a new Planner Plan.
-     *
-     * @param owner Id of Group object.
-     * @param title The Title of the Plan.
-     */
-    Plans.prototype.add = function (owner, title) {
-        var _this = this;
-        var postBody = {
-            owner: owner,
-            title: title,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                plan: _this.getById(r.id),
-            };
-        });
-    };
-    Plans = __decorate([
-        defaultPath("plans")
-    ], Plans);
-    return Plans;
-}(GraphQueryableCollection));
-/**
- * Should not be able to get by Id
- */
-var graph_es5_Plan = /** @class */ (function (_super) {
-    __extends(Plan, _super);
-    function Plan() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Plan.prototype, "tasks", {
-        get: function () {
-            return new graph_es5_Tasks(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Plan.prototype, "buckets", {
-        get: function () {
-            return new graph_es5_Buckets(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Plan.prototype, "details", {
-        get: function () {
-            return new Details(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Deletes this Plan
-     */
-    Plan.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a Plan
-     *
-     * @param properties Set of properties of this Plan to update
-     */
-    Plan.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    return Plan;
-}(GraphQueryableInstance));
-var graph_es5_Tasks = /** @class */ (function (_super) {
-    __extends(Tasks, _super);
-    function Tasks() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Tasks.prototype.getById = function (id) {
-        return new graph_es5_Task(this, id);
-    };
-    /**
-     * Create a new Planner Task.
-     *
-     * @param planId Id of Plan.
-     * @param title The Title of the Task.
-     * @param assignments Assign the task
-     * @param bucketId Id of Bucket
-     */
-    Tasks.prototype.add = function (planId, title, assignments, bucketId) {
-        var _this = this;
-        var postBody = Object(common_es5["g" /* extend */])({
-            planId: planId,
-            title: title,
-        }, assignments);
-        if (bucketId) {
-            postBody = Object(common_es5["g" /* extend */])(postBody, {
-                bucketId: bucketId,
-            });
-        }
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                task: _this.getById(r.id),
-            };
-        });
-    };
-    Tasks = __decorate([
-        defaultPath("tasks")
-    ], Tasks);
-    return Tasks;
-}(GraphQueryableCollection));
-var graph_es5_Task = /** @class */ (function (_super) {
-    __extends(Task, _super);
-    function Task() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Deletes this Task
-     */
-    Task.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a Task
-     *
-     * @param properties Set of properties of this Task to update
-     */
-    Task.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    Object.defineProperty(Task.prototype, "details", {
-        get: function () {
-            return new Details(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Task;
-}(GraphQueryableInstance));
-var graph_es5_Buckets = /** @class */ (function (_super) {
-    __extends(Buckets, _super);
-    function Buckets() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Create a new Bucket.
-     *
-     * @param name Name of Bucket object.
-     * @param planId The Id of the Plan.
-     * @param oderHint Hint used to order items of this type in a list view.
-     */
-    Buckets.prototype.add = function (name, planId, orderHint) {
-        var _this = this;
-        var postBody = {
-            name: name,
-            orderHint: orderHint ? orderHint : "",
-            planId: planId,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                bucket: _this.getById(r.id),
-                data: r,
-            };
-        });
-    };
-    Buckets.prototype.getById = function (id) {
-        return new graph_es5_Bucket(this, id);
-    };
-    Buckets = __decorate([
-        defaultPath("buckets")
-    ], Buckets);
-    return Buckets;
-}(GraphQueryableCollection));
-var graph_es5_Bucket = /** @class */ (function (_super) {
-    __extends(Bucket, _super);
-    function Bucket() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Deletes this Bucket
-     */
-    Bucket.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a Bucket
-     *
-     * @param properties Set of properties of this Bucket to update
-     */
-    Bucket.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    Object.defineProperty(Bucket.prototype, "tasks", {
-        get: function () {
-            return new graph_es5_Tasks(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Bucket;
-}(GraphQueryableInstance));
-var Details = /** @class */ (function (_super) {
-    __extends(Details, _super);
-    function Details() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Details = __decorate([
-        defaultPath("details")
-    ], Details);
-    return Details;
-}(GraphQueryableCollection));
-
-var graph_es5_Photo = /** @class */ (function (_super) {
-    __extends(Photo, _super);
-    function Photo() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Photo_1 = Photo;
-    /**
-     * Gets the image bytes as a blob (browser)
-     */
-    Photo.prototype.getBlob = function () {
-        return this.clone(Photo_1, "$value", false).get(new odata_es5["a" /* BlobParser */]());
-    };
-    /**
-     * Gets the image file byets as a Buffer (node.js)
-     */
-    Photo.prototype.getBuffer = function () {
-        return this.clone(Photo_1, "$value", false).get(new odata_es5["b" /* BufferParser */]());
-    };
-    /**
-     * Sets the file bytes
-     *
-     * @param content Image file contents, max 4 MB
-     */
-    Photo.prototype.setContent = function (content) {
-        return this.clone(Photo_1, "$value", false).patchCore({
-            body: content,
-        });
-    };
-    var Photo_1;
-    Photo = Photo_1 = __decorate([
-        defaultPath("photo")
-    ], Photo);
-    return Photo;
-}(GraphQueryableInstance));
-
-var Teams = /** @class */ (function (_super) {
-    __extends(Teams, _super);
-    function Teams() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Creates a new team and associated Group with the given information
-     * @param name The name of the new Group
-     * @param description Optional description of the group
-     * @param ownerId Add an owner with a user id from the graph
-     */
-    Teams.prototype.create = function (name, description, ownerId, teamProperties) {
-        if (description === void 0) { description = ""; }
-        if (teamProperties === void 0) { teamProperties = {}; }
-        var groupProps = {
-            "description": description && description.length > 0 ? description : "",
-            "owners@odata.bind": [
-                "https://graph.microsoft.com/v1.0/users/" + ownerId,
-            ],
-        };
-        return graph.groups.add(name, name, GroupType.Office365, groupProps).then(function (gar) {
-            return gar.group.createTeam(teamProperties).then(function (data) {
-                return {
-                    data: data,
-                    group: gar.group,
-                    team: new graph_es5_Team(gar.group),
-                };
-            });
-        });
-    };
-    Teams.prototype.getById = function (id) {
-        return new graph_es5_Team(this, id);
-    };
-    Teams = __decorate([
-        defaultPath("teams")
-    ], Teams);
-    return Teams;
-}(GraphQueryableCollection));
-/**
- * Represents a Microsoft Team
- */
-var graph_es5_Team = /** @class */ (function (_super) {
-    __extends(Team, _super);
-    function Team() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Team_1 = Team;
-    Object.defineProperty(Team.prototype, "channels", {
-        get: function () {
-            return new graph_es5_Channels(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Team.prototype, "installedApps", {
-        get: function () {
-            return new graph_es5_Apps(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Updates this team instance's properties
-     *
-     * @param properties The set of properties to update
-     */
-    // TODO:: update properties to be typed once type is available in graph-types
-    Team.prototype.update = function (properties) {
-        var _this = this;
-        return this.clone(Team_1, "").patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        }).then(function (data) {
-            return {
-                data: data,
-                team: _this,
-            };
-        });
-    };
-    /**
-     * Archives this Team
-     *
-     * @param shouldSetSpoSiteReadOnlyForMembers Should members have Read-only in associated Team Site
-     */
-    // TODO:: update properties to be typed once type is available in graph-types
-    Team.prototype.archive = function (shouldSetSpoSiteReadOnlyForMembers) {
-        var _this = this;
-        var postBody;
-        if (shouldSetSpoSiteReadOnlyForMembers != null) {
-            postBody = Object(common_es5["g" /* extend */])(postBody, {
-                shouldSetSpoSiteReadOnlyForMembers: shouldSetSpoSiteReadOnlyForMembers,
-            });
-        }
-        return this.clone(Team_1, "archive").postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (data) {
-            return {
-                data: data,
-                team: _this,
-            };
-        });
-    };
-    /**
-    * Unarchives this Team
-    *
-    */
-    // TODO:: update properties to be typed once type is available in graph-types
-    Team.prototype.unarchive = function () {
-        var _this = this;
-        return this.clone(Team_1, "unarchive").postCore({}).then(function (data) {
-            return {
-                data: data,
-                team: _this,
-            };
-        });
-    };
-    /**
-     * Clones this Team
-     * @param name The name of the new Group
-     * @param description Optional description of the group
-     * @param partsToClone Parts to clone ex: apps,tabs,settings,channels,members
-     * @param visibility Set visibility to public or private
-     */
-    // TODO:: update properties to be typed once type is available in graph-types
-    Team.prototype.cloneTeam = function (name, description, partsToClone, visibility) {
-        var _this = this;
-        if (description === void 0) { description = ""; }
-        var postBody = {
-            description: description ? description : "",
-            displayName: name,
-            mailNickname: name,
-            partsToClone: partsToClone,
-            visibility: visibility,
-        };
-        return this.clone(Team_1, "clone").postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (data) {
-            return {
-                data: data,
-                team: _this,
-            };
-        });
-    };
-    /**
-     * Executes the currently built request
-     *
-     * @param parser Allows you to specify a parser to handle the result
-     * @param getOptions The options used for this request
-     */
-    Team.prototype.get = function (parser, options) {
-        if (parser === void 0) { parser = new odata_es5["f" /* ODataDefaultParser */](); }
-        if (options === void 0) { options = {}; }
-        return this.clone(Team_1, "").getCore(parser, options);
-    };
-    var Team_1;
-    Team = Team_1 = __decorate([
-        defaultPath("team")
-    ], Team);
-    return Team;
-}(GraphQueryableInstance));
-var graph_es5_Channels = /** @class */ (function (_super) {
-    __extends(Channels, _super);
-    function Channels() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Creates a new Channel in the Team
-     * @param name The display name of the new channel
-     * @param description Optional description of the channel
-     *
-     */
-    Channels.prototype.create = function (name, description) {
-        var _this = this;
-        if (description === void 0) { description = ""; }
-        var postBody = {
-            description: description && description.length > 0 ? description : "",
-            displayName: name,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                channel: _this.getById(r.id),
-                data: r,
-            };
-        });
-    };
-    Channels.prototype.getById = function (id) {
-        return new Channel(this, id);
-    };
-    Channels = __decorate([
-        defaultPath("channels")
-    ], Channels);
-    return Channels;
-}(GraphQueryableCollection));
-var Channel = /** @class */ (function (_super) {
-    __extends(Channel, _super);
-    function Channel() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Channel.prototype, "tabs", {
-        get: function () {
-            return new graph_es5_Tabs(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Channel;
-}(GraphQueryableInstance));
-var graph_es5_Apps = /** @class */ (function (_super) {
-    __extends(Apps, _super);
-    function Apps() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Creates a new App in the Team
-     * @param appUrl The url to an app ex: https://graph.microsoft.com/beta/appCatalogs/teamsApps/12345678-9abc-def0-123456789a
-     *
-     */
-    Apps.prototype.add = function (appUrl) {
-        var postBody = {
-            "teamsApp@odata.bind": appUrl,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-            };
-        });
-    };
-    /**
-     * Deletes this app
-     */
-    Apps.prototype.remove = function () {
-        return this.deleteCore();
-    };
-    Apps = __decorate([
-        defaultPath("installedApps")
-    ], Apps);
-    return Apps;
-}(GraphQueryableCollection));
-var graph_es5_Tabs = /** @class */ (function (_super) {
-    __extends(Tabs, _super);
-    function Tabs() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Adds a tab to the cahnnel
-     * @param name The name of the new Tab
-     * @param appUrl The url to an app ex: https://graph.microsoft.com/beta/appCatalogs/teamsApps/12345678-9abc-def0-123456789a
-     * @param tabsConfiguration visit https://developer.microsoft.com/en-us/graph/docs/api-reference/v1.0/api/teamstab_add for reference
-     */
-    Tabs.prototype.add = function (name, appUrl, properties) {
-        var _this = this;
-        var postBody = Object(common_es5["g" /* extend */])({
-            name: name,
-            "teamsApp@odata.bind": appUrl,
-        }, properties);
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                tab: _this.getById(r.id),
-            };
-        });
-    };
-    Tabs.prototype.getById = function (id) {
-        return new graph_es5_Tab(this, id);
-    };
-    Tabs = __decorate([
-        defaultPath("tabs")
-    ], Tabs);
-    return Tabs;
-}(GraphQueryableCollection));
-/**
- * Represents a Microsoft Team
- */
-var graph_es5_Tab = /** @class */ (function (_super) {
-    __extends(Tab, _super);
-    function Tab() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Tab_1 = Tab;
-    /**
-     * Updates this tab
-     *
-     * @param properties The set of properties to update
-     */
-    // TODO:: update properties to be typed once type is available in graph-types
-    Tab.prototype.update = function (properties) {
-        var _this = this;
-        return this.clone(Tab_1, "").patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        }).then(function (data) {
-            return {
-                data: data,
-                tab: _this,
-            };
-        });
-    };
-    /**
-     * Deletes this tab
-     */
-    Tab.prototype.remove = function () {
-        return this.deleteCore();
-    };
-    var Tab_1;
-    Tab = Tab_1 = __decorate([
-        defaultPath("tab")
-    ], Tab);
-    return Tab;
-}(GraphQueryableInstance));
-
-var GroupType;
-(function (GroupType) {
-    /**
-     * Office 365 (aka unified group)
-     */
-    GroupType[GroupType["Office365"] = 0] = "Office365";
-    /**
-     * Dynamic membership
-     */
-    GroupType[GroupType["Dynamic"] = 1] = "Dynamic";
-    /**
-     * Security
-     */
-    GroupType[GroupType["Security"] = 2] = "Security";
-})(GroupType || (GroupType = {}));
-/**
- * Describes a collection of Field objects
- *
- */
-var graph_es5_Groups = /** @class */ (function (_super) {
-    __extends(Groups, _super);
-    function Groups() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a group from the collection using the specified id
-     *
-     * @param id Id of the group to get from this collection
-     */
-    Groups.prototype.getById = function (id) {
-        return new graph_es5_Group(this, id);
-    };
-    /**
-     * Create a new group as specified in the request body.
-     *
-     * @param name Name to display in the address book for the group
-     * @param mailNickname Mail alias for the group
-     * @param groupType Type of group being created
-     * @param additionalProperties A plain object collection of additional properties you want to set on the new group
-     */
-    Groups.prototype.add = function (name, mailNickname, groupType, additionalProperties) {
-        var _this = this;
-        if (additionalProperties === void 0) { additionalProperties = {}; }
-        var postBody = Object(common_es5["g" /* extend */])({
-            displayName: name,
-            mailEnabled: groupType === GroupType.Office365,
-            mailNickname: mailNickname,
-            securityEnabled: groupType !== GroupType.Office365,
-        }, additionalProperties);
-        // include a group type if required
-        if (groupType !== GroupType.Security) {
-            postBody = Object(common_es5["g" /* extend */])(postBody, {
-                groupTypes: groupType === GroupType.Office365 ? ["Unified"] : ["DynamicMembership"],
-            });
-        }
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                group: _this.getById(r.id),
-            };
-        });
-    };
-    Groups = __decorate([
-        defaultPath("groups")
-    ], Groups);
-    return Groups;
-}(GraphQueryableCollection));
-/**
- * Represents a group entity
- */
-var graph_es5_Group = /** @class */ (function (_super) {
-    __extends(Group, _super);
-    function Group() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Group.prototype, "calendar", {
-        /**
-         * The calendar associated with this group
-         */
-        get: function () {
-            return new Calendar(this, "calendar");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "events", {
-        /**
-         * Retrieve a list of event objects
-         */
-        get: function () {
-            return new graph_es5_Events(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "owners", {
-        /**
-         * Gets the collection of owners for this group
-         */
-        get: function () {
-            return new Owners(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "plans", {
-        /**
-         * The collection of plans for this group
-         */
-        get: function () {
-            return new graph_es5_Plans(this, "planner/plans");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "members", {
-        /**
-         * Gets the collection of members for this group
-         */
-        get: function () {
-            return new graph_es5_Members(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "conversations", {
-        /**
-         * Gets the conversations collection for this group
-         */
-        get: function () {
-            return new graph_es5_Conversations(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "acceptedSenders", {
-        /**
-         * Gets the collection of accepted senders for this group
-         */
-        get: function () {
-            return new graph_es5_Senders(this, "acceptedsenders");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "rejectedSenders", {
-        /**
-         * Gets the collection of rejected senders for this group
-         */
-        get: function () {
-            return new graph_es5_Senders(this, "rejectedsenders");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "photo", {
-        /**
-         * The photo associated with the group
-         */
-        get: function () {
-            return new graph_es5_Photo(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Group.prototype, "team", {
-        /**
-         * Gets the team associated with this group, if it exists
-         */
-        get: function () {
-            return new graph_es5_Team(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Add the group to the list of the current user's favorite groups. Supported for only Office 365 groups
-     */
-    Group.prototype.addFavorite = function () {
-        return this.clone(Group, "addFavorite").postCore();
-    };
-    /**
-     * Creates a Microsoft Team associated with this group
-     *
-     * @param properties Initial properties for the new Team
-     */
-    Group.prototype.createTeam = function (properties) {
-        return this.clone(Group, "team").putCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    /**
-     * Returns all the groups and directory roles that the specified group is a member of. The check is transitive
-     *
-     * @param securityEnabledOnly
-     */
-    Group.prototype.getMemberObjects = function (securityEnabledOnly) {
-        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
-        return this.clone(Group, "getMemberObjects").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                securityEnabledOnly: securityEnabledOnly,
-            }),
-        });
-    };
-    /**
-     * Return all the groups that the specified group is a member of. The check is transitive
-     *
-     * @param securityEnabledOnly
-     */
-    Group.prototype.getMemberGroups = function (securityEnabledOnly) {
-        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
-        return this.clone(Group, "getMemberGroups").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                securityEnabledOnly: securityEnabledOnly,
-            }),
-        });
-    };
-    /**
-     * Check for membership in a specified list of groups, and returns from that list those groups of which the specified user, group, or directory object is a member.
-     * This function is transitive.
-     * @param groupIds A collection that contains the object IDs of the groups in which to check membership. Up to 20 groups may be specified.
-     */
-    Group.prototype.checkMemberGroups = function (groupIds) {
-        return this.clone(Group, "checkMemberGroups").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                groupIds: groupIds,
-            }),
-        });
-    };
-    /**
-     * Deletes this group
-     */
-    Group.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a group object
-     *
-     * @param properties Set of properties of this group to update
-     */
-    Group.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    /**
-     * Remove the group from the list of the current user's favorite groups. Supported for only Office 365 groups
-     */
-    Group.prototype.removeFavorite = function () {
-        return this.clone(Group, "removeFavorite").postCore();
-    };
-    /**
-     * Reset the unseenCount of all the posts that the current user has not seen since their last visit
-     */
-    Group.prototype.resetUnseenCount = function () {
-        return this.clone(Group, "resetUnseenCount").postCore();
-    };
-    /**
-     * Calling this method will enable the current user to receive email notifications for this group,
-     * about new posts, events, and files in that group. Supported for only Office 365 groups
-     */
-    Group.prototype.subscribeByMail = function () {
-        return this.clone(Group, "subscribeByMail").postCore();
-    };
-    /**
-     * Calling this method will prevent the current user from receiving email notifications for this group
-     * about new posts, events, and files in that group. Supported for only Office 365 groups
-     */
-    Group.prototype.unsubscribeByMail = function () {
-        return this.clone(Group, "unsubscribeByMail").postCore();
-    };
-    /**
-     * Get the occurrences, exceptions, and single instances of events in a calendar view defined by a time range, from the default calendar of a group
-     *
-     * @param start Start date and time of the time range
-     * @param end End date and time of the time range
-     */
-    Group.prototype.getCalendarView = function (start, end) {
-        var view = this.clone(Group, "calendarView");
-        view.query.set("startDateTime", start.toISOString());
-        view.query.set("endDateTime", end.toISOString());
-        return view.get();
-    };
-    return Group;
-}(GraphQueryableInstance));
-
-var graph_es5_Contacts = /** @class */ (function (_super) {
-    __extends(Contacts, _super);
-    function Contacts() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Contacts.prototype.getById = function (id) {
-        return new graph_es5_Contact(this, id);
-    };
-    /**
-    * Create a new Contact for the user.
-    *
-    * @param givenName The contact's given name.
-    * @param surName The contact's surname.
-    * @param emailAddresses The contact's email addresses.
-    * @param businessPhones The contact's business phone numbers.
-    * @param additionalProperties A plain object collection of additional properties you want to set on the new contact
-    */
-    Contacts.prototype.add = function (givenName, surName, emailAddresses, businessPhones, additionalProperties) {
-        var _this = this;
-        if (additionalProperties === void 0) { additionalProperties = {}; }
-        var postBody = Object(common_es5["g" /* extend */])({
-            businessPhones: businessPhones,
-            emailAddresses: emailAddresses,
-            givenName: givenName,
-            surName: surName,
-        }, additionalProperties);
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                contact: _this.getById(r.id),
-                data: r,
-            };
-        });
-    };
-    Contacts = __decorate([
-        defaultPath("contacts")
-    ], Contacts);
-    return Contacts;
-}(GraphQueryableCollection));
-var graph_es5_Contact = /** @class */ (function (_super) {
-    __extends(Contact, _super);
-    function Contact() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Deletes this contact
-     */
-    Contact.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a contact object
-     *
-     * @param properties Set of properties of this contact to update
-     */
-    Contact.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    return Contact;
-}(GraphQueryableInstance));
-var graph_es5_ContactFolders = /** @class */ (function (_super) {
-    __extends(ContactFolders, _super);
-    function ContactFolders() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    ContactFolders.prototype.getById = function (id) {
-        return new graph_es5_ContactFolder(this, id);
-    };
-    /**
-     * Create a new Contact Folder for the user.
-     *
-     * @param displayName The folder's display name.
-     * @param parentFolderId The ID of the folder's parent folder.
-     */
-    ContactFolders.prototype.add = function (displayName, parentFolderId) {
-        var _this = this;
-        var postBody = {
-            displayName: displayName,
-            parentFolderId: parentFolderId,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                contactFolder: _this.getById(r.id),
-                data: r,
-            };
-        });
-    };
-    ContactFolders = __decorate([
-        defaultPath("contactFolders")
-    ], ContactFolders);
-    return ContactFolders;
-}(GraphQueryableCollection));
-var graph_es5_ContactFolder = /** @class */ (function (_super) {
-    __extends(ContactFolder, _super);
-    function ContactFolder() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(ContactFolder.prototype, "contacts", {
-        /**
-         * Gets the contacts in this contact folder
-         */
-        get: function () {
-            return new graph_es5_Contacts(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(ContactFolder.prototype, "childFolders", {
-        /**
-        * Gets the contacts in this contact folder
-        */
-        get: function () {
-            return new graph_es5_ContactFolders(this, "childFolders");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Deletes this contact folder
-     */
-    ContactFolder.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a contact folder
-     *
-     * @param properties Set of properties of this contact folder to update
-     */
-    ContactFolder.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    return ContactFolder;
-}(GraphQueryableInstance));
-
-/**
- * Represents a onenote entity
- */
-var OneNote = /** @class */ (function (_super) {
-    __extends(OneNote, _super);
-    function OneNote() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(OneNote.prototype, "notebooks", {
-        get: function () {
-            return new graph_es5_Notebooks(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(OneNote.prototype, "sections", {
-        get: function () {
-            return new graph_es5_Sections(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(OneNote.prototype, "pages", {
-        get: function () {
-            return new Pages(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    OneNote = __decorate([
-        defaultPath("onenote")
-    ], OneNote);
-    return OneNote;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Notebook objects
- *
- */
-var graph_es5_Notebooks = /** @class */ (function (_super) {
-    __extends(Notebooks, _super);
-    function Notebooks() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a notebook instance by id
-     *
-     * @param id Notebook id
-     */
-    Notebooks.prototype.getById = function (id) {
-        return new Notebook(this, id);
-    };
-    /**
-     * Create a new notebook as specified in the request body.
-     *
-     * @param displayName Notebook display name
-     */
-    Notebooks.prototype.add = function (displayName) {
-        var _this = this;
-        var postBody = {
-            displayName: displayName,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                notebook: _this.getById(r.id),
-            };
-        });
-    };
-    Notebooks = __decorate([
-        defaultPath("notebooks")
-    ], Notebooks);
-    return Notebooks;
-}(GraphQueryableCollection));
-/**
- * Describes a notebook instance
- *
- */
-var Notebook = /** @class */ (function (_super) {
-    __extends(Notebook, _super);
-    function Notebook(baseUrl, path) {
-        return _super.call(this, baseUrl, path) || this;
-    }
-    Object.defineProperty(Notebook.prototype, "sections", {
-        get: function () {
-            return new graph_es5_Sections(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return Notebook;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Sections objects
- *
- */
-var graph_es5_Sections = /** @class */ (function (_super) {
-    __extends(Sections, _super);
-    function Sections() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a section instance by id
-     *
-     * @param id Section id
-     */
-    Sections.prototype.getById = function (id) {
-        return new Section(this, id);
-    };
-    /**
-     * Adds a new section
-     *
-     * @param displayName New section display name
-     */
-    Sections.prototype.add = function (displayName) {
-        var _this = this;
-        var postBody = {
-            displayName: displayName,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                section: _this.getById(r.id),
-            };
-        });
-    };
-    Sections = __decorate([
-        defaultPath("sections")
-    ], Sections);
-    return Sections;
-}(GraphQueryableCollection));
-/**
- * Describes a sections instance
- *
- */
-var Section = /** @class */ (function (_super) {
-    __extends(Section, _super);
-    function Section(baseUrl, path) {
-        return _super.call(this, baseUrl, path) || this;
-    }
-    return Section;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Pages objects
- *
- */
-var Pages = /** @class */ (function (_super) {
-    __extends(Pages, _super);
-    function Pages() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Pages = __decorate([
-        defaultPath("pages")
-    ], Pages);
-    return Pages;
-}(GraphQueryableCollection));
-
-/**
- * Describes a collection of Drive objects
- *
- */
-var Drives = /** @class */ (function (_super) {
-    __extends(Drives, _super);
-    function Drives() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a Drive instance by id
-     *
-     * @param id Drive id
-     */
-    Drives.prototype.getById = function (id) {
-        return new Drive(this, id);
-    };
-    Drives = __decorate([
-        defaultPath("drives")
-    ], Drives);
-    return Drives;
-}(GraphQueryableCollection));
-/**
- * Describes a Drive instance
- *
- */
-var Drive = /** @class */ (function (_super) {
-    __extends(Drive, _super);
-    function Drive() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Drive.prototype, "root", {
-        get: function () {
-            return new Root(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Drive.prototype, "items", {
-        get: function () {
-            return new DriveItems(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Drive.prototype, "list", {
-        get: function () {
-            return new DriveList(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Drive.prototype, "recent", {
-        get: function () {
-            return new Recent(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Drive.prototype, "sharedWithMe", {
-        get: function () {
-            return new SharedWithMe(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Drive = __decorate([
-        defaultPath("drive")
-    ], Drive);
-    return Drive;
-}(GraphQueryableInstance));
-/**
- * Describes a Root instance
- *
- */
-var Root = /** @class */ (function (_super) {
-    __extends(Root, _super);
-    function Root() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Root.prototype, "children", {
-        get: function () {
-            return new graph_es5_Children(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Root.prototype.search = function (query) {
-        return new DriveSearch(this, "search(q='" + query + "')");
-    };
-    Root = __decorate([
-        defaultPath("root")
-    ], Root);
-    return Root;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Drive Item objects
- *
- */
-var DriveItems = /** @class */ (function (_super) {
-    __extends(DriveItems, _super);
-    function DriveItems() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a Drive Item instance by id
-     *
-     * @param id Drive Item id
-     */
-    DriveItems.prototype.getById = function (id) {
-        return new graph_es5_DriveItem(this, id);
-    };
-    DriveItems = __decorate([
-        defaultPath("items")
-    ], DriveItems);
-    return DriveItems;
-}(GraphQueryableCollection));
-/**
- * Describes a Drive Item instance
- *
- */
-var graph_es5_DriveItem = /** @class */ (function (_super) {
-    __extends(DriveItem, _super);
-    function DriveItem() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(DriveItem.prototype, "children", {
-        get: function () {
-            return new graph_es5_Children(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(DriveItem.prototype, "thumbnails", {
-        get: function () {
-            return new Thumbnails(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Deletes this Drive Item
-     */
-    DriveItem.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a Drive item
-     *
-     * @param properties Set of properties of this Drive Item to update
-     */
-    DriveItem.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    /**
-     * Move the Drive item and optionally update the properties
-     *
-     * @param parentReference Should contain Id of new parent folder
-     * @param properties Optional set of properties of this Drive Item to update
-     */
-    DriveItem.prototype.move = function (parentReference, properties) {
-        var patchBody = Object(common_es5["g" /* extend */])({}, parentReference);
-        if (properties) {
-            patchBody = Object(common_es5["g" /* extend */])({}, properties);
-        }
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(patchBody),
-        });
-    };
-    return DriveItem;
-}(GraphQueryableInstance));
-/**
- * Return a collection of DriveItems in the children relationship of a DriveItem
- *
- */
-var graph_es5_Children = /** @class */ (function (_super) {
-    __extends(Children, _super);
-    function Children() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-    * Create a new folder or DriveItem in a Drive with a specified parent item or path
-    * Currently only Folder or File works
-    * @param name The name of the Drive Item.
-    * @param properties Type of Drive Item to create.
-    * */
-    Children.prototype.add = function (name, driveItemType) {
-        var _this = this;
-        var postBody = Object(common_es5["g" /* extend */])({
-            name: name,
-        }, driveItemType);
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                driveItem: new graph_es5_DriveItem(_this, r.id),
-            };
-        });
-    };
-    Children = __decorate([
-        defaultPath("children")
-    ], Children);
-    return Children;
-}(GraphQueryableCollection));
-var DriveList = /** @class */ (function (_super) {
-    __extends(DriveList, _super);
-    function DriveList() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    DriveList = __decorate([
-        defaultPath("list")
-    ], DriveList);
-    return DriveList;
-}(GraphQueryableCollection));
-var Recent = /** @class */ (function (_super) {
-    __extends(Recent, _super);
-    function Recent() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Recent = __decorate([
-        defaultPath("recent")
-    ], Recent);
-    return Recent;
-}(GraphQueryableInstance));
-var SharedWithMe = /** @class */ (function (_super) {
-    __extends(SharedWithMe, _super);
-    function SharedWithMe() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    SharedWithMe = __decorate([
-        defaultPath("sharedWithMe")
-    ], SharedWithMe);
-    return SharedWithMe;
-}(GraphQueryableInstance));
-var DriveSearch = /** @class */ (function (_super) {
-    __extends(DriveSearch, _super);
-    function DriveSearch() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    DriveSearch = __decorate([
-        defaultPath("search")
-    ], DriveSearch);
-    return DriveSearch;
-}(GraphQueryableInstance));
-var Thumbnails = /** @class */ (function (_super) {
-    __extends(Thumbnails, _super);
-    function Thumbnails() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Thumbnails = __decorate([
-        defaultPath("thumbnails")
-    ], Thumbnails);
-    return Thumbnails;
-}(GraphQueryableInstance));
-
-var graph_es5_Messages = /** @class */ (function (_super) {
-    __extends(Messages, _super);
-    function Messages() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a member of the group by id
-     *
-     * @param id Attachment id
-     */
-    Messages.prototype.getById = function (id) {
-        return new Message(this, id);
-    };
-    /**
-     * Add a message to this collection
-     *
-     * @param message The message details
-     */
-    Messages.prototype.add = function (message) {
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(message),
-        });
-    };
-    Messages = __decorate([
-        defaultPath("messages")
-    ], Messages);
-    return Messages;
-}(GraphQueryableCollection));
-var Message = /** @class */ (function (_super) {
-    __extends(Message, _super);
-    function Message() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return Message;
-}(GraphQueryableInstance));
-var graph_es5_MailFolders = /** @class */ (function (_super) {
-    __extends(MailFolders, _super);
-    function MailFolders() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a member of the group by id
-     *
-     * @param id Attachment id
-     */
-    MailFolders.prototype.getById = function (id) {
-        return new MailFolder(this, id);
-    };
-    /**
-     * Add a mail folder to this collection
-     *
-     * @param message The message details
-     */
-    MailFolders.prototype.add = function (mailFolder) {
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(mailFolder),
-        });
-    };
-    MailFolders = __decorate([
-        defaultPath("mailFolders")
-    ], MailFolders);
-    return MailFolders;
-}(GraphQueryableCollection));
-var MailFolder = /** @class */ (function (_super) {
-    __extends(MailFolder, _super);
-    function MailFolder() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return MailFolder;
-}(GraphQueryableInstance));
-var graph_es5_MailboxSettings = /** @class */ (function (_super) {
-    __extends(MailboxSettings, _super);
-    function MailboxSettings() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    MailboxSettings.prototype.update = function (settings) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(settings),
-        });
-    };
-    MailboxSettings = __decorate([
-        defaultPath("mailboxSettings")
-    ], MailboxSettings);
-    return MailboxSettings;
-}(GraphQueryableInstance));
-
-var DirectoryObjectType;
-(function (DirectoryObjectType) {
-    /**
-     * Directory Objects
-     */
-    DirectoryObjectType[DirectoryObjectType["directoryObject"] = 0] = "directoryObject";
-    /**
-     * User
-     */
-    DirectoryObjectType[DirectoryObjectType["user"] = 1] = "user";
-    /**
-     * Group
-     */
-    DirectoryObjectType[DirectoryObjectType["group"] = 2] = "group";
-    /**
-     * Device
-     */
-    DirectoryObjectType[DirectoryObjectType["device"] = 3] = "device";
-})(DirectoryObjectType || (DirectoryObjectType = {}));
-/**
- * Describes a collection of Directory Objects
- *
- */
-var graph_es5_DirectoryObjects = /** @class */ (function (_super) {
-    __extends(DirectoryObjects, _super);
-    function DirectoryObjects() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    DirectoryObjects_1 = DirectoryObjects;
-    /**
-     * Gets a directoryObject from the collection using the specified id
-     *
-     * @param id Id of the Directory Object to get from this collection
-     */
-    DirectoryObjects.prototype.getById = function (id) {
-        return new graph_es5_DirectoryObject(this, id);
-    };
-    /**
-    * Returns the directory objects specified in a list of ids. NOTE: The directory objects returned are the full objects containing all their properties.
-    * The $select query option is not available for this operation.
-    *
-    * @param ids A collection of ids for which to return objects. You can specify up to 1000 ids.
-    * @param type A collection of resource types that specifies the set of resource collections to search. Default is directoryObject.
-    */
-    DirectoryObjects.prototype.getByIds = function (ids, type) {
-        if (type === void 0) { type = DirectoryObjectType.directoryObject; }
-        return this.clone(DirectoryObjects_1, "getByIds").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                ids: ids,
-                type: type,
-            }),
-        });
-    };
-    var DirectoryObjects_1;
-    DirectoryObjects = DirectoryObjects_1 = __decorate([
-        defaultPath("directoryObjects")
-    ], DirectoryObjects);
-    return DirectoryObjects;
-}(GraphQueryableCollection));
-/**
- * Represents a Directory Object entity
- */
-var graph_es5_DirectoryObject = /** @class */ (function (_super) {
-    __extends(DirectoryObject, _super);
-    function DirectoryObject() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Deletes this group
-     */
-    DirectoryObject.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Returns all the groups and directory roles that the specified Directory Object is a member of. The check is transitive
-     *
-     * @param securityEnabledOnly
-     */
-    DirectoryObject.prototype.getMemberObjects = function (securityEnabledOnly) {
-        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
-        return this.clone(DirectoryObject, "getMemberObjects").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                securityEnabledOnly: securityEnabledOnly,
-            }),
-        });
-    };
-    /**
-     * Returns all the groups that the specified Directory Object is a member of. The check is transitive
-     *
-     * @param securityEnabledOnly
-     */
-    DirectoryObject.prototype.getMemberGroups = function (securityEnabledOnly) {
-        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
-        return this.clone(DirectoryObject, "getMemberGroups").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                securityEnabledOnly: securityEnabledOnly,
-            }),
-        });
-    };
-    /**
-     * Check for membership in a specified list of groups, and returns from that list those groups of which the specified user, group, or directory object is a member.
-     * This function is transitive.
-     * @param groupIds A collection that contains the object IDs of the groups in which to check membership. Up to 20 groups may be specified.
-     */
-    DirectoryObject.prototype.checkMemberGroups = function (groupIds) {
-        return this.clone(DirectoryObject, "checkMemberGroups").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                groupIds: groupIds,
-            }),
-        });
-    };
-    return DirectoryObject;
-}(GraphQueryableInstance));
-
-var People = /** @class */ (function (_super) {
-    __extends(People, _super);
-    function People() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    People = __decorate([
-        defaultPath("people")
-    ], People);
-    return People;
-}(GraphQueryableCollection));
-
-/**
- * Represents a Insights entity
- */
-var Insights = /** @class */ (function (_super) {
-    __extends(Insights, _super);
-    function Insights() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Insights.prototype, "trending", {
-        get: function () {
-            return new Trending(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Insights.prototype, "used", {
-        get: function () {
-            return new Used(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Insights.prototype, "shared", {
-        get: function () {
-            return new Shared(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Insights = __decorate([
-        defaultPath("insights")
-    ], Insights);
-    return Insights;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Trending objects
- *
- */
-var Trending = /** @class */ (function (_super) {
-    __extends(Trending, _super);
-    function Trending() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Trending = __decorate([
-        defaultPath("trending")
-    ], Trending);
-    return Trending;
-}(GraphQueryableCollection));
-/**
- * Describes a collection of Used objects
- *
- */
-var Used = /** @class */ (function (_super) {
-    __extends(Used, _super);
-    function Used() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Used = __decorate([
-        defaultPath("used")
-    ], Used);
-    return Used;
-}(GraphQueryableCollection));
-/**
- * Describes a collection of Shared objects
- *
- */
-var Shared = /** @class */ (function (_super) {
-    __extends(Shared, _super);
-    function Shared() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Shared = __decorate([
-        defaultPath("shared")
-    ], Shared);
-    return Shared;
-}(GraphQueryableCollection));
-
-/**
- * Describes a collection of Users objects
- *
- */
-var Users = /** @class */ (function (_super) {
-    __extends(Users, _super);
-    function Users() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a user from the collection using the specified id
-     *
-     * @param id Id of the user to get from this collection
-     */
-    Users.prototype.getById = function (id) {
-        return new graph_es5_User(this, id);
-    };
-    Users = __decorate([
-        defaultPath("users")
-    ], Users);
-    return Users;
-}(GraphQueryableCollection));
-/**
- * Represents a user entity
- */
-var graph_es5_User = /** @class */ (function (_super) {
-    __extends(User, _super);
-    function User() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(User.prototype, "onenote", {
-        /**
-        * The onenote associated with me
-        */
-        get: function () {
-            return new OneNote(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "contacts", {
-        /**
-        * The Contacts associated with the user
-        */
-        get: function () {
-            return new graph_es5_Contacts(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "joinedTeams", {
-        /**
-        * The Teams associated with the user
-        */
-        get: function () {
-            return new Teams(this, "joinedTeams");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "memberOf", {
-        /**
-        * The groups and directory roles associated with the user
-        */
-        get: function () {
-            return new graph_es5_DirectoryObjects(this, "memberOf");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Returns all the groups and directory roles that the specified useris a member of. The check is transitive
-     *
-     * @param securityEnabledOnly
-     */
-    User.prototype.getMemberObjects = function (securityEnabledOnly) {
-        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
-        return this.clone(User, "getMemberObjects").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                securityEnabledOnly: securityEnabledOnly,
-            }),
-        });
-    };
-    /**
-     * Return all the groups that the specified user is a member of. The check is transitive
-     *
-     * @param securityEnabledOnly
-     */
-    User.prototype.getMemberGroups = function (securityEnabledOnly) {
-        if (securityEnabledOnly === void 0) { securityEnabledOnly = false; }
-        return this.clone(User, "getMemberGroups").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                securityEnabledOnly: securityEnabledOnly,
-            }),
-        });
-    };
-    /**
-     * Check for membership in a specified list of groups, and returns from that list those groups of which the specified user, group, or directory object is a member.
-     * This function is transitive.
-     * @param groupIds A collection that contains the object IDs of the groups in which to check membership. Up to 20 groups may be specified.
-     */
-    User.prototype.checkMemberGroups = function (groupIds) {
-        return this.clone(User, "checkMemberGroups").postCore({
-            body: Object(common_es5["q" /* jsS */])({
-                groupIds: groupIds,
-            }),
-        });
-    };
-    Object.defineProperty(User.prototype, "contactFolders", {
-        /**
-        * The Contact Folders associated with the user
-        */
-        get: function () {
-            return new graph_es5_ContactFolders(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "drive", {
-        /**
-        * The default Drive associated with the user
-        */
-        get: function () {
-            return new Drive(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "drives", {
-        /**
-        * The Drives the user has available
-        */
-        get: function () {
-            return new Drives(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "tasks", {
-        /**
-        * The Tasks the user has available
-        */
-        get: function () {
-            return new graph_es5_Tasks(this, "planner/tasks");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "messages", {
-        /**
-         * Get the messages in the signed-in user's mailbox
-         */
-        get: function () {
-            return new graph_es5_Messages(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "mailboxSettings", {
-        /**
-         * Get the MailboxSettings in the signed-in user's mailbox
-         */
-        get: function () {
-            return new graph_es5_MailboxSettings(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "mailFolders", {
-        /**
-         * Get the MailboxSettings in the signed-in user's mailbox
-         */
-        get: function () {
-            return new graph_es5_MailFolders(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Updates this user
-     *
-     * @param properties Properties used to update this user
-     */
-    User.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    /**
-     * Deletes this user
-     */
-    User.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Send the message specified in the request body. The message is saved in the Sent Items folder by default.
-     */
-    User.prototype.sendMail = function (message) {
-        return this.clone(User, "sendMail").postCore({
-            body: Object(common_es5["q" /* jsS */])(message),
-        });
-    };
-    Object.defineProperty(User.prototype, "people", {
-        /**
-        * People ordered by their relevance to the user
-        */
-        get: function () {
-            return new People(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "directReports", {
-        /**
-        * People that have direct reports to the user
-        */
-        get: function () {
-            return new People(this, "directReports");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(User.prototype, "insights", {
-        /**
-        * The Insights associated with me
-        */
-        get: function () {
-            return new Insights(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return User;
-}(GraphQueryableInstance));
-
-var graph_es5_GraphBatch = /** @class */ (function (_super) {
-    __extends(GraphBatch, _super);
-    function GraphBatch(batchUrl, maxRequests) {
-        if (batchUrl === void 0) { batchUrl = "https://graph.microsoft.com/v1.0/$batch"; }
-        if (maxRequests === void 0) { maxRequests = 20; }
-        var _this = _super.call(this) || this;
-        _this.batchUrl = batchUrl;
-        _this.maxRequests = maxRequests;
-        return _this;
-    }
-    /**
-     * Urls come to the batch absolute, but the processor expects relative
-     * @param url Url to ensure is relative
-     */
-    GraphBatch.makeUrlRelative = function (url) {
-        if (!Object(common_es5["p" /* isUrlAbsolute */])(url)) {
-            // already not absolute, just give it back
-            return url;
-        }
-        var index = url.indexOf(".com/v1.0/");
-        if (index < 0) {
-            index = url.indexOf(".com/beta/");
-            if (index > -1) {
-                // beta url
-                return url.substr(index + 10);
-            }
-        }
-        else {
-            // v1.0 url
-            return url.substr(index + 9);
-        }
-        // no idea
-        return url;
-    };
-    GraphBatch.formatRequests = function (requests) {
-        var _this = this;
-        return requests.map(function (reqInfo, index) {
-            var requestFragment = {
-                id: "" + ++index,
-                method: reqInfo.method,
-                url: _this.makeUrlRelative(reqInfo.url),
-            };
-            var headers = {};
-            // merge global config headers
-            if (GraphRuntimeConfig.headers !== undefined && GraphRuntimeConfig.headers !== null) {
-                headers = Object(common_es5["g" /* extend */])(headers, GraphRuntimeConfig.headers);
-            }
-            if (reqInfo.options !== undefined) {
-                // merge per request headers
-                if (reqInfo.options.headers !== undefined && reqInfo.options.headers !== null) {
-                    headers = Object(common_es5["g" /* extend */])(headers, reqInfo.options.headers);
-                }
-                // add a request body
-                if (reqInfo.options.body !== undefined && reqInfo.options.body !== null) {
-                    requestFragment = Object(common_es5["g" /* extend */])(requestFragment, {
-                        body: reqInfo.options.body,
-                    });
-                }
-            }
-            requestFragment = Object(common_es5["g" /* extend */])(requestFragment, {
-                headers: headers,
-            });
-            return requestFragment;
-        });
-    };
-    GraphBatch.parseResponse = function (requests, graphResponse) {
-        return new Promise(function (resolve) {
-            var parsedResponses = new Array(requests.length).fill(null);
-            for (var i = 0; i < graphResponse.responses.length; ++i) {
-                var response = graphResponse.responses[i];
-                // we create the request id by adding 1 to the index, so we place the response by subtracting one to match
-                // the array of requests and make it easier to map them by index
-                var responseId = parseInt(response.id, 10) - 1;
-                if (response.status === 204) {
-                    parsedResponses[responseId] = new Response();
-                }
-                else {
-                    parsedResponses[responseId] = new Response(JSON.stringify(response.body), response);
-                }
-            }
-            resolve({
-                nextLink: graphResponse.nextLink,
-                responses: parsedResponses,
-            });
-        });
-    };
-    GraphBatch.prototype.executeImpl = function () {
-        var _this = this;
-        logging_es5["a" /* Logger */].write("[" + this.batchId + "] (" + (new Date()).getTime() + ") Executing batch with " + this.requests.length + " requests.", 1 /* Info */);
-        if (this.requests.length < 1) {
-            logging_es5["a" /* Logger */].write("Resolving empty batch.", 1 /* Info */);
-            return Promise.resolve();
-        }
-        var client = new graph_es5_GraphHttpClient();
-        // create a working copy of our requests
-        var requests = this.requests.slice();
-        // this is the root of our promise chain
-        var promise = Promise.resolve();
-        var _loop_1 = function () {
-            var requestsChunk = requests.splice(0, this_1.maxRequests);
-            var batchRequest = {
-                requests: GraphBatch.formatRequests(requestsChunk),
-            };
-            var batchOptions = {
-                body: Object(common_es5["q" /* jsS */])(batchRequest),
-                headers: {
-                    "Accept": "application/json",
-                    "Content-Type": "application/json",
-                },
-                method: "POST",
-            };
-            logging_es5["a" /* Logger */].write("[" + this_1.batchId + "] (" + (new Date()).getTime() + ") Sending batch request.", 1 /* Info */);
-            client.fetch(this_1.batchUrl, batchOptions)
-                .then(function (r) { return r.json(); })
-                .then(function (j) { return GraphBatch.parseResponse(requestsChunk, j); })
-                .then(function (parsedResponse) {
-                logging_es5["a" /* Logger */].write("[" + _this.batchId + "] (" + (new Date()).getTime() + ") Resolving batched requests.", 1 /* Info */);
-                parsedResponse.responses.reduce(function (chain, response, index) {
-                    var request = requestsChunk[index];
-                    logging_es5["a" /* Logger */].write("[" + _this.batchId + "] (" + (new Date()).getTime() + ") Resolving batched request " + request.method + " " + request.url + ".", 0 /* Verbose */);
-                    return chain.then(function (_) { return request.parser.parse(response).then(request.resolve).catch(request.reject); });
-                }, promise);
-            });
-        };
-        var this_1 = this;
-        while (requests.length > 0) {
-            _loop_1();
-        }
-        return promise;
-    };
-    return GraphBatch;
-}(odata_es5["e" /* ODataBatch */]));
-
-var graph_es5_Invitations = /** @class */ (function (_super) {
-    __extends(Invitations, _super);
-    function Invitations() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Create a new Invitation via invitation manager.
-     *
-     * @param invitedUserEmailAddress The email address of the user being invited.
-     * @param inviteRedirectUrl The URL user should be redirected to once the invitation is redeemed.
-     * @param additionalProperties A plain object collection of additional properties you want to set in the invitation
-     */
-    Invitations.prototype.create = function (invitedUserEmailAddress, inviteRedirectUrl, additionalProperties) {
-        if (additionalProperties === void 0) { additionalProperties = {}; }
-        var postBody = Object(common_es5["g" /* extend */])({
-            inviteRedirectUrl: inviteRedirectUrl,
-            invitedUserEmailAddress: invitedUserEmailAddress,
-        }, additionalProperties);
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-            };
-        });
-    };
-    Invitations = __decorate([
-        defaultPath("invitations")
-    ], Invitations);
-    return Invitations;
-}(GraphQueryableCollection));
-
-var graph_es5_Subscriptions = /** @class */ (function (_super) {
-    __extends(Subscriptions, _super);
-    function Subscriptions() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Subscriptions.prototype.getById = function (id) {
-        return new graph_es5_Subscription(this, id);
-    };
-    /**
-     * Create a new Subscription.
-     *
-     * @param changeType Indicates the type of change in the subscribed resource that will raise a notification. The supported values are: created, updated, deleted.
-     * @param notificationUrl The URL of the endpoint that will receive the notifications. This URL must make use of the HTTPS protocol.
-     * @param resource Specifies the resource that will be monitored for changes. Do not include the base URL (https://graph.microsoft.com/v1.0/).
-     * @param expirationDateTime Specifies the date and time when the webhook subscription expires. The time is in UTC.
-     * @param additionalProperties A plain object collection of additional properties you want to set on the new subscription
-     *
-     */
-    Subscriptions.prototype.add = function (changeType, notificationUrl, resource, expirationDateTime, additionalProperties) {
-        var _this = this;
-        if (additionalProperties === void 0) { additionalProperties = {}; }
-        var postBody = Object(common_es5["g" /* extend */])({
-            changeType: changeType,
-            expirationDateTime: expirationDateTime,
-            notificationUrl: notificationUrl,
-            resource: resource,
-        }, additionalProperties);
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                subscription: _this.getById(r.id),
-            };
-        });
-    };
-    Subscriptions = __decorate([
-        defaultPath("subscriptions")
-    ], Subscriptions);
-    return Subscriptions;
-}(GraphQueryableCollection));
-var graph_es5_Subscription = /** @class */ (function (_super) {
-    __extends(Subscription, _super);
-    function Subscription() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Deletes this Subscription
-     */
-    Subscription.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a Subscription
-     *
-     * @param properties Set of properties of this Subscription to update
-     */
-    Subscription.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    return Subscription;
-}(GraphQueryableInstance));
-
-var Security = /** @class */ (function (_super) {
-    __extends(Security, _super);
-    function Security() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Security.prototype, "alerts", {
-        get: function () {
-            return new Alerts(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Security = __decorate([
-        defaultPath("security")
-    ], Security);
-    return Security;
-}(GraphQueryableInstance));
-var Alerts = /** @class */ (function (_super) {
-    __extends(Alerts, _super);
-    function Alerts() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Alerts.prototype.getById = function (id) {
-        return new graph_es5_Alert(this, id);
-    };
-    Alerts = __decorate([
-        defaultPath("alerts")
-    ], Alerts);
-    return Alerts;
-}(GraphQueryableCollection));
-var graph_es5_Alert = /** @class */ (function (_super) {
-    __extends(Alert, _super);
-    function Alert() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-    * Update the properties of an Alert
-    *
-    * @param properties Set of properties of this Alert to update
-    */
-    Alert.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    return Alert;
-}(GraphQueryableInstance));
-
-/**
- * Represents a Sites entity
- */
-var Sites = /** @class */ (function (_super) {
-    __extends(Sites, _super);
-    function Sites() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(Sites.prototype, "root", {
-        /**
-         * Gets the root site collection of the tenant
-         */
-        get: function () {
-            return new GraphSite(this, "root");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Gets a Site instance by id
-     *
-     * @param baseUrl Base url ex: contoso.sharepoint.com
-     * @param relativeUrl Optional relative url ex: /sites/site
-     */
-    Sites.prototype.getById = function (baseUrl, relativeUrl) {
-        var siteUrl = baseUrl;
-        // If a relative URL combine url with : at the right places
-        if (relativeUrl) {
-            siteUrl = this._urlCombine(baseUrl, relativeUrl);
-        }
-        return new GraphSite(this, siteUrl);
-    };
-    /**
-     * Method to make sure the url is encoded as it should with :
-     *
-     */
-    Sites.prototype._urlCombine = function (baseUrl, relativeUrl) {
-        // remove last '/' of base if exists
-        if (baseUrl.lastIndexOf("/") === baseUrl.length - 1) {
-            baseUrl = baseUrl.substring(0, baseUrl.length - 1);
-        }
-        // remove '/' at 0
-        if (relativeUrl.charAt(0) === "/") {
-            relativeUrl = relativeUrl.substring(1, relativeUrl.length);
-        }
-        // remove last '/' of next if exists
-        if (relativeUrl.lastIndexOf("/") === relativeUrl.length - 1) {
-            relativeUrl = relativeUrl.substring(0, relativeUrl.length - 1);
-        }
-        return baseUrl + ":/" + relativeUrl + ":";
-    };
-    Sites = __decorate([
-        defaultPath("sites")
-    ], Sites);
-    return Sites;
-}(GraphQueryableInstance));
-/**
- * Describes a Site object
- *
- */
-var GraphSite = /** @class */ (function (_super) {
-    __extends(GraphSite, _super);
-    function GraphSite() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(GraphSite.prototype, "columns", {
-        get: function () {
-            return new GraphColumns(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphSite.prototype, "contentTypes", {
-        get: function () {
-            return new GraphContentTypes(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphSite.prototype, "drive", {
-        get: function () {
-            return new Drive(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphSite.prototype, "drives", {
-        get: function () {
-            return new Drives(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphSite.prototype, "lists", {
-        get: function () {
-            return new graph_es5_GraphLists(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphSite.prototype, "sites", {
-        get: function () {
-            return new Sites(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return GraphSite;
-}(GraphQueryableInstance));
-/**
-* Describes a collection of Content Type objects
-*
-*/
-var GraphContentTypes = /** @class */ (function (_super) {
-    __extends(GraphContentTypes, _super);
-    function GraphContentTypes() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a Content Type instance by id
-     *
-     * @param id Content Type id
-     */
-    GraphContentTypes.prototype.getById = function (id) {
-        return new GraphContentType(this, id);
-    };
-    GraphContentTypes = __decorate([
-        defaultPath("contenttypes")
-    ], GraphContentTypes);
-    return GraphContentTypes;
-}(GraphQueryableCollection));
-/**
- * Describes a Content Type object
- *
- */
-var GraphContentType = /** @class */ (function (_super) {
-    __extends(GraphContentType, _super);
-    function GraphContentType() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return GraphContentType;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Column Definition objects
- *
- */
-var GraphColumns = /** @class */ (function (_super) {
-    __extends(GraphColumns, _super);
-    function GraphColumns() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a Column instance by id
-     *
-     * @param id Column id
-     */
-    GraphColumns.prototype.getById = function (id) {
-        return new GraphColumn(this, id);
-    };
-    GraphColumns = __decorate([
-        defaultPath("columns")
-    ], GraphColumns);
-    return GraphColumns;
-}(GraphQueryableCollection));
-/**
- * Describes a Column Definition object
- *
- */
-var GraphColumn = /** @class */ (function (_super) {
-    __extends(GraphColumn, _super);
-    function GraphColumn() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(GraphColumn.prototype, "columnLinks", {
-        get: function () {
-            return new GraphColumnLinks(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return GraphColumn;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Column Link objects
- *
- */
-var GraphColumnLinks = /** @class */ (function (_super) {
-    __extends(GraphColumnLinks, _super);
-    function GraphColumnLinks() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a Column Link instance by id
-     *
-     * @param id Column link id
-     */
-    GraphColumnLinks.prototype.getById = function (id) {
-        return new GraphColumnLink(this, id);
-    };
-    GraphColumnLinks = __decorate([
-        defaultPath("columnlinks")
-    ], GraphColumnLinks);
-    return GraphColumnLinks;
-}(GraphQueryableCollection));
-/**
- * Describes a Column Link object
- *
- */
-var GraphColumnLink = /** @class */ (function (_super) {
-    __extends(GraphColumnLink, _super);
-    function GraphColumnLink() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return GraphColumnLink;
-}(GraphQueryableInstance));
-/**
-* Describes a collection of Column definitions objects
-*/
-var graph_es5_GraphLists = /** @class */ (function (_super) {
-    __extends(GraphLists, _super);
-    function GraphLists() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a List instance by id
-     *
-     * @param id List id
-     */
-    GraphLists.prototype.getById = function (id) {
-        return new GraphList(this, id);
-    };
-    /**
-    * Create a new List
-    * @param displayName The display name of the List
-    * @param list List information. Which template, if hidden, and contentTypesEnabled.
-    * @param additionalProperties A plain object collection of additional properties you want to set in list
-    *
-    * */
-    GraphLists.prototype.create = function (displayName, list, additionalProperties) {
-        var _this = this;
-        if (additionalProperties === void 0) { additionalProperties = {}; }
-        var postBody = Object(common_es5["g" /* extend */])({
-            displayName: displayName,
-            list: list,
-        }, additionalProperties);
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                list: new GraphList(_this, r.id),
-            };
-        });
-    };
-    GraphLists = __decorate([
-        defaultPath("lists")
-    ], GraphLists);
-    return GraphLists;
-}(GraphQueryableCollection));
-/**
- * Describes a List object
- *
- */
-var GraphList = /** @class */ (function (_super) {
-    __extends(GraphList, _super);
-    function GraphList() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(GraphList.prototype, "columns", {
-        get: function () {
-            return new GraphColumns(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphList.prototype, "contentTypes", {
-        get: function () {
-            return new GraphContentTypes(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphList.prototype, "drive", {
-        get: function () {
-            return new Drive(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphList.prototype, "items", {
-        get: function () {
-            return new graph_es5_GraphItems(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return GraphList;
-}(GraphQueryableInstance));
-/**
-* Describes a collection of Item objects
-*/
-var graph_es5_GraphItems = /** @class */ (function (_super) {
-    __extends(GraphItems, _super);
-    function GraphItems() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Gets a List Item instance by id
-     *
-     * @param id List item id
-     */
-    GraphItems.prototype.getById = function (id) {
-        return new graph_es5_GraphItem(this, id);
-    };
-    /**
-    * Create a new Item
-    * @param displayName The display name of the List
-    * @param list List information. Which template, if hidden, and contentTypesEnabled.
-    * @param additionalProperties A plain object collection of additional properties you want to set in list
-    *
-    * */
-    GraphItems.prototype.create = function (fields) {
-        var _this = this;
-        var postBody = {
-            fields: fields,
-        };
-        return this.postCore({
-            body: Object(common_es5["q" /* jsS */])(postBody),
-        }).then(function (r) {
-            return {
-                data: r,
-                item: new graph_es5_GraphItem(_this, r.id),
-            };
-        });
-    };
-    GraphItems = __decorate([
-        defaultPath("items")
-    ], GraphItems);
-    return GraphItems;
-}(GraphQueryableCollection));
-/**
- * Describes an Item object
- *
- */
-var graph_es5_GraphItem = /** @class */ (function (_super) {
-    __extends(GraphItem, _super);
-    function GraphItem() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(GraphItem.prototype, "driveItem", {
-        get: function () {
-            return new graph_es5_DriveItem(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphItem.prototype, "fields", {
-        get: function () {
-            return new GraphFields(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphItem.prototype, "versions", {
-        get: function () {
-            return new GraphVersions(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    /**
-     * Deletes this item
-     */
-    GraphItem.prototype.delete = function () {
-        return this.deleteCore();
-    };
-    /**
-     * Update the properties of a item object
-     *
-     * @param properties Set of properties of this item to update
-     */
-    GraphItem.prototype.update = function (properties) {
-        return this.patchCore({
-            body: Object(common_es5["q" /* jsS */])(properties),
-        });
-    };
-    return GraphItem;
-}(GraphQueryableInstance));
-/**
- * Describes a collection of Field objects
- *
- */
-var GraphFields = /** @class */ (function (_super) {
-    __extends(GraphFields, _super);
-    function GraphFields() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    GraphFields = __decorate([
-        defaultPath("fields")
-    ], GraphFields);
-    return GraphFields;
-}(GraphQueryableCollection));
-/**
- * Describes a collection of Version objects
- *
- */
-var GraphVersions = /** @class */ (function (_super) {
-    __extends(GraphVersions, _super);
-    function GraphVersions() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-    * Gets a Version instance by id
-    *
-    * @param id Version id
-    */
-    GraphVersions.prototype.getById = function (id) {
-        return new Version(this, id);
-    };
-    GraphVersions = __decorate([
-        defaultPath("versions")
-    ], GraphVersions);
-    return GraphVersions;
-}(GraphQueryableCollection));
-/**
- * Describes a Version object
- *
- */
-var Version = /** @class */ (function (_super) {
-    __extends(Version, _super);
-    function Version() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    return Version;
-}(GraphQueryableInstance));
-
-var GraphRest = /** @class */ (function (_super) {
-    __extends(GraphRest, _super);
-    function GraphRest(baseUrl, path) {
-        return _super.call(this, baseUrl, path) || this;
-    }
-    Object.defineProperty(GraphRest.prototype, "directoryObjects", {
-        get: function () {
-            return new graph_es5_DirectoryObjects(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "groups", {
-        get: function () {
-            return new graph_es5_Groups(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "teams", {
-        get: function () {
-            return new Teams(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "me", {
-        get: function () {
-            return new graph_es5_User(this, "me");
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "planner", {
-        get: function () {
-            return new Planner(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "users", {
-        get: function () {
-            return new Users(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "invitations", {
-        get: function () {
-            return new graph_es5_Invitations(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "subscriptions", {
-        get: function () {
-            return new graph_es5_Subscriptions(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    GraphRest.prototype.createBatch = function () {
-        return new graph_es5_GraphBatch();
-    };
-    GraphRest.prototype.setup = function (config) {
-        setup(config);
-    };
-    Object.defineProperty(GraphRest.prototype, "security", {
-        get: function () {
-            return new Security(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(GraphRest.prototype, "sites", {
-        get: function () {
-            return new Sites(this);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return GraphRest;
-}(graph_es5_GraphQueryable));
-var graph = new GraphRest("v1.0");
-
-
-
-// EXTERNAL MODULE: ./node_modules/@pnp/sp/dist/sp.es5.js
-var sp_es5 = __webpack_require__(19);
-
-// CONCATENATED MODULE: ./node_modules/@pnp/sp-addinhelpers/dist/sp-addinhelpers.es5.js
-/**
- * @license
- * v1.3.3
- * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
- * Copyright (c) 2019 Microsoft
- * docs: https://pnp.github.io/pnpjs/
- * source: https://github.com/pnp/pnpjs
- * bugs: https://github.com/pnp/pnpjs/issues
- */
-
-
-
-/**
- * Makes requests using the SP.RequestExecutor library.
- */
-var sp_addinhelpers_es5_SPRequestExecutorClient = /** @class */ (function () {
-    function SPRequestExecutorClient() {
-        /**
-         * Converts a SharePoint REST API response to a fetch API response.
-         */
-        this.convertToResponse = function (spResponse) {
-            var responseHeaders = new Headers();
-            if (spResponse.headers !== undefined) {
-                for (var h in spResponse.headers) {
-                    if (spResponse.headers[h]) {
-                        responseHeaders.append(h, spResponse.headers[h]);
-                    }
-                }
-            }
-            // Cannot have an empty string body when creating a Response with status 204
-            var body = spResponse.statusCode === 204 ? null : spResponse.body;
-            return new Response(body, {
-                headers: responseHeaders,
-                status: spResponse.statusCode,
-                statusText: spResponse.statusText,
-            });
-        };
-    }
-    /**
-     * Fetches a URL using the SP.RequestExecutor library.
-     */
-    SPRequestExecutorClient.prototype.fetch = function (url, options) {
-        var _this = this;
-        if (SP === undefined || SP.RequestExecutor === undefined) {
-            throw Error("SP.RequestExecutor is undefined. Load the SP.RequestExecutor.js library (/_layouts/15/SP.RequestExecutor.js) before loading the PnP JS Core library.");
-        }
-        var addinWebUrl = url.substring(0, url.indexOf("/_api")), executor = new SP.RequestExecutor(addinWebUrl);
-        var headers = {}, iterator, temp;
-        if (options.headers && options.headers instanceof Headers) {
-            iterator = options.headers.entries();
-            temp = iterator.next();
-            while (!temp.done) {
-                headers[temp.value[0]] = temp.value[1];
-                temp = iterator.next();
-            }
-        }
-        else {
-            headers = options.headers;
-        }
-        return new Promise(function (resolve, reject) {
-            var requestOptions = {
-                error: function (error) {
-                    reject(_this.convertToResponse(error));
-                },
-                headers: headers,
-                method: options.method,
-                success: function (response) {
-                    resolve(_this.convertToResponse(response));
-                },
-                url: url,
-            };
-            if (options.body) {
-                requestOptions = Object(common_es5["g" /* extend */])(requestOptions, { body: options.body });
-            }
-            else {
-                requestOptions = Object(common_es5["g" /* extend */])(requestOptions, { binaryStringRequestBody: true });
-            }
-            executor.executeAsync(requestOptions);
-        });
-    };
-    return SPRequestExecutorClient;
-}());
-
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
-
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
-
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var sp_addinhelpers_es5_extendStatics = function(d, b) {
-    sp_addinhelpers_es5_extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return sp_addinhelpers_es5_extendStatics(d, b);
-};
-
-function sp_addinhelpers_es5___extends(d, b) {
-    sp_addinhelpers_es5_extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-var sp_addinhelpers_es5_SPRestAddIn = /** @class */ (function (_super) {
-    sp_addinhelpers_es5___extends(SPRestAddIn, _super);
-    function SPRestAddIn() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    /**
-     * Begins a cross-domain, host site scoped REST request, for use in add-in webs
-     *
-     * @param addInWebUrl The absolute url of the add-in web
-     * @param hostWebUrl The absolute url of the host web
-     */
-    SPRestAddIn.prototype.crossDomainSite = function (addInWebUrl, hostWebUrl) {
-        return this._cdImpl(sp_es5["b" /* Site */], addInWebUrl, hostWebUrl, "site");
-    };
-    /**
-     * Begins a cross-domain, host web scoped REST request, for use in add-in webs
-     *
-     * @param addInWebUrl The absolute url of the add-in web
-     * @param hostWebUrl The absolute url of the host web
-     */
-    SPRestAddIn.prototype.crossDomainWeb = function (addInWebUrl, hostWebUrl) {
-        return this._cdImpl(sp_es5["c" /* Web */], addInWebUrl, hostWebUrl, "web");
-    };
-    /**
-     * Implements the creation of cross domain REST urls
-     *
-     * @param factory The constructor of the object to create Site | Web
-     * @param addInWebUrl The absolute url of the add-in web
-     * @param hostWebUrl The absolute url of the host web
-     * @param urlPart String part to append to the url "site" | "web"
-     */
-    SPRestAddIn.prototype._cdImpl = function (factory, addInWebUrl, hostWebUrl, urlPart) {
-        if (!Object(common_es5["p" /* isUrlAbsolute */])(addInWebUrl)) {
-            throw Error("The addInWebUrl parameter must be an absolute url.");
-        }
-        if (!Object(common_es5["p" /* isUrlAbsolute */])(hostWebUrl)) {
-            throw Error("The hostWebUrl parameter must be an absolute url.");
-        }
-        var url = Object(common_es5["e" /* combine */])(addInWebUrl, "_api/SP.AppContextSite(@target)");
-        var instance = new factory(url, urlPart);
-        instance.query.set("@target", "'" + encodeURIComponent(hostWebUrl) + "'");
-        return instance.configure(this._options);
-    };
-    return SPRestAddIn;
-}(sp_es5["a" /* SPRest */]));
-var sp = new sp_addinhelpers_es5_SPRestAddIn();
-
-
-
-// CONCATENATED MODULE: ./node_modules/@pnp/pnpjs/dist/pnpjs.es5.js
-/* unused harmony export util */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return sp$1; });
-/* unused harmony export graph */
-/* unused harmony export storage */
-/* unused harmony export config */
-/* unused harmony export log */
-/* unused harmony export setup */
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["a" /* AdalClient */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["v" /* objectToMap */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["s" /* mergeMaps */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["d" /* RuntimeConfig */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["r" /* mergeHeaders */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["t" /* mergeOptions */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["b" /* FetchClient */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["c" /* PnPClientStorage */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["i" /* getCtxCallback */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["f" /* dateAdd */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["e" /* combine */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["l" /* getRandomString */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["j" /* getGUID */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["o" /* isFunc */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["u" /* objectDefinedNotNull */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["n" /* isArray */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["g" /* extend */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["p" /* isUrlAbsolute */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["x" /* stringIsNullOrEmpty */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["h" /* getAttrValueFromString */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["w" /* sanitizeGuid */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["q" /* jsS */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["m" /* hOP */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["k" /* getHashCode */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return logging_es5["a" /* Logger */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return config_store_es5_Settings; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return config_store_es5_CachingConfigurationProvider; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return SPListConfigurationProvider; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphRest; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GroupType; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Group; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Groups; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphBatch; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphQueryable; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphQueryableCollection; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphQueryableInstance; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphQueryableSearchableCollection; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Teams; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Team; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Channels; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Channel; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Apps; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Tabs; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Tab; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphEndpoints; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return OneNote; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Notebooks; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Notebook; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Sections; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Section; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Pages; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Contacts; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Contact; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_ContactFolders; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_ContactFolder; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Drives; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Drive; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Root; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DriveItems; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_DriveItem; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Children; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DriveList; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Recent; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return SharedWithMe; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DriveSearch; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Thumbnails; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Planner; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Plans; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Plan; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Tasks; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Task; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Buckets; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Bucket; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Details; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return DirectoryObjectType; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_DirectoryObjects; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_DirectoryObject; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Invitations; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Subscriptions; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Subscription; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Security; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Alerts; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_Alert; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return People; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Sites; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphSite; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphContentTypes; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphContentType; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumns; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumn; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumnLinks; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphColumnLink; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphLists; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphList; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphItems; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return graph_es5_GraphItem; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphFields; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return GraphVersions; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Version; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Insights; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Trending; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Used; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return Shared; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["a" /* SPRest */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["b" /* Site */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["c" /* Web */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["c" /* CachingOptions */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["g" /* ODataParserBase */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["f" /* ODataDefaultParser */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["i" /* TextParser */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["a" /* BlobParser */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["d" /* JSONParser */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["b" /* BufferParser */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["h" /* ODataQueryable */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return odata_es5["e" /* ODataBatch */]; });
-/**
- * @license
- * v1.3.3
- * MIT (https://github.com/pnp/pnpjs/blob/master/LICENSE)
- * Copyright (c) 2019 Microsoft
- * docs: https://pnp.github.io/pnpjs/
- * source: https://github.com/pnp/pnpjs
- * bugs: https://github.com/pnp/pnpjs/issues
- */
-
-
-
-
-
-
-
-
-
-
-
-
-function pnpjs_es5_setup(config) {
-    common_es5["d" /* RuntimeConfig */].extend(config);
-}
-
-/**
- * Utility methods
- */
-var util = {
-    combine: common_es5["e" /* combine */],
-    dateAdd: common_es5["f" /* dateAdd */],
-    extend: common_es5["g" /* extend */],
-    getAttrValueFromString: common_es5["h" /* getAttrValueFromString */],
-    getCtxCallback: common_es5["i" /* getCtxCallback */],
-    getGUID: common_es5["j" /* getGUID */],
-    getRandomString: common_es5["l" /* getRandomString */],
-    isArray: common_es5["n" /* isArray */],
-    isFunc: common_es5["o" /* isFunc */],
-    isUrlAbsolute: common_es5["p" /* isUrlAbsolute */],
-    objectDefinedNotNull: common_es5["u" /* objectDefinedNotNull */],
-    sanitizeGuid: common_es5["w" /* sanitizeGuid */],
-    stringIsNullOrEmpty: common_es5["x" /* stringIsNullOrEmpty */],
-};
-/**
- * Provides access to the SharePoint REST interface
- */
-var sp$1 = sp;
-/**
- * Provides access to the Microsoft Graph REST interface
- */
-var graph$1 = graph;
-/**
- * Provides access to local and session storage
- */
-var storage = new common_es5["c" /* PnPClientStorage */]();
-/**
- * Global configuration instance to which providers can be added
- */
-var pnpjs_es5_config = new config_store_es5_Settings();
-/**
- * Global logging instance to which subscribers can be registered and messages written
- */
-var log = logging_es5["a" /* Logger */];
-/**
- * Allows for the configuration of the library
- */
-var setup$1 = pnpjs_es5_setup;
-// /**
-//  * Expose a subset of classes from the library for public consumption
-//  */
-// creating this class instead of directly assigning to default fixes issue #116
-var Def = {
-    /**
-     * Global configuration instance to which providers can be added
-     */
-    config: pnpjs_es5_config,
-    /**
-     * Provides access to the Microsoft Graph REST interface
-     */
-    graph: graph$1,
-    /**
-     * Global logging instance to which subscribers can be registered and messages written
-     */
-    log: log,
-    /**
-     * Provides access to local and session storage
-     */
-    setup: setup$1,
-    /**
-     * Provides access to the REST interface
-     */
-    sp: sp$1,
-    /**
-     * Provides access to local and session storage
-     */
-    storage: storage,
-    /**
-     * Utility methods
-     */
-    util: util,
-};
-
-/* harmony default export */ var pnpjs_es5 = __webpack_exports__["a"] = (Def);
-
-
-
-/***/ }),
-/* 24 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 /* tslint:disable:no-string-literal */
-var object_1 = __webpack_require__(32);
+var object_1 = __webpack_require__(39);
 /** An instance of EventGroup allows anything with a handle to it to trigger events on it.
  *  If the target is an HTMLElement, the event will be attached to the element and can be
  *  triggered as usual (like clicking for onclick).
@@ -18896,17 +19295,17 @@ exports.EventGroup = EventGroup;
 
 
 /***/ }),
-/* 25 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(12);
+var Stylesheet_1 = __webpack_require__(14);
 var kebabRules_1 = __webpack_require__(128);
 var prefixRules_1 = __webpack_require__(129);
 var provideUnits_1 = __webpack_require__(131);
-var rtlifyRules_1 = __webpack_require__(59);
+var rtlifyRules_1 = __webpack_require__(63);
 var DISPLAY_NAME = 'displayName';
 function getDisplayName(rules) {
     var rootStyle = rules && rules['&'];
@@ -19094,7 +19493,7 @@ exports.styleToClassName = styleToClassName;
 
 
 /***/ }),
-/* 26 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19104,12 +19503,12 @@ var tslib_1 = __webpack_require__(0);
 var AnimationStyles_1 = __webpack_require__(172);
 exports.AnimationStyles = AnimationStyles_1.AnimationStyles;
 exports.AnimationVariables = AnimationStyles_1.AnimationVariables;
-var DefaultPalette_1 = __webpack_require__(38);
+var DefaultPalette_1 = __webpack_require__(45);
 exports.DefaultPalette = DefaultPalette_1.DefaultPalette;
-var DefaultFontStyles_1 = __webpack_require__(71);
+var DefaultFontStyles_1 = __webpack_require__(75);
 exports.DefaultFontStyles = DefaultFontStyles_1.DefaultFontStyles;
 exports.registerDefaultFontFaces = DefaultFontStyles_1.registerDefaultFontFaces;
-var fonts_1 = __webpack_require__(72);
+var fonts_1 = __webpack_require__(76);
 exports.FontSizes = fonts_1.FontSizes;
 exports.FontWeights = fonts_1.FontWeights;
 exports.IconFontSizes = fonts_1.IconFontSizes;
@@ -19130,20 +19529,20 @@ exports.loadTheme = theme_1.loadTheme;
 exports.createTheme = theme_1.createTheme;
 exports.registerOnThemeChangeCallback = theme_1.registerOnThemeChangeCallback;
 exports.removeOnThemeChangeCallback = theme_1.removeOnThemeChangeCallback;
-tslib_1.__exportStar(__webpack_require__(73), exports);
+tslib_1.__exportStar(__webpack_require__(77), exports);
 tslib_1.__exportStar(__webpack_require__(178), exports);
-tslib_1.__exportStar(__webpack_require__(74), exports);
+tslib_1.__exportStar(__webpack_require__(78), exports);
 
 
 /***/ }),
-/* 27 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var ContextualMenuItemWrapper = /** @class */ (function (_super) {
     tslib_1.__extends(ContextualMenuItemWrapper, _super);
     function ContextualMenuItemWrapper() {
@@ -19195,16 +19594,16 @@ exports.ContextualMenuItemWrapper = ContextualMenuItemWrapper;
 
 
 /***/ }),
-/* 28 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var BaseButton_1 = __webpack_require__(14);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var BaseButton_1 = __webpack_require__(16);
+var Utilities_1 = __webpack_require__(2);
 var DefaultButton_styles_1 = __webpack_require__(227);
 var DefaultButton = /** @class */ (function (_super) {
     tslib_1.__extends(DefaultButton, _super);
@@ -19229,14 +19628,14 @@ exports.DefaultButton = DefaultButton;
 
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
     var buttonHighContrastFocus = {
         left: -2,
@@ -19303,13 +19702,1051 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
 
 
 /***/ }),
-/* 30 */
+/* 33 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_30__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_33__;
 
 /***/ }),
-/* 31 */
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/** @license React v16.8.6
+ * react-is.development.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+
+
+if (true) {
+  (function() {
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+var hasSymbol = typeof Symbol === 'function' && Symbol.for;
+
+var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
+var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
+var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
+var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
+var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
+var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
+var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;
+var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
+var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
+var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
+var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
+var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
+var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
+
+function isValidElementType(type) {
+  return typeof type === 'string' || typeof type === 'function' ||
+  // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
+  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);
+}
+
+/**
+ * Forked from fbjs/warning:
+ * https://github.com/facebook/fbjs/blob/e66ba20ad5be433eb54423f2b097d829324d9de6/packages/fbjs/src/__forks__/warning.js
+ *
+ * Only change is we use console.warn instead of console.error,
+ * and do nothing when 'console' is not supported.
+ * This really simplifies the code.
+ * ---
+ * Similar to invariant but only logs a warning if the condition is not met.
+ * This can be used to log issues in development environments in critical
+ * paths. Removing the logging code for production environments will keep the
+ * same logic and follow the same code paths.
+ */
+
+var lowPriorityWarning = function () {};
+
+{
+  var printWarning = function (format) {
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    var argIndex = 0;
+    var message = 'Warning: ' + format.replace(/%s/g, function () {
+      return args[argIndex++];
+    });
+    if (typeof console !== 'undefined') {
+      console.warn(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+
+  lowPriorityWarning = function (condition, format) {
+    if (format === undefined) {
+      throw new Error('`lowPriorityWarning(condition, format, ...args)` requires a warning ' + 'message argument');
+    }
+    if (!condition) {
+      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+        args[_key2 - 2] = arguments[_key2];
+      }
+
+      printWarning.apply(undefined, [format].concat(args));
+    }
+  };
+}
+
+var lowPriorityWarning$1 = lowPriorityWarning;
+
+function typeOf(object) {
+  if (typeof object === 'object' && object !== null) {
+    var $$typeof = object.$$typeof;
+    switch ($$typeof) {
+      case REACT_ELEMENT_TYPE:
+        var type = object.type;
+
+        switch (type) {
+          case REACT_ASYNC_MODE_TYPE:
+          case REACT_CONCURRENT_MODE_TYPE:
+          case REACT_FRAGMENT_TYPE:
+          case REACT_PROFILER_TYPE:
+          case REACT_STRICT_MODE_TYPE:
+          case REACT_SUSPENSE_TYPE:
+            return type;
+          default:
+            var $$typeofType = type && type.$$typeof;
+
+            switch ($$typeofType) {
+              case REACT_CONTEXT_TYPE:
+              case REACT_FORWARD_REF_TYPE:
+              case REACT_PROVIDER_TYPE:
+                return $$typeofType;
+              default:
+                return $$typeof;
+            }
+        }
+      case REACT_LAZY_TYPE:
+      case REACT_MEMO_TYPE:
+      case REACT_PORTAL_TYPE:
+        return $$typeof;
+    }
+  }
+
+  return undefined;
+}
+
+// AsyncMode is deprecated along with isAsyncMode
+var AsyncMode = REACT_ASYNC_MODE_TYPE;
+var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
+var ContextConsumer = REACT_CONTEXT_TYPE;
+var ContextProvider = REACT_PROVIDER_TYPE;
+var Element = REACT_ELEMENT_TYPE;
+var ForwardRef = REACT_FORWARD_REF_TYPE;
+var Fragment = REACT_FRAGMENT_TYPE;
+var Lazy = REACT_LAZY_TYPE;
+var Memo = REACT_MEMO_TYPE;
+var Portal = REACT_PORTAL_TYPE;
+var Profiler = REACT_PROFILER_TYPE;
+var StrictMode = REACT_STRICT_MODE_TYPE;
+var Suspense = REACT_SUSPENSE_TYPE;
+
+var hasWarnedAboutDeprecatedIsAsyncMode = false;
+
+// AsyncMode should be deprecated
+function isAsyncMode(object) {
+  {
+    if (!hasWarnedAboutDeprecatedIsAsyncMode) {
+      hasWarnedAboutDeprecatedIsAsyncMode = true;
+      lowPriorityWarning$1(false, 'The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
+    }
+  }
+  return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
+}
+function isConcurrentMode(object) {
+  return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
+}
+function isContextConsumer(object) {
+  return typeOf(object) === REACT_CONTEXT_TYPE;
+}
+function isContextProvider(object) {
+  return typeOf(object) === REACT_PROVIDER_TYPE;
+}
+function isElement(object) {
+  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+}
+function isForwardRef(object) {
+  return typeOf(object) === REACT_FORWARD_REF_TYPE;
+}
+function isFragment(object) {
+  return typeOf(object) === REACT_FRAGMENT_TYPE;
+}
+function isLazy(object) {
+  return typeOf(object) === REACT_LAZY_TYPE;
+}
+function isMemo(object) {
+  return typeOf(object) === REACT_MEMO_TYPE;
+}
+function isPortal(object) {
+  return typeOf(object) === REACT_PORTAL_TYPE;
+}
+function isProfiler(object) {
+  return typeOf(object) === REACT_PROFILER_TYPE;
+}
+function isStrictMode(object) {
+  return typeOf(object) === REACT_STRICT_MODE_TYPE;
+}
+function isSuspense(object) {
+  return typeOf(object) === REACT_SUSPENSE_TYPE;
+}
+
+exports.typeOf = typeOf;
+exports.AsyncMode = AsyncMode;
+exports.ConcurrentMode = ConcurrentMode;
+exports.ContextConsumer = ContextConsumer;
+exports.ContextProvider = ContextProvider;
+exports.Element = Element;
+exports.ForwardRef = ForwardRef;
+exports.Fragment = Fragment;
+exports.Lazy = Lazy;
+exports.Memo = Memo;
+exports.Portal = Portal;
+exports.Profiler = Profiler;
+exports.StrictMode = StrictMode;
+exports.Suspense = Suspense;
+exports.isValidElementType = isValidElementType;
+exports.isAsyncMode = isAsyncMode;
+exports.isConcurrentMode = isConcurrentMode;
+exports.isContextConsumer = isContextConsumer;
+exports.isContextProvider = isContextProvider;
+exports.isElement = isElement;
+exports.isForwardRef = isForwardRef;
+exports.isFragment = isFragment;
+exports.isLazy = isLazy;
+exports.isMemo = isMemo;
+exports.isPortal = isPortal;
+exports.isProfiler = isProfiler;
+exports.isStrictMode = isStrictMode;
+exports.isSuspense = isSuspense;
+  })();
+}
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var ReactIs = __webpack_require__(20);
+var assign = __webpack_require__(36);
+
+var ReactPropTypesSecret = __webpack_require__(21);
+var checkPropTypes = __webpack_require__(37);
+
+var has = Function.call.bind(Object.prototype.hasOwnProperty);
+var printWarning = function() {};
+
+if (true) {
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+
+function emptyFunctionThatReturnsNull() {
+  return null;
+}
+
+module.exports = function(isValidElement, throwOnDirectAccess) {
+  /* global Symbol */
+  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
+
+  /**
+   * Returns the iterator method function contained on the iterable object.
+   *
+   * Be sure to invoke the function with the iterable as context:
+   *
+   *     var iteratorFn = getIteratorFn(myIterable);
+   *     if (iteratorFn) {
+   *       var iterator = iteratorFn.call(myIterable);
+   *       ...
+   *     }
+   *
+   * @param {?object} maybeIterable
+   * @return {?function}
+   */
+  function getIteratorFn(maybeIterable) {
+    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
+    if (typeof iteratorFn === 'function') {
+      return iteratorFn;
+    }
+  }
+
+  /**
+   * Collection of methods that allow declaration and validation of props that are
+   * supplied to React components. Example usage:
+   *
+   *   var Props = require('ReactPropTypes');
+   *   var MyArticle = React.createClass({
+   *     propTypes: {
+   *       // An optional string prop named "description".
+   *       description: Props.string,
+   *
+   *       // A required enum prop named "category".
+   *       category: Props.oneOf(['News','Photos']).isRequired,
+   *
+   *       // A prop named "dialog" that requires an instance of Dialog.
+   *       dialog: Props.instanceOf(Dialog).isRequired
+   *     },
+   *     render: function() { ... }
+   *   });
+   *
+   * A more formal specification of how these methods are used:
+   *
+   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
+   *   decl := ReactPropTypes.{type}(.isRequired)?
+   *
+   * Each and every declaration produces a function with the same signature. This
+   * allows the creation of custom validation functions. For example:
+   *
+   *  var MyLink = React.createClass({
+   *    propTypes: {
+   *      // An optional string or URI prop named "href".
+   *      href: function(props, propName, componentName) {
+   *        var propValue = props[propName];
+   *        if (propValue != null && typeof propValue !== 'string' &&
+   *            !(propValue instanceof URI)) {
+   *          return new Error(
+   *            'Expected a string or an URI for ' + propName + ' in ' +
+   *            componentName
+   *          );
+   *        }
+   *      }
+   *    },
+   *    render: function() {...}
+   *  });
+   *
+   * @internal
+   */
+
+  var ANONYMOUS = '<<anonymous>>';
+
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
+  var ReactPropTypes = {
+    array: createPrimitiveTypeChecker('array'),
+    bool: createPrimitiveTypeChecker('boolean'),
+    func: createPrimitiveTypeChecker('function'),
+    number: createPrimitiveTypeChecker('number'),
+    object: createPrimitiveTypeChecker('object'),
+    string: createPrimitiveTypeChecker('string'),
+    symbol: createPrimitiveTypeChecker('symbol'),
+
+    any: createAnyTypeChecker(),
+    arrayOf: createArrayOfTypeChecker,
+    element: createElementTypeChecker(),
+    elementType: createElementTypeTypeChecker(),
+    instanceOf: createInstanceTypeChecker,
+    node: createNodeChecker(),
+    objectOf: createObjectOfTypeChecker,
+    oneOf: createEnumTypeChecker,
+    oneOfType: createUnionTypeChecker,
+    shape: createShapeTypeChecker,
+    exact: createStrictShapeTypeChecker,
+  };
+
+  /**
+   * inlined Object.is polyfill to avoid requiring consumers ship their own
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+   */
+  /*eslint-disable no-self-compare*/
+  function is(x, y) {
+    // SameValue algorithm
+    if (x === y) {
+      // Steps 1-5, 7-10
+      // Steps 6.b-6.e: +0 != -0
+      return x !== 0 || 1 / x === 1 / y;
+    } else {
+      // Step 6.a: NaN == NaN
+      return x !== x && y !== y;
+    }
+  }
+  /*eslint-enable no-self-compare*/
+
+  /**
+   * We use an Error-like object for backward compatibility as people may call
+   * PropTypes directly and inspect their output. However, we don't use real
+   * Errors anymore. We don't inspect their stack anyway, and creating them
+   * is prohibitively expensive if they are created too often, such as what
+   * happens in oneOfType() for any type before the one that matched.
+   */
+  function PropTypeError(message) {
+    this.message = message;
+    this.stack = '';
+  }
+  // Make `instanceof Error` still work for returned errors.
+  PropTypeError.prototype = Error.prototype;
+
+  function createChainableTypeChecker(validate) {
+    if (true) {
+      var manualPropTypeCallCache = {};
+      var manualPropTypeWarningCount = 0;
+    }
+    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
+      componentName = componentName || ANONYMOUS;
+      propFullName = propFullName || propName;
+
+      if (secret !== ReactPropTypesSecret) {
+        if (throwOnDirectAccess) {
+          // New behavior only for users of `prop-types` package
+          var err = new Error(
+            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+            'Use `PropTypes.checkPropTypes()` to call them. ' +
+            'Read more at http://fb.me/use-check-prop-types'
+          );
+          err.name = 'Invariant Violation';
+          throw err;
+        } else if ("dev" !== 'production' && typeof console !== 'undefined') {
+          // Old behavior for people using React.PropTypes
+          var cacheKey = componentName + ':' + propName;
+          if (
+            !manualPropTypeCallCache[cacheKey] &&
+            // Avoid spamming the console because they are often not actionable except for lib authors
+            manualPropTypeWarningCount < 3
+          ) {
+            printWarning(
+              'You are manually calling a React.PropTypes validation ' +
+              'function for the `' + propFullName + '` prop on `' + componentName  + '`. This is deprecated ' +
+              'and will throw in the standalone `prop-types` package. ' +
+              'You may be seeing this warning due to a third-party PropTypes ' +
+              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
+            );
+            manualPropTypeCallCache[cacheKey] = true;
+            manualPropTypeWarningCount++;
+          }
+        }
+      }
+      if (props[propName] == null) {
+        if (isRequired) {
+          if (props[propName] === null) {
+            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
+          }
+          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
+        }
+        return null;
+      } else {
+        return validate(props, propName, componentName, location, propFullName);
+      }
+    }
+
+    var chainedCheckType = checkType.bind(null, false);
+    chainedCheckType.isRequired = checkType.bind(null, true);
+
+    return chainedCheckType;
+  }
+
+  function createPrimitiveTypeChecker(expectedType) {
+    function validate(props, propName, componentName, location, propFullName, secret) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== expectedType) {
+        // `propValue` being instance of, say, date/regexp, pass the 'object'
+        // check, but we can offer a more precise error message here rather than
+        // 'of type `object`'.
+        var preciseType = getPreciseType(propValue);
+
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createAnyTypeChecker() {
+    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
+  }
+
+  function createArrayOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
+      }
+      var propValue = props[propName];
+      if (!Array.isArray(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
+      }
+      for (var i = 0; i < propValue.length; i++) {
+        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
+        if (error instanceof Error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!isValidElement(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!ReactIs.isValidElementType(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createInstanceTypeChecker(expectedClass) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!(props[propName] instanceof expectedClass)) {
+        var expectedClassName = expectedClass.name || ANONYMOUS;
+        var actualClassName = getClassName(props[propName]);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createEnumTypeChecker(expectedValues) {
+    if (!Array.isArray(expectedValues)) {
+      if (true) {
+        if (arguments.length > 1) {
+          printWarning(
+            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
+            'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).'
+          );
+        } else {
+          printWarning('Invalid argument supplied to oneOf, expected an array.');
+        }
+      }
+      return emptyFunctionThatReturnsNull;
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      for (var i = 0; i < expectedValues.length; i++) {
+        if (is(propValue, expectedValues[i])) {
+          return null;
+        }
+      }
+
+      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
+        var type = getPreciseType(value);
+        if (type === 'symbol') {
+          return String(value);
+        }
+        return value;
+      });
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createObjectOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
+      }
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
+      }
+      for (var key in propValue) {
+        if (has(propValue, key)) {
+          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+          if (error instanceof Error) {
+            return error;
+          }
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createUnionTypeChecker(arrayOfTypeCheckers) {
+    if (!Array.isArray(arrayOfTypeCheckers)) {
+       true ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
+      return emptyFunctionThatReturnsNull;
+    }
+
+    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+      var checker = arrayOfTypeCheckers[i];
+      if (typeof checker !== 'function') {
+        printWarning(
+          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
+          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
+        );
+        return emptyFunctionThatReturnsNull;
+      }
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+        var checker = arrayOfTypeCheckers[i];
+        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
+          return null;
+        }
+      }
+
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createNodeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!isNode(props[propName])) {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      for (var key in shapeTypes) {
+        var checker = shapeTypes[key];
+        if (!checker) {
+          continue;
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createStrictShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      // We need to check all keys in case some are required but missing from
+      // props.
+      var allKeys = assign({}, props[propName], shapeTypes);
+      for (var key in allKeys) {
+        var checker = shapeTypes[key];
+        if (!checker) {
+          return new PropTypeError(
+            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
+            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
+            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
+          );
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+
+    return createChainableTypeChecker(validate);
+  }
+
+  function isNode(propValue) {
+    switch (typeof propValue) {
+      case 'number':
+      case 'string':
+      case 'undefined':
+        return true;
+      case 'boolean':
+        return !propValue;
+      case 'object':
+        if (Array.isArray(propValue)) {
+          return propValue.every(isNode);
+        }
+        if (propValue === null || isValidElement(propValue)) {
+          return true;
+        }
+
+        var iteratorFn = getIteratorFn(propValue);
+        if (iteratorFn) {
+          var iterator = iteratorFn.call(propValue);
+          var step;
+          if (iteratorFn !== propValue.entries) {
+            while (!(step = iterator.next()).done) {
+              if (!isNode(step.value)) {
+                return false;
+              }
+            }
+          } else {
+            // Iterator will provide entry [k,v] tuples rather than values.
+            while (!(step = iterator.next()).done) {
+              var entry = step.value;
+              if (entry) {
+                if (!isNode(entry[1])) {
+                  return false;
+                }
+              }
+            }
+          }
+        } else {
+          return false;
+        }
+
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  function isSymbol(propType, propValue) {
+    // Native Symbol.
+    if (propType === 'symbol') {
+      return true;
+    }
+
+    // falsy value can't be a Symbol
+    if (!propValue) {
+      return false;
+    }
+
+    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+    if (propValue['@@toStringTag'] === 'Symbol') {
+      return true;
+    }
+
+    // Fallback for non-spec compliant Symbols which are polyfilled.
+    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Equivalent of `typeof` but with special handling for array and regexp.
+  function getPropType(propValue) {
+    var propType = typeof propValue;
+    if (Array.isArray(propValue)) {
+      return 'array';
+    }
+    if (propValue instanceof RegExp) {
+      // Old webkits (at least until Android 4.0) return 'function' rather than
+      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+      // passes PropTypes.object.
+      return 'object';
+    }
+    if (isSymbol(propType, propValue)) {
+      return 'symbol';
+    }
+    return propType;
+  }
+
+  // This handles more types than `getPropType`. Only used for error messages.
+  // See `createPrimitiveTypeChecker`.
+  function getPreciseType(propValue) {
+    if (typeof propValue === 'undefined' || propValue === null) {
+      return '' + propValue;
+    }
+    var propType = getPropType(propValue);
+    if (propType === 'object') {
+      if (propValue instanceof Date) {
+        return 'date';
+      } else if (propValue instanceof RegExp) {
+        return 'regexp';
+      }
+    }
+    return propType;
+  }
+
+  // Returns a string that is postfixed to a warning about an invalid type.
+  // For example, "undefined" or "of type array"
+  function getPostfixForTypeWarning(value) {
+    var type = getPreciseType(value);
+    switch (type) {
+      case 'array':
+      case 'object':
+        return 'an ' + type;
+      case 'boolean':
+      case 'date':
+      case 'regexp':
+        return 'a ' + type;
+      default:
+        return type;
+    }
+  }
+
+  // Returns class name of the object, if any.
+  function getClassName(propValue) {
+    if (!propValue.constructor || !propValue.constructor.name) {
+      return ANONYMOUS;
+    }
+    return propValue.constructor.name;
+  }
+
+  ReactPropTypes.checkPropTypes = checkPropTypes;
+  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var printWarning = function() {};
+
+if (true) {
+  var ReactPropTypesSecret = __webpack_require__(21);
+  var loggedTypeFailures = {};
+  var has = Function.call.bind(Object.prototype.hasOwnProperty);
+
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+
+/**
+ * Assert that the values match with the type specs.
+ * Error messages are memorized and will only be shown once.
+ *
+ * @param {object} typeSpecs Map of name to a ReactPropType
+ * @param {object} values Runtime values that need to be type-checked
+ * @param {string} location e.g. "prop", "context", "child context"
+ * @param {string} componentName Name of the component for error messages.
+ * @param {?Function} getStack Returns the component stack.
+ * @private
+ */
+function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
+  if (true) {
+    for (var typeSpecName in typeSpecs) {
+      if (has(typeSpecs, typeSpecName)) {
+        var error;
+        // Prop type validation may throw. In case they do, we don't want to
+        // fail the render phase where it didn't fail before. So we log it.
+        // After these have been cleaned up, we'll let them throw.
+        try {
+          // This is intentionally an invariant that gets caught. It's the same
+          // behavior as without this statement except with a better message.
+          if (typeof typeSpecs[typeSpecName] !== 'function') {
+            var err = Error(
+              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
+              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'
+            );
+            err.name = 'Invariant Violation';
+            throw err;
+          }
+          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
+        } catch (ex) {
+          error = ex;
+        }
+        if (error && !(error instanceof Error)) {
+          printWarning(
+            (componentName || 'React class') + ': type specification of ' +
+            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
+            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
+            'You may have forgotten to pass an argument to the type checker ' +
+            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
+            'shape all require an argument).'
+          );
+        }
+        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
+          // Only monitor this failure once because there tends to be a lot of the
+          // same error.
+          loggedTypeFailures[error.message] = true;
+
+          var stack = getStack ? getStack() : '';
+
+          printWarning(
+            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Resets warning cache when testing.
+ *
+ * @private
+ */
+checkPropTypes.resetWarningCache = function() {
+  if (true) {
+    loggedTypeFailures = {};
+  }
+}
+
+module.exports = checkPropTypes;
+
+
+/***/ }),
+/* 38 */
 /***/ (function(module, exports) {
 
 /*! adal-angular v1.0.17 2018-02-27 */
@@ -19317,7 +20754,7 @@ var AuthenticationContext=function(){"use strict";return AuthenticationContext=f
 this.log(this.CONSTANTS.LOGGING_LEVEL.INFO,a,null)},AuthenticationContext.prototype.verbose=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.VERBOSE,a,null)},AuthenticationContext.prototype.errorPii=function(a,b){this.log(this.CONSTANTS.LOGGING_LEVEL.ERROR,a,b,!0)},AuthenticationContext.prototype.warnPii=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.WARN,a,null,!0)},AuthenticationContext.prototype.infoPii=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.INFO,a,null,!0)},AuthenticationContext.prototype.verbosePii=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.VERBOSE,a,null,!0)},AuthenticationContext.prototype._libVersion=function(){return"1.0.17"},"undefined"!=typeof module&&module.exports&&(module.exports=AuthenticationContext,module.exports.inject=function(a){return new AuthenticationContext(a)}),AuthenticationContext}();
 
 /***/ }),
-/* 32 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19445,7 +20882,7 @@ exports.values = values;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(126)))
 
 /***/ }),
-/* 33 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19543,14 +20980,14 @@ exports.setWarningCallback = setWarningCallback;
 
 
 /***/ }),
-/* 34 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(8);
-var keyboard_1 = __webpack_require__(63);
+var dom_1 = __webpack_require__(11);
+var keyboard_1 = __webpack_require__(67);
 exports.IsFocusVisibleClassName = 'ms-Fabric--isFocusVisible';
 /**
  * Initializes the logic which:
@@ -19596,15 +21033,15 @@ function _onKeyDown(ev) {
 
 
 /***/ }),
-/* 35 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var GlobalSettings_1 = __webpack_require__(36);
-var EventGroup_1 = __webpack_require__(24);
+var GlobalSettings_1 = __webpack_require__(43);
+var EventGroup_1 = __webpack_require__(27);
 var CustomizationsGlobalKey = 'customizations';
 var NO_CUSTOMIZATIONS = { settings: {}, scopedSettings: {} };
 var _allSettings = GlobalSettings_1.GlobalSettings.getValue(CustomizationsGlobalKey, {
@@ -19661,7 +21098,7 @@ exports.Customizations = Customizations;
 
 
 /***/ }),
-/* 36 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19740,7 +21177,7 @@ var _a;
 
 
 /***/ }),
-/* 37 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19748,7 +21185,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 var buildClassMap_1 = __webpack_require__(170);
 exports.buildClassMap = buildClassMap_1.buildClassMap;
-var icons_1 = __webpack_require__(70);
+var icons_1 = __webpack_require__(74);
 exports.getIcon = icons_1.getIcon;
 exports.registerIcons = icons_1.registerIcons;
 exports.registerIconAlias = icons_1.registerIconAlias;
@@ -19758,7 +21195,7 @@ exports.getIconClassName = getIconClassName_1.getIconClassName;
 
 
 /***/ }),
-/* 38 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19818,373 +21255,7 @@ exports.DefaultPalette = {
 
 
 /***/ }),
-/* 39 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-/**
- * An IThemingInstruction can specify a rawString to be preserved or a theme slot and a default value
- * to use if that slot is not specified by the theme.
- */
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-// IE needs to inject styles using cssText. However, we need to evaluate this lazily, so this
-// value will initialize as undefined, and later will be set once on first loadStyles injection.
-var _injectStylesWithCssText;
-// Store the theming state in __themeState__ global scope for reuse in the case of duplicate
-// load-themed-styles hosted on the page.
-var _root = (typeof window === 'undefined') ? global : window; // tslint:disable-line:no-any
-// Nonce string to inject into script tag if one provided. This is used in CSP (Content Security Policy).
-var _styleNonce = _root && _root.CSPSettings && _root.CSPSettings.nonce;
-var _themeState = initializeThemeState();
-/**
- * Matches theming tokens. For example, "[theme: themeSlotName, default: #FFF]" (including the quotes).
- */
-// tslint:disable-next-line:max-line-length
-var _themeTokenRegex = /[\'\"]\[theme:\s*(\w+)\s*(?:\,\s*default:\s*([\\"\']?[\.\,\(\)\#\-\s\w]*[\.\,\(\)\#\-\w][\"\']?))?\s*\][\'\"]/g;
-/** Maximum style text length, for supporting IE style restrictions. */
-var MAX_STYLE_CONTENT_SIZE = 10000;
-var now = function () { return (typeof performance !== 'undefined' && !!performance.now) ? performance.now() : Date.now(); };
-function measure(func) {
-    var start = now();
-    func();
-    var end = now();
-    _themeState.perf.duration += end - start;
-}
-/**
- * initialize global state object
- */
-function initializeThemeState() {
-    var state = _root.__themeState__ || {
-        theme: undefined,
-        lastStyleElement: undefined,
-        registeredStyles: []
-    };
-    if (!state.runState) {
-        state = __assign({}, (state), { perf: {
-                count: 0,
-                duration: 0
-            }, runState: {
-                flushTimer: 0,
-                mode: 0 /* sync */,
-                buffer: []
-            } });
-    }
-    if (!state.registeredThemableStyles) {
-        state = __assign({}, (state), { registeredThemableStyles: [] });
-    }
-    _root.__themeState__ = state;
-    return state;
-}
-/**
- * Loads a set of style text. If it is registered too early, we will register it when the window.load
- * event is fired.
- * @param {string | ThemableArray} styles Themable style text to register.
- * @param {boolean} loadAsync When true, always load styles in async mode, irrespective of current sync mode.
- */
-function loadStyles(styles, loadAsync) {
-    if (loadAsync === void 0) { loadAsync = false; }
-    measure(function () {
-        var styleParts = Array.isArray(styles) ? styles : splitStyles(styles);
-        if (_injectStylesWithCssText === undefined) {
-            _injectStylesWithCssText = shouldUseCssText();
-        }
-        var _a = _themeState.runState, mode = _a.mode, buffer = _a.buffer, flushTimer = _a.flushTimer;
-        if (loadAsync || mode === 1 /* async */) {
-            buffer.push(styleParts);
-            if (!flushTimer) {
-                _themeState.runState.flushTimer = asyncLoadStyles();
-            }
-        }
-        else {
-            applyThemableStyles(styleParts);
-        }
-    });
-}
-exports.loadStyles = loadStyles;
-/**
- * Allows for customizable loadStyles logic. e.g. for server side rendering application
- * @param {(processedStyles: string, rawStyles?: string | ThemableArray) => void}
- * a loadStyles callback that gets called when styles are loaded or reloaded
- */
-function configureLoadStyles(loadStylesFn) {
-    _themeState.loadStyles = loadStylesFn;
-}
-exports.configureLoadStyles = configureLoadStyles;
-/**
- * Configure run mode of load-themable-styles
- * @param mode load-themable-styles run mode, async or sync
- */
-function configureRunMode(mode) {
-    _themeState.runState.mode = mode;
-}
-exports.configureRunMode = configureRunMode;
-/**
- * external code can call flush to synchronously force processing of currently buffered styles
- */
-function flush() {
-    measure(function () {
-        var styleArrays = _themeState.runState.buffer.slice();
-        _themeState.runState.buffer = [];
-        var mergedStyleArray = [].concat.apply([], styleArrays);
-        if (mergedStyleArray.length > 0) {
-            applyThemableStyles(mergedStyleArray);
-        }
-    });
-}
-exports.flush = flush;
-/**
- * register async loadStyles
- */
-function asyncLoadStyles() {
-    return setTimeout(function () {
-        _themeState.runState.flushTimer = 0;
-        flush();
-    }, 0);
-}
-/**
- * Loads a set of style text. If it is registered too early, we will register it when the window.load event
- * is fired.
- * @param {string} styleText Style to register.
- * @param {IStyleRecord} styleRecord Existing style record to re-apply.
- */
-function applyThemableStyles(stylesArray, styleRecord) {
-    if (_themeState.loadStyles) {
-        _themeState.loadStyles(resolveThemableArray(stylesArray).styleString, stylesArray);
-    }
-    else {
-        _injectStylesWithCssText ?
-            registerStylesIE(stylesArray, styleRecord) :
-            registerStyles(stylesArray);
-    }
-}
-/**
- * Registers a set theme tokens to find and replace. If styles were already registered, they will be
- * replaced.
- * @param {theme} theme JSON object of theme tokens to values.
- */
-function loadTheme(theme) {
-    _themeState.theme = theme;
-    // reload styles.
-    reloadStyles();
-}
-exports.loadTheme = loadTheme;
-/**
- * Clear already registered style elements and style records in theme_State object
- * @param option - specify which group of registered styles should be cleared.
- * Default to be both themable and non-themable styles will be cleared
- */
-function clearStyles(option) {
-    if (option === void 0) { option = 3 /* all */; }
-    if (option === 3 /* all */ || option === 2 /* onlyNonThemable */) {
-        clearStylesInternal(_themeState.registeredStyles);
-        _themeState.registeredStyles = [];
-    }
-    if (option === 3 /* all */ || option === 1 /* onlyThemable */) {
-        clearStylesInternal(_themeState.registeredThemableStyles);
-        _themeState.registeredThemableStyles = [];
-    }
-}
-exports.clearStyles = clearStyles;
-function clearStylesInternal(records) {
-    records.forEach(function (styleRecord) {
-        var styleElement = styleRecord && styleRecord.styleElement;
-        if (styleElement && styleElement.parentElement) {
-            styleElement.parentElement.removeChild(styleElement);
-        }
-    });
-}
-/**
- * Reloads styles.
- */
-function reloadStyles() {
-    if (_themeState.theme) {
-        var themableStyles = [];
-        for (var _i = 0, _a = _themeState.registeredThemableStyles; _i < _a.length; _i++) {
-            var styleRecord = _a[_i];
-            themableStyles.push(styleRecord.themableStyle);
-        }
-        if (themableStyles.length > 0) {
-            clearStyles(1 /* onlyThemable */);
-            applyThemableStyles([].concat.apply([], themableStyles));
-        }
-    }
-}
-/**
- * Find theme tokens and replaces them with provided theme values.
- * @param {string} styles Tokenized styles to fix.
- */
-function detokenize(styles) {
-    if (styles) {
-        styles = resolveThemableArray(splitStyles(styles)).styleString;
-    }
-    return styles;
-}
-exports.detokenize = detokenize;
-/**
- * Resolves ThemingInstruction objects in an array and joins the result into a string.
- * @param {ThemableArray} splitStyleArray ThemableArray to resolve and join.
- */
-function resolveThemableArray(splitStyleArray) {
-    var theme = _themeState.theme;
-    var themable = false;
-    // Resolve the array of theming instructions to an array of strings.
-    // Then join the array to produce the final CSS string.
-    var resolvedArray = (splitStyleArray || []).map(function (currentValue) {
-        var themeSlot = currentValue.theme;
-        if (themeSlot) {
-            themable = true;
-            // A theming annotation. Resolve it.
-            var themedValue = theme ? theme[themeSlot] : undefined;
-            var defaultValue = currentValue.defaultValue || 'inherit';
-            // Warn to console if we hit an unthemed value even when themes are provided, but only if "DEBUG" is true.
-            // Allow the themedValue to be undefined to explicitly request the default value.
-            if (theme && !themedValue && console && !(themeSlot in theme) && "boolean" !== 'undefined' && true) {
-                console.warn("Theming value not provided for \"" + themeSlot + "\". Falling back to \"" + defaultValue + "\".");
-            }
-            return themedValue || defaultValue;
-        }
-        else {
-            // A non-themable string. Preserve it.
-            return currentValue.rawString;
-        }
-    });
-    return {
-        styleString: resolvedArray.join(''),
-        themable: themable
-    };
-}
-/**
- * Split tokenized CSS into an array of strings and theme specification objects
- * @param {string} styles Tokenized styles to split.
- */
-function splitStyles(styles) {
-    var result = [];
-    if (styles) {
-        var pos = 0; // Current position in styles.
-        var tokenMatch = void 0; // tslint:disable-line:no-null-keyword
-        while (tokenMatch = _themeTokenRegex.exec(styles)) {
-            var matchIndex = tokenMatch.index;
-            if (matchIndex > pos) {
-                result.push({
-                    rawString: styles.substring(pos, matchIndex)
-                });
-            }
-            result.push({
-                theme: tokenMatch[1],
-                defaultValue: tokenMatch[2] // May be undefined
-            });
-            // index of the first character after the current match
-            pos = _themeTokenRegex.lastIndex;
-        }
-        // Push the rest of the string after the last match.
-        result.push({
-            rawString: styles.substring(pos)
-        });
-    }
-    return result;
-}
-exports.splitStyles = splitStyles;
-/**
- * Registers a set of style text. If it is registered too early, we will register it when the
- * window.load event is fired.
- * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
- * @param {IStyleRecord} styleRecord May specify a style Element to update.
- */
-function registerStyles(styleArray) {
-    if (typeof document === 'undefined') {
-        return;
-    }
-    var head = document.getElementsByTagName('head')[0];
-    var styleElement = document.createElement('style');
-    var _a = resolveThemableArray(styleArray), styleString = _a.styleString, themable = _a.themable;
-    styleElement.type = 'text/css';
-    if (_styleNonce) {
-        styleElement.setAttribute('nonce', _styleNonce);
-    }
-    styleElement.appendChild(document.createTextNode(styleString));
-    _themeState.perf.count++;
-    head.appendChild(styleElement);
-    var record = {
-        styleElement: styleElement,
-        themableStyle: styleArray
-    };
-    if (themable) {
-        _themeState.registeredThemableStyles.push(record);
-    }
-    else {
-        _themeState.registeredStyles.push(record);
-    }
-}
-/**
- * Registers a set of style text, for IE 9 and below, which has a ~30 style element limit so we need
- * to register slightly differently.
- * @param {ThemableArray} styleArray Array of IThemingInstruction objects to register.
- * @param {IStyleRecord} styleRecord May specify a style Element to update.
- */
-function registerStylesIE(styleArray, styleRecord) {
-    if (typeof document === 'undefined') {
-        return;
-    }
-    var head = document.getElementsByTagName('head')[0];
-    var registeredStyles = _themeState.registeredStyles;
-    var lastStyleElement = _themeState.lastStyleElement;
-    var stylesheet = lastStyleElement ? lastStyleElement.styleSheet : undefined;
-    var lastStyleContent = stylesheet ? stylesheet.cssText : '';
-    var lastRegisteredStyle = registeredStyles[registeredStyles.length - 1];
-    var resolvedStyleText = resolveThemableArray(styleArray).styleString;
-    if (!lastStyleElement || (lastStyleContent.length + resolvedStyleText.length) > MAX_STYLE_CONTENT_SIZE) {
-        lastStyleElement = document.createElement('style');
-        lastStyleElement.type = 'text/css';
-        if (styleRecord) {
-            head.replaceChild(lastStyleElement, styleRecord.styleElement);
-            styleRecord.styleElement = lastStyleElement;
-        }
-        else {
-            head.appendChild(lastStyleElement);
-        }
-        if (!styleRecord) {
-            lastRegisteredStyle = {
-                styleElement: lastStyleElement,
-                themableStyle: styleArray
-            };
-            registeredStyles.push(lastRegisteredStyle);
-        }
-    }
-    lastStyleElement.styleSheet.cssText += detokenize(resolvedStyleText);
-    Array.prototype.push.apply(lastRegisteredStyle.themableStyle, styleArray); // concat in-place
-    // Preserve the theme state.
-    _themeState.lastStyleElement = lastStyleElement;
-}
-/**
- * Checks to see if styleSheet exists as a property off of a style element.
- * This will determine if style registration should be done via cssText (<= IE9) or not
- */
-function shouldUseCssText() {
-    var useCSSText = false;
-    if (typeof document !== 'undefined') {
-        var emptyStyle = document.createElement('style');
-        emptyStyle.type = 'text/css';
-        useCSSText = !!emptyStyle.styleSheet;
-    }
-    return useCSSText;
-}
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7)))
-
-/***/ }),
-/* 40 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20192,11 +21263,11 @@ function shouldUseCssText() {
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 /* tslint:disable:no-unused-variable */
-var React = __webpack_require__(2);
-var ReactDOM = __webpack_require__(10);
+var React = __webpack_require__(1);
+var ReactDOM = __webpack_require__(6);
 /* tslint:enable:no-unused-variable */
 var Fabric_1 = __webpack_require__(199);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var _layersByHostId = {};
 var _defaultHostSelector;
 var getClassNames = Utilities_1.classNamesFunction();
@@ -20328,7 +21399,7 @@ exports.LayerBase = LayerBase;
 
 
 /***/ }),
-/* 41 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20339,16 +21410,16 @@ tslib_1.__exportStar(__webpack_require__(205), exports);
 
 
 /***/ }),
-/* 42 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var BaseButton_1 = __webpack_require__(14);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var BaseButton_1 = __webpack_require__(16);
+var Utilities_1 = __webpack_require__(2);
 var ActionButton_styles_1 = __webpack_require__(228);
 var ActionButton = /** @class */ (function (_super) {
     tslib_1.__extends(ActionButton, _super);
@@ -20373,13 +21444,13 @@ exports.ActionButton = ActionButton;
 
 
 /***/ }),
-/* 43 */
+/* 49 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_43__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_49__;
 
 /***/ }),
-/* 44 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20395,7 +21466,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var telemetry_js_1 = __webpack_require__(251);
 var version_1 = __webpack_require__(253);
-var sp_core_library_1 = __webpack_require__(11);
+var sp_core_library_1 = __webpack_require__(13);
 var CONTROL_TYPE = "property";
 function track(componentName, properties) {
     if (properties === void 0) { properties = {}; }
@@ -20407,7 +21478,7 @@ exports.track = track;
 
 
 /***/ }),
-/* 45 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20450,40 +21521,7 @@ var SpinnerType;
 
 
 /***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-if (false) {
-  module.exports = require('./cjs/react-is.production.min.js');
-} else {
-  module.exports = __webpack_require__(107);
-}
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
-
-module.exports = ReactPropTypesSecret;
-
-
-/***/ }),
-/* 48 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20555,7 +21593,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 49 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20575,7 +21613,7 @@ exports.default = function (position, axis) {
 };
 
 /***/ }),
-/* 50 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
@@ -20612,7 +21650,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
 });
 
 /***/ }),
-/* 51 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20624,29 +21662,29 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(2);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(10);
+var _reactDom = __webpack_require__(6);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _propTypes = __webpack_require__(18);
+var _propTypes = __webpack_require__(10);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _cssClasses = __webpack_require__(48);
+var _cssClasses = __webpack_require__(52);
 
 var _cssClasses2 = _interopRequireDefault(_cssClasses);
 
 var _dimensions = __webpack_require__(113);
 
-var _CSSTranslate = __webpack_require__(49);
+var _CSSTranslate = __webpack_require__(53);
 
 var _CSSTranslate2 = _interopRequireDefault(_CSSTranslate);
 
-var _reactEasySwipe = __webpack_require__(50);
+var _reactEasySwipe = __webpack_require__(54);
 
 var _reactEasySwipe2 = _interopRequireDefault(_reactEasySwipe);
 
@@ -20991,7 +22029,7 @@ Thumbs.defaultProps = {
 exports.default = Thumbs;
 
 /***/ }),
-/* 52 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21007,13 +22045,13 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(2);
+var React = __webpack_require__(1);
 var Dropdown_1 = __webpack_require__(120);
-var Utilities_1 = __webpack_require__(1);
-var Label_1 = __webpack_require__(41);
-var SPListPickerService_1 = __webpack_require__(96);
-var FieldErrorMessage_1 = __webpack_require__(98);
-var telemetry = __webpack_require__(44);
+var Utilities_1 = __webpack_require__(2);
+var Label_1 = __webpack_require__(47);
+var SPListPickerService_1 = __webpack_require__(100);
+var FieldErrorMessage_1 = __webpack_require__(102);
+var telemetry = __webpack_require__(50);
 // Empty list value, to be checked for single list selection
 var EMPTY_LIST_KEY = 'NO_LIST_SELECTED';
 /**
@@ -21182,7 +22220,7 @@ exports.default = PropertyFieldListPickerHost;
 
 
 /***/ }),
-/* 53 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21190,22 +22228,22 @@ exports.default = PropertyFieldListPickerHost;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(121), exports);
-tslib_1.__exportStar(__webpack_require__(54), exports);
+tslib_1.__exportStar(__webpack_require__(58), exports);
 
 
 /***/ }),
-/* 54 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var SelectableOption_types_1 = __webpack_require__(55);
+var SelectableOption_types_1 = __webpack_require__(59);
 exports.DropdownMenuItemType = SelectableOption_types_1.SelectableOptionMenuItemType;
 
 
 /***/ }),
-/* 55 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21220,7 +22258,7 @@ var SelectableOptionMenuItemType;
 
 
 /***/ }),
-/* 56 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21231,7 +22269,7 @@ tslib_1.__exportStar(__webpack_require__(122), exports);
 
 
 /***/ }),
-/* 57 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21658,14 +22696,14 @@ exports.Async = Async;
 
 
 /***/ }),
-/* 58 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(8);
-var index_1 = __webpack_require__(6);
+var dom_1 = __webpack_require__(11);
+var index_1 = __webpack_require__(9);
 var _scrollbarWidth;
 var _bodyScrollDisabledCount = 0;
 var DisabledScrollClassName = index_1.mergeStyles({
@@ -21767,13 +22805,13 @@ exports.findScrollableParent = findScrollableParent;
 
 
 /***/ }),
-/* 59 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(12);
+var Stylesheet_1 = __webpack_require__(14);
 var LEFT = 'left';
 var RIGHT = 'right';
 var NO_FLIP = '@noflip';
@@ -21880,13 +22918,13 @@ var _a;
 
 
 /***/ }),
-/* 60 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(12);
+var Stylesheet_1 = __webpack_require__(14);
 /**
  * Separates the classes and style objects. Any classes that are pre-registered
  * args are auto expanded into objects.
@@ -21939,7 +22977,7 @@ exports.extractStyleParts = extractStyleParts;
 
 
 /***/ }),
-/* 61 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21979,18 +23017,18 @@ exports.concatStyleSets = concatStyleSets;
 
 
 /***/ }),
-/* 62 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Async_1 = __webpack_require__(57);
-var EventGroup_1 = __webpack_require__(24);
-var warn_1 = __webpack_require__(33);
-var initializeFocusRects_1 = __webpack_require__(34);
+var React = __webpack_require__(1);
+var Async_1 = __webpack_require__(61);
+var EventGroup_1 = __webpack_require__(27);
+var warn_1 = __webpack_require__(40);
+var initializeFocusRects_1 = __webpack_require__(41);
 var initializeDir_1 = __webpack_require__(135);
 /**
  * BaseComponent class, which provides basic helpers for all components.
@@ -22218,7 +23256,7 @@ exports.nullRender = nullRender;
 
 
 /***/ }),
-/* 63 */
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22255,7 +23293,7 @@ var _a;
 
 
 /***/ }),
-/* 64 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22284,13 +23322,13 @@ exports.hoistStatics = hoistStatics;
 
 
 /***/ }),
-/* 65 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(8);
+var dom_1 = __webpack_require__(11);
 var localStorage_1 = __webpack_require__(152);
 // Default to undefined so that we initialize on first read.
 var _language;
@@ -22336,7 +23374,7 @@ exports.setLanguage = setLanguage;
 
 
 /***/ }),
-/* 66 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22344,12 +23382,12 @@ exports.setLanguage = setLanguage;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 /* tslint:disable */
-var React = __webpack_require__(2);
+var React = __webpack_require__(1);
 /* tslint:enable */
-var Icon_types_1 = __webpack_require__(67);
+var Icon_types_1 = __webpack_require__(71);
 var Image_1 = __webpack_require__(164);
-var Image_types_1 = __webpack_require__(68);
-var Utilities_1 = __webpack_require__(1);
+var Image_types_1 = __webpack_require__(72);
+var Utilities_1 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 var getClassNames = Utilities_1.classNamesFunction();
 var IconBase = /** @class */ (function (_super) {
@@ -22413,7 +23451,7 @@ exports.IconBase = IconBase;
 
 
 /***/ }),
-/* 67 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22444,7 +23482,7 @@ var IconType;
 
 
 /***/ }),
-/* 68 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22514,13 +23552,13 @@ var ImageLoadState;
 
 
 /***/ }),
-/* 69 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(6);
+var index_1 = __webpack_require__(9);
 exports.InjectionMode = index_1.InjectionMode;
 exports.Stylesheet = index_1.Stylesheet;
 exports.concatStyleSets = index_1.concatStyleSets;
@@ -22531,16 +23569,16 @@ exports.mergeStyles = index_1.mergeStyles;
 
 
 /***/ }),
-/* 70 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var warn_1 = __webpack_require__(33);
-var GlobalSettings_1 = __webpack_require__(36);
-var index_1 = __webpack_require__(6);
+var warn_1 = __webpack_require__(40);
+var GlobalSettings_1 = __webpack_require__(43);
+var index_1 = __webpack_require__(9);
 var ICON_SETTING_NAME = 'icons';
 var _iconSettings = GlobalSettings_1.GlobalSettings.getValue(ICON_SETTING_NAME, {
     __options: {
@@ -22653,15 +23691,15 @@ function _warnDuplicateIcon(iconName) {
 
 
 /***/ }),
-/* 71 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(6);
-var fonts_1 = __webpack_require__(72);
-var language_1 = __webpack_require__(65);
+var index_1 = __webpack_require__(9);
+var fonts_1 = __webpack_require__(76);
+var language_1 = __webpack_require__(69);
 // Default urls.
 var DefaultBaseUrl = 'https://static2.sharepointonline.com/files/fabric/assets';
 // Standard font styling.
@@ -22724,7 +23762,7 @@ registerDefaultFontFaces(_getFontBaseUrl());
 
 
 /***/ }),
-/* 72 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22877,7 +23915,7 @@ function _createFont(size, weight, fontFamily) {
 
 
 /***/ }),
-/* 73 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22902,7 +23940,7 @@ exports.getScreenSelector = getScreenSelector;
 
 
 /***/ }),
-/* 74 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22920,14 +23958,14 @@ var ZIndexes;
 
 
 /***/ }),
-/* 75 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var MS_CHECKBOX_LABEL_SIZE = '20px';
 var MS_CHECKBOX_TRANSITION_DURATION = '200ms';
 var MS_CHECKBOX_TRANSITION_TIMING = 'cubic-bezier(.4, 0, .23, 1)';
@@ -23051,7 +24089,7 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
 
 
 /***/ }),
-/* 76 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23079,7 +24117,7 @@ var KeytipEvents;
 
 
 /***/ }),
-/* 77 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23090,7 +24128,7 @@ tslib_1.__exportStar(__webpack_require__(187), exports);
 
 
 /***/ }),
-/* 78 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23113,7 +24151,7 @@ var Position;
 
 
 /***/ }),
-/* 79 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23124,20 +24162,20 @@ tslib_1.__exportStar(__webpack_require__(194), exports);
 
 
 /***/ }),
-/* 80 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
-var Layer_base_1 = __webpack_require__(40);
+var Utilities_1 = __webpack_require__(2);
+var Layer_base_1 = __webpack_require__(46);
 var Layer_styles_1 = __webpack_require__(203);
 exports.Layer = Utilities_1.styled(Layer_base_1.LayerBase, Layer_styles_1.getStyles);
 
 
 /***/ }),
-/* 81 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23205,7 +24243,7 @@ var DirectionalHint;
 
 
 /***/ }),
-/* 82 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23216,13 +24254,13 @@ tslib_1.__exportStar(__webpack_require__(208), exports);
 
 
 /***/ }),
-/* 83 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var DirectionalHint_1 = __webpack_require__(81);
+var DirectionalHint_1 = __webpack_require__(85);
 exports.DirectionalHint = DirectionalHint_1.DirectionalHint;
 var ContextualMenuItemType;
 (function (ContextualMenuItemType) {
@@ -23234,7 +24272,7 @@ var ContextualMenuItemType;
 
 
 /***/ }),
-/* 84 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23245,7 +24283,7 @@ tslib_1.__exportStar(__webpack_require__(212), exports);
 
 
 /***/ }),
-/* 85 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23272,16 +24310,16 @@ var FocusZoneDirection;
 
 
 /***/ }),
-/* 86 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var VerticalDivider_classNames_1 = __webpack_require__(87);
+var VerticalDivider_classNames_1 = __webpack_require__(91);
 var ContextualMenu_styles_1 = __webpack_require__(214);
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 exports.getSplitButtonVerticalDividerClassNames = Utilities_1.memoizeFunction(function (theme) {
     return Styling_1.mergeStyleSets(VerticalDivider_classNames_1.getDividerClassNames(theme), {
         divider: {
@@ -23450,13 +24488,13 @@ exports.getItemClassNames = Utilities_1.memoizeFunction(function (theme, disable
 
 
 /***/ }),
-/* 87 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 exports.getDividerClassNames = Utilities_1.memoizeFunction(function (theme) {
     return Styling_1.mergeStyleSets({
@@ -23475,16 +24513,16 @@ exports.getDividerClassNames = Utilities_1.memoizeFunction(function (theme) {
 
 
 /***/ }),
-/* 88 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
+var React = __webpack_require__(1);
 var BaseDecorator_1 = __webpack_require__(216);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var ResponsiveMode;
 (function (ResponsiveMode) {
     ResponsiveMode[ResponsiveMode["small"] = 0] = "small";
@@ -23572,7 +24610,7 @@ exports.withResponsiveMode = withResponsiveMode;
 
 
 /***/ }),
-/* 89 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23598,7 +24636,7 @@ var ButtonType;
 
 
 /***/ }),
-/* 90 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23801,16 +24839,16 @@ exports.primaryStyles = primaryStyles;
 
 
 /***/ }),
-/* 91 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var BaseButton_1 = __webpack_require__(14);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var BaseButton_1 = __webpack_require__(16);
+var Utilities_1 = __webpack_require__(2);
 var CompoundButton_styles_1 = __webpack_require__(229);
 var CompoundButton = /** @class */ (function (_super) {
     tslib_1.__extends(CompoundButton, _super);
@@ -23835,16 +24873,16 @@ exports.CompoundButton = CompoundButton;
 
 
 /***/ }),
-/* 92 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var BaseButton_1 = __webpack_require__(14);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var BaseButton_1 = __webpack_require__(16);
+var Utilities_1 = __webpack_require__(2);
 var IconButton_styles_1 = __webpack_require__(230);
 var IconButton = /** @class */ (function (_super) {
     tslib_1.__extends(IconButton, _super);
@@ -23869,16 +24907,16 @@ exports.IconButton = IconButton;
 
 
 /***/ }),
-/* 93 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var DefaultButton_1 = __webpack_require__(28);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var DefaultButton_1 = __webpack_require__(31);
 var PrimaryButton = /** @class */ (function (_super) {
     tslib_1.__extends(PrimaryButton, _super);
     function PrimaryButton() {
@@ -23901,7 +24939,7 @@ exports.PrimaryButton = PrimaryButton;
 
 
 /***/ }),
-/* 94 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23989,15 +25027,15 @@ var PanelType;
 
 
 /***/ }),
-/* 95 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var getClassNames = Utilities_1.classNamesFunction();
 var OverlayBase = /** @class */ (function (_super) {
     tslib_1.__extends(OverlayBase, _super);
@@ -24029,15 +25067,15 @@ exports.OverlayBase = OverlayBase;
 
 
 /***/ }),
-/* 96 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var sp_http_1 = __webpack_require__(43);
-var sp_core_library_1 = __webpack_require__(11);
-var IPropertyFieldListPicker_1 = __webpack_require__(97);
+var sp_http_1 = __webpack_require__(49);
+var sp_core_library_1 = __webpack_require__(13);
+var IPropertyFieldListPicker_1 = __webpack_require__(101);
 var SPListPickerMockService_1 = __webpack_require__(247);
 /**
  * Service implementation to get list & list items from current SharePoint site
@@ -24116,7 +25154,7 @@ exports.default = SPListPickerService;
 
 
 /***/ }),
-/* 97 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24134,7 +25172,7 @@ var PropertyFieldListPickerOrderBy;
 
 
 /***/ }),
-/* 98 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24150,9 +25188,9 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(2);
+var React = __webpack_require__(1);
 var FieldErrorMessage_module_scss_1 = __webpack_require__(248);
-var Icon_1 = __webpack_require__(20);
+var Icon_1 = __webpack_require__(24);
 /**
  * Component that shows an error message when something went wront with the property control
  */
@@ -24179,7 +25217,7 @@ exports.default = FieldErrorMessage;
 
 
 /***/ }),
-/* 99 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24204,9 +25242,9 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var strings = __webpack_require__(263);
-var React = __webpack_require__(2);
-var Dropdown_1 = __webpack_require__(53);
-var telemetry = __webpack_require__(44);
+var React = __webpack_require__(1);
+var Dropdown_1 = __webpack_require__(57);
+var telemetry = __webpack_require__(50);
 var PropertyFieldMultiSelectHost = (function (_super) {
     __extends(PropertyFieldMultiSelectHost, _super);
     function PropertyFieldMultiSelectHost(props) {
@@ -24231,39 +25269,39 @@ exports.default = PropertyFieldMultiSelectHost;
 
 
 /***/ }),
-/* 100 */
+/* 104 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 // EXTERNAL MODULE: external "react"
-var external__react_ = __webpack_require__(2);
+var external__react_ = __webpack_require__(1);
 var external__react__default = /*#__PURE__*/__webpack_require__.n(external__react_);
 
 // EXTERNAL MODULE: external "react-dom"
-var external__react_dom_ = __webpack_require__(10);
+var external__react_dom_ = __webpack_require__(6);
 var external__react_dom__default = /*#__PURE__*/__webpack_require__.n(external__react_dom_);
 
 // EXTERNAL MODULE: external "@microsoft/sp-core-library"
-var sp_core_library_ = __webpack_require__(11);
+var sp_core_library_ = __webpack_require__(13);
 var sp_core_library__default = /*#__PURE__*/__webpack_require__.n(sp_core_library_);
 
 // EXTERNAL MODULE: external "@microsoft/sp-webpart-base"
-var sp_webpart_base_ = __webpack_require__(30);
+var sp_webpart_base_ = __webpack_require__(33);
 var sp_webpart_base__default = /*#__PURE__*/__webpack_require__.n(sp_webpart_base_);
 
 // EXTERNAL MODULE: external "@microsoft/sp-property-pane"
-var sp_property_pane_ = __webpack_require__(101);
+var sp_property_pane_ = __webpack_require__(105);
 var sp_property_pane__default = /*#__PURE__*/__webpack_require__.n(sp_property_pane_);
 
 // EXTERNAL MODULE: external "ActionItemSliderWebPartStrings"
-var external__ActionItemSliderWebPartStrings_ = __webpack_require__(102);
+var external__ActionItemSliderWebPartStrings_ = __webpack_require__(106);
 var external__ActionItemSliderWebPartStrings__default = /*#__PURE__*/__webpack_require__.n(external__ActionItemSliderWebPartStrings_);
 
 // CONCATENATED MODULE: ./lib/webparts/actionItemSlider/components/ActionItemSlider.module.scss.js
 /* tslint:disable */
-__webpack_require__(103);
+__webpack_require__(107);
 var styles = {
     actionItemSlider: 'actionItemSlider_373d78d8',
     container: 'container_373d78d8',
@@ -24280,11 +25318,11 @@ var styles = {
 /* tslint:enable */ 
 
 // EXTERNAL MODULE: ./node_modules/react-responsive-carousel/lib/index.js
-var lib = __webpack_require__(105);
+var lib = __webpack_require__(109);
 var lib_default = /*#__PURE__*/__webpack_require__.n(lib);
 
 // EXTERNAL MODULE: ./node_modules/@pnp/pnpjs/dist/pnpjs.es5.js + 3 modules
-var pnpjs_es5 = __webpack_require__(23);
+var pnpjs_es5 = __webpack_require__(22);
 
 // CONCATENATED MODULE: ./lib/webparts/actionItemSlider/components/ActionItemSlider.js
 var __extends = (this && this.__extends) || (function () {
@@ -24543,23 +25581,23 @@ var ActionItemSliderWebPart_ActionItemSliderWebPart = /** @class */ (function (_
 
 
 /***/ }),
-/* 101 */
+/* 105 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_101__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_105__;
 
 /***/ }),
-/* 102 */
+/* 106 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_102__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_106__;
 
 /***/ }),
-/* 103 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var content = __webpack_require__(104);
-var loader = __webpack_require__(17);
+var content = __webpack_require__(108);
+var loader = __webpack_require__(19);
 
 if(typeof content === "string") content = [[module.i, content]];
 
@@ -24569,10 +25607,10 @@ for (var i = 0; i < content.length; i++) loader.loadStyles(content[i][1], true);
 if(content.locals) module.exports = content.locals;
 
 /***/ }),
-/* 104 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(16)(false);
+exports = module.exports = __webpack_require__(18)(false);
 // imports
 
 
@@ -24583,7 +25621,7 @@ exports.push([module.i, ".actionItemSlider_373d78d8 .container_373d78d8{max-widt
 
 
 /***/ }),
-/* 105 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24594,11 +25632,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Thumbs = exports.Carousel = undefined;
 
-var _Carousel = __webpack_require__(106);
+var _Carousel = __webpack_require__(110);
 
 var _Carousel2 = _interopRequireDefault(_Carousel);
 
-var _Thumbs = __webpack_require__(51);
+var _Thumbs = __webpack_require__(55);
 
 var _Thumbs2 = _interopRequireDefault(_Thumbs);
 
@@ -24608,7 +25646,7 @@ exports.Carousel = _Carousel2.default;
 exports.Thumbs = _Thumbs2.default;
 
 /***/ }),
-/* 106 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24622,31 +25660,31 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(2);
+var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = __webpack_require__(10);
+var _reactDom = __webpack_require__(6);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _propTypes = __webpack_require__(18);
+var _propTypes = __webpack_require__(10);
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
-var _cssClasses = __webpack_require__(48);
+var _cssClasses = __webpack_require__(52);
 
 var _cssClasses2 = _interopRequireDefault(_cssClasses);
 
-var _CSSTranslate = __webpack_require__(49);
+var _CSSTranslate = __webpack_require__(53);
 
 var _CSSTranslate2 = _interopRequireDefault(_CSSTranslate);
 
-var _reactEasySwipe = __webpack_require__(50);
+var _reactEasySwipe = __webpack_require__(54);
 
 var _reactEasySwipe2 = _interopRequireDefault(_reactEasySwipe);
 
-var _Thumbs = __webpack_require__(51);
+var _Thumbs = __webpack_require__(55);
 
 var _Thumbs2 = _interopRequireDefault(_Thumbs);
 
@@ -25296,1044 +26334,6 @@ Carousel.defaultProps = {
 exports.default = Carousel;
 
 /***/ }),
-/* 107 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/** @license React v16.8.6
- * react-is.development.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-
-
-if (true) {
-  (function() {
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
-// nor polyfill, then a plain number is used for performance.
-var hasSymbol = typeof Symbol === 'function' && Symbol.for;
-
-var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
-var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
-var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
-var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
-var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
-var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
-var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;
-var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
-var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
-var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
-var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
-var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
-var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
-
-function isValidElementType(type) {
-  return typeof type === 'string' || typeof type === 'function' ||
-  // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
-  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);
-}
-
-/**
- * Forked from fbjs/warning:
- * https://github.com/facebook/fbjs/blob/e66ba20ad5be433eb54423f2b097d829324d9de6/packages/fbjs/src/__forks__/warning.js
- *
- * Only change is we use console.warn instead of console.error,
- * and do nothing when 'console' is not supported.
- * This really simplifies the code.
- * ---
- * Similar to invariant but only logs a warning if the condition is not met.
- * This can be used to log issues in development environments in critical
- * paths. Removing the logging code for production environments will keep the
- * same logic and follow the same code paths.
- */
-
-var lowPriorityWarning = function () {};
-
-{
-  var printWarning = function (format) {
-    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    var argIndex = 0;
-    var message = 'Warning: ' + format.replace(/%s/g, function () {
-      return args[argIndex++];
-    });
-    if (typeof console !== 'undefined') {
-      console.warn(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-
-  lowPriorityWarning = function (condition, format) {
-    if (format === undefined) {
-      throw new Error('`lowPriorityWarning(condition, format, ...args)` requires a warning ' + 'message argument');
-    }
-    if (!condition) {
-      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-        args[_key2 - 2] = arguments[_key2];
-      }
-
-      printWarning.apply(undefined, [format].concat(args));
-    }
-  };
-}
-
-var lowPriorityWarning$1 = lowPriorityWarning;
-
-function typeOf(object) {
-  if (typeof object === 'object' && object !== null) {
-    var $$typeof = object.$$typeof;
-    switch ($$typeof) {
-      case REACT_ELEMENT_TYPE:
-        var type = object.type;
-
-        switch (type) {
-          case REACT_ASYNC_MODE_TYPE:
-          case REACT_CONCURRENT_MODE_TYPE:
-          case REACT_FRAGMENT_TYPE:
-          case REACT_PROFILER_TYPE:
-          case REACT_STRICT_MODE_TYPE:
-          case REACT_SUSPENSE_TYPE:
-            return type;
-          default:
-            var $$typeofType = type && type.$$typeof;
-
-            switch ($$typeofType) {
-              case REACT_CONTEXT_TYPE:
-              case REACT_FORWARD_REF_TYPE:
-              case REACT_PROVIDER_TYPE:
-                return $$typeofType;
-              default:
-                return $$typeof;
-            }
-        }
-      case REACT_LAZY_TYPE:
-      case REACT_MEMO_TYPE:
-      case REACT_PORTAL_TYPE:
-        return $$typeof;
-    }
-  }
-
-  return undefined;
-}
-
-// AsyncMode is deprecated along with isAsyncMode
-var AsyncMode = REACT_ASYNC_MODE_TYPE;
-var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
-var ContextConsumer = REACT_CONTEXT_TYPE;
-var ContextProvider = REACT_PROVIDER_TYPE;
-var Element = REACT_ELEMENT_TYPE;
-var ForwardRef = REACT_FORWARD_REF_TYPE;
-var Fragment = REACT_FRAGMENT_TYPE;
-var Lazy = REACT_LAZY_TYPE;
-var Memo = REACT_MEMO_TYPE;
-var Portal = REACT_PORTAL_TYPE;
-var Profiler = REACT_PROFILER_TYPE;
-var StrictMode = REACT_STRICT_MODE_TYPE;
-var Suspense = REACT_SUSPENSE_TYPE;
-
-var hasWarnedAboutDeprecatedIsAsyncMode = false;
-
-// AsyncMode should be deprecated
-function isAsyncMode(object) {
-  {
-    if (!hasWarnedAboutDeprecatedIsAsyncMode) {
-      hasWarnedAboutDeprecatedIsAsyncMode = true;
-      lowPriorityWarning$1(false, 'The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
-    }
-  }
-  return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
-}
-function isConcurrentMode(object) {
-  return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
-}
-function isContextConsumer(object) {
-  return typeOf(object) === REACT_CONTEXT_TYPE;
-}
-function isContextProvider(object) {
-  return typeOf(object) === REACT_PROVIDER_TYPE;
-}
-function isElement(object) {
-  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
-}
-function isForwardRef(object) {
-  return typeOf(object) === REACT_FORWARD_REF_TYPE;
-}
-function isFragment(object) {
-  return typeOf(object) === REACT_FRAGMENT_TYPE;
-}
-function isLazy(object) {
-  return typeOf(object) === REACT_LAZY_TYPE;
-}
-function isMemo(object) {
-  return typeOf(object) === REACT_MEMO_TYPE;
-}
-function isPortal(object) {
-  return typeOf(object) === REACT_PORTAL_TYPE;
-}
-function isProfiler(object) {
-  return typeOf(object) === REACT_PROFILER_TYPE;
-}
-function isStrictMode(object) {
-  return typeOf(object) === REACT_STRICT_MODE_TYPE;
-}
-function isSuspense(object) {
-  return typeOf(object) === REACT_SUSPENSE_TYPE;
-}
-
-exports.typeOf = typeOf;
-exports.AsyncMode = AsyncMode;
-exports.ConcurrentMode = ConcurrentMode;
-exports.ContextConsumer = ContextConsumer;
-exports.ContextProvider = ContextProvider;
-exports.Element = Element;
-exports.ForwardRef = ForwardRef;
-exports.Fragment = Fragment;
-exports.Lazy = Lazy;
-exports.Memo = Memo;
-exports.Portal = Portal;
-exports.Profiler = Profiler;
-exports.StrictMode = StrictMode;
-exports.Suspense = Suspense;
-exports.isValidElementType = isValidElementType;
-exports.isAsyncMode = isAsyncMode;
-exports.isConcurrentMode = isConcurrentMode;
-exports.isContextConsumer = isContextConsumer;
-exports.isContextProvider = isContextProvider;
-exports.isElement = isElement;
-exports.isForwardRef = isForwardRef;
-exports.isFragment = isFragment;
-exports.isLazy = isLazy;
-exports.isMemo = isMemo;
-exports.isPortal = isPortal;
-exports.isProfiler = isProfiler;
-exports.isStrictMode = isStrictMode;
-exports.isSuspense = isSuspense;
-  })();
-}
-
-
-/***/ }),
-/* 108 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var ReactIs = __webpack_require__(46);
-var assign = __webpack_require__(109);
-
-var ReactPropTypesSecret = __webpack_require__(47);
-var checkPropTypes = __webpack_require__(110);
-
-var has = Function.call.bind(Object.prototype.hasOwnProperty);
-var printWarning = function() {};
-
-if (true) {
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-}
-
-function emptyFunctionThatReturnsNull() {
-  return null;
-}
-
-module.exports = function(isValidElement, throwOnDirectAccess) {
-  /* global Symbol */
-  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
-  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
-
-  /**
-   * Returns the iterator method function contained on the iterable object.
-   *
-   * Be sure to invoke the function with the iterable as context:
-   *
-   *     var iteratorFn = getIteratorFn(myIterable);
-   *     if (iteratorFn) {
-   *       var iterator = iteratorFn.call(myIterable);
-   *       ...
-   *     }
-   *
-   * @param {?object} maybeIterable
-   * @return {?function}
-   */
-  function getIteratorFn(maybeIterable) {
-    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
-    if (typeof iteratorFn === 'function') {
-      return iteratorFn;
-    }
-  }
-
-  /**
-   * Collection of methods that allow declaration and validation of props that are
-   * supplied to React components. Example usage:
-   *
-   *   var Props = require('ReactPropTypes');
-   *   var MyArticle = React.createClass({
-   *     propTypes: {
-   *       // An optional string prop named "description".
-   *       description: Props.string,
-   *
-   *       // A required enum prop named "category".
-   *       category: Props.oneOf(['News','Photos']).isRequired,
-   *
-   *       // A prop named "dialog" that requires an instance of Dialog.
-   *       dialog: Props.instanceOf(Dialog).isRequired
-   *     },
-   *     render: function() { ... }
-   *   });
-   *
-   * A more formal specification of how these methods are used:
-   *
-   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
-   *   decl := ReactPropTypes.{type}(.isRequired)?
-   *
-   * Each and every declaration produces a function with the same signature. This
-   * allows the creation of custom validation functions. For example:
-   *
-   *  var MyLink = React.createClass({
-   *    propTypes: {
-   *      // An optional string or URI prop named "href".
-   *      href: function(props, propName, componentName) {
-   *        var propValue = props[propName];
-   *        if (propValue != null && typeof propValue !== 'string' &&
-   *            !(propValue instanceof URI)) {
-   *          return new Error(
-   *            'Expected a string or an URI for ' + propName + ' in ' +
-   *            componentName
-   *          );
-   *        }
-   *      }
-   *    },
-   *    render: function() {...}
-   *  });
-   *
-   * @internal
-   */
-
-  var ANONYMOUS = '<<anonymous>>';
-
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
-  var ReactPropTypes = {
-    array: createPrimitiveTypeChecker('array'),
-    bool: createPrimitiveTypeChecker('boolean'),
-    func: createPrimitiveTypeChecker('function'),
-    number: createPrimitiveTypeChecker('number'),
-    object: createPrimitiveTypeChecker('object'),
-    string: createPrimitiveTypeChecker('string'),
-    symbol: createPrimitiveTypeChecker('symbol'),
-
-    any: createAnyTypeChecker(),
-    arrayOf: createArrayOfTypeChecker,
-    element: createElementTypeChecker(),
-    elementType: createElementTypeTypeChecker(),
-    instanceOf: createInstanceTypeChecker,
-    node: createNodeChecker(),
-    objectOf: createObjectOfTypeChecker,
-    oneOf: createEnumTypeChecker,
-    oneOfType: createUnionTypeChecker,
-    shape: createShapeTypeChecker,
-    exact: createStrictShapeTypeChecker,
-  };
-
-  /**
-   * inlined Object.is polyfill to avoid requiring consumers ship their own
-   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-   */
-  /*eslint-disable no-self-compare*/
-  function is(x, y) {
-    // SameValue algorithm
-    if (x === y) {
-      // Steps 1-5, 7-10
-      // Steps 6.b-6.e: +0 != -0
-      return x !== 0 || 1 / x === 1 / y;
-    } else {
-      // Step 6.a: NaN == NaN
-      return x !== x && y !== y;
-    }
-  }
-  /*eslint-enable no-self-compare*/
-
-  /**
-   * We use an Error-like object for backward compatibility as people may call
-   * PropTypes directly and inspect their output. However, we don't use real
-   * Errors anymore. We don't inspect their stack anyway, and creating them
-   * is prohibitively expensive if they are created too often, such as what
-   * happens in oneOfType() for any type before the one that matched.
-   */
-  function PropTypeError(message) {
-    this.message = message;
-    this.stack = '';
-  }
-  // Make `instanceof Error` still work for returned errors.
-  PropTypeError.prototype = Error.prototype;
-
-  function createChainableTypeChecker(validate) {
-    if (true) {
-      var manualPropTypeCallCache = {};
-      var manualPropTypeWarningCount = 0;
-    }
-    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
-      componentName = componentName || ANONYMOUS;
-      propFullName = propFullName || propName;
-
-      if (secret !== ReactPropTypesSecret) {
-        if (throwOnDirectAccess) {
-          // New behavior only for users of `prop-types` package
-          var err = new Error(
-            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-            'Use `PropTypes.checkPropTypes()` to call them. ' +
-            'Read more at http://fb.me/use-check-prop-types'
-          );
-          err.name = 'Invariant Violation';
-          throw err;
-        } else if ("dev" !== 'production' && typeof console !== 'undefined') {
-          // Old behavior for people using React.PropTypes
-          var cacheKey = componentName + ':' + propName;
-          if (
-            !manualPropTypeCallCache[cacheKey] &&
-            // Avoid spamming the console because they are often not actionable except for lib authors
-            manualPropTypeWarningCount < 3
-          ) {
-            printWarning(
-              'You are manually calling a React.PropTypes validation ' +
-              'function for the `' + propFullName + '` prop on `' + componentName  + '`. This is deprecated ' +
-              'and will throw in the standalone `prop-types` package. ' +
-              'You may be seeing this warning due to a third-party PropTypes ' +
-              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
-            );
-            manualPropTypeCallCache[cacheKey] = true;
-            manualPropTypeWarningCount++;
-          }
-        }
-      }
-      if (props[propName] == null) {
-        if (isRequired) {
-          if (props[propName] === null) {
-            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
-          }
-          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
-        }
-        return null;
-      } else {
-        return validate(props, propName, componentName, location, propFullName);
-      }
-    }
-
-    var chainedCheckType = checkType.bind(null, false);
-    chainedCheckType.isRequired = checkType.bind(null, true);
-
-    return chainedCheckType;
-  }
-
-  function createPrimitiveTypeChecker(expectedType) {
-    function validate(props, propName, componentName, location, propFullName, secret) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== expectedType) {
-        // `propValue` being instance of, say, date/regexp, pass the 'object'
-        // check, but we can offer a more precise error message here rather than
-        // 'of type `object`'.
-        var preciseType = getPreciseType(propValue);
-
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createAnyTypeChecker() {
-    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
-  }
-
-  function createArrayOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
-      }
-      var propValue = props[propName];
-      if (!Array.isArray(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
-      }
-      for (var i = 0; i < propValue.length; i++) {
-        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
-        if (error instanceof Error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!isValidElement(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!ReactIs.isValidElementType(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createInstanceTypeChecker(expectedClass) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!(props[propName] instanceof expectedClass)) {
-        var expectedClassName = expectedClass.name || ANONYMOUS;
-        var actualClassName = getClassName(props[propName]);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createEnumTypeChecker(expectedValues) {
-    if (!Array.isArray(expectedValues)) {
-      if (true) {
-        if (arguments.length > 1) {
-          printWarning(
-            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
-            'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).'
-          );
-        } else {
-          printWarning('Invalid argument supplied to oneOf, expected an array.');
-        }
-      }
-      return emptyFunctionThatReturnsNull;
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      for (var i = 0; i < expectedValues.length; i++) {
-        if (is(propValue, expectedValues[i])) {
-          return null;
-        }
-      }
-
-      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
-        var type = getPreciseType(value);
-        if (type === 'symbol') {
-          return String(value);
-        }
-        return value;
-      });
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createObjectOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
-      }
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
-      }
-      for (var key in propValue) {
-        if (has(propValue, key)) {
-          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-          if (error instanceof Error) {
-            return error;
-          }
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createUnionTypeChecker(arrayOfTypeCheckers) {
-    if (!Array.isArray(arrayOfTypeCheckers)) {
-       true ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
-      return emptyFunctionThatReturnsNull;
-    }
-
-    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-      var checker = arrayOfTypeCheckers[i];
-      if (typeof checker !== 'function') {
-        printWarning(
-          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
-          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
-        );
-        return emptyFunctionThatReturnsNull;
-      }
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-        var checker = arrayOfTypeCheckers[i];
-        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
-          return null;
-        }
-      }
-
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createNodeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!isNode(props[propName])) {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      for (var key in shapeTypes) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          continue;
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createStrictShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      // We need to check all keys in case some are required but missing from
-      // props.
-      var allKeys = assign({}, props[propName], shapeTypes);
-      for (var key in allKeys) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          return new PropTypeError(
-            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
-            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
-            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
-          );
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-
-    return createChainableTypeChecker(validate);
-  }
-
-  function isNode(propValue) {
-    switch (typeof propValue) {
-      case 'number':
-      case 'string':
-      case 'undefined':
-        return true;
-      case 'boolean':
-        return !propValue;
-      case 'object':
-        if (Array.isArray(propValue)) {
-          return propValue.every(isNode);
-        }
-        if (propValue === null || isValidElement(propValue)) {
-          return true;
-        }
-
-        var iteratorFn = getIteratorFn(propValue);
-        if (iteratorFn) {
-          var iterator = iteratorFn.call(propValue);
-          var step;
-          if (iteratorFn !== propValue.entries) {
-            while (!(step = iterator.next()).done) {
-              if (!isNode(step.value)) {
-                return false;
-              }
-            }
-          } else {
-            // Iterator will provide entry [k,v] tuples rather than values.
-            while (!(step = iterator.next()).done) {
-              var entry = step.value;
-              if (entry) {
-                if (!isNode(entry[1])) {
-                  return false;
-                }
-              }
-            }
-          }
-        } else {
-          return false;
-        }
-
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  function isSymbol(propType, propValue) {
-    // Native Symbol.
-    if (propType === 'symbol') {
-      return true;
-    }
-
-    // falsy value can't be a Symbol
-    if (!propValue) {
-      return false;
-    }
-
-    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
-    if (propValue['@@toStringTag'] === 'Symbol') {
-      return true;
-    }
-
-    // Fallback for non-spec compliant Symbols which are polyfilled.
-    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
-      return true;
-    }
-
-    return false;
-  }
-
-  // Equivalent of `typeof` but with special handling for array and regexp.
-  function getPropType(propValue) {
-    var propType = typeof propValue;
-    if (Array.isArray(propValue)) {
-      return 'array';
-    }
-    if (propValue instanceof RegExp) {
-      // Old webkits (at least until Android 4.0) return 'function' rather than
-      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
-      // passes PropTypes.object.
-      return 'object';
-    }
-    if (isSymbol(propType, propValue)) {
-      return 'symbol';
-    }
-    return propType;
-  }
-
-  // This handles more types than `getPropType`. Only used for error messages.
-  // See `createPrimitiveTypeChecker`.
-  function getPreciseType(propValue) {
-    if (typeof propValue === 'undefined' || propValue === null) {
-      return '' + propValue;
-    }
-    var propType = getPropType(propValue);
-    if (propType === 'object') {
-      if (propValue instanceof Date) {
-        return 'date';
-      } else if (propValue instanceof RegExp) {
-        return 'regexp';
-      }
-    }
-    return propType;
-  }
-
-  // Returns a string that is postfixed to a warning about an invalid type.
-  // For example, "undefined" or "of type array"
-  function getPostfixForTypeWarning(value) {
-    var type = getPreciseType(value);
-    switch (type) {
-      case 'array':
-      case 'object':
-        return 'an ' + type;
-      case 'boolean':
-      case 'date':
-      case 'regexp':
-        return 'a ' + type;
-      default:
-        return type;
-    }
-  }
-
-  // Returns class name of the object, if any.
-  function getClassName(propValue) {
-    if (!propValue.constructor || !propValue.constructor.name) {
-      return ANONYMOUS;
-    }
-    return propValue.constructor.name;
-  }
-
-  ReactPropTypes.checkPropTypes = checkPropTypes;
-  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
-};
-
-
-/***/ }),
-/* 109 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-
-
-/* eslint-disable no-unused-vars */
-var getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !==
-				'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (err) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-module.exports = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (getOwnPropertySymbols) {
-			symbols = getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-
-
-/***/ }),
-/* 110 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var printWarning = function() {};
-
-if (true) {
-  var ReactPropTypesSecret = __webpack_require__(47);
-  var loggedTypeFailures = {};
-  var has = Function.call.bind(Object.prototype.hasOwnProperty);
-
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-}
-
-/**
- * Assert that the values match with the type specs.
- * Error messages are memorized and will only be shown once.
- *
- * @param {object} typeSpecs Map of name to a ReactPropType
- * @param {object} values Runtime values that need to be type-checked
- * @param {string} location e.g. "prop", "context", "child context"
- * @param {string} componentName Name of the component for error messages.
- * @param {?Function} getStack Returns the component stack.
- * @private
- */
-function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
-  if (true) {
-    for (var typeSpecName in typeSpecs) {
-      if (has(typeSpecs, typeSpecName)) {
-        var error;
-        // Prop type validation may throw. In case they do, we don't want to
-        // fail the render phase where it didn't fail before. So we log it.
-        // After these have been cleaned up, we'll let them throw.
-        try {
-          // This is intentionally an invariant that gets caught. It's the same
-          // behavior as without this statement except with a better message.
-          if (typeof typeSpecs[typeSpecName] !== 'function') {
-            var err = Error(
-              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
-              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'
-            );
-            err.name = 'Invariant Violation';
-            throw err;
-          }
-          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
-        } catch (ex) {
-          error = ex;
-        }
-        if (error && !(error instanceof Error)) {
-          printWarning(
-            (componentName || 'React class') + ': type specification of ' +
-            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
-            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
-            'You may have forgotten to pass an argument to the type checker ' +
-            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
-            'shape all require an argument).'
-          );
-        }
-        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
-          // Only monitor this failure once because there tends to be a lot of the
-          // same error.
-          loggedTypeFailures[error.message] = true;
-
-          var stack = getStack ? getStack() : '';
-
-          printWarning(
-            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
-          );
-        }
-      }
-    }
-  }
-}
-
-/**
- * Resets warning cache when testing.
- *
- * @private
- */
-checkPropTypes.resetWarningCache = function() {
-  if (true) {
-    loggedTypeFailures = {};
-  }
-}
-
-module.exports = checkPropTypes;
-
-
-/***/ }),
 /* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -26398,7 +26398,7 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
   if (true) {
-    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(18)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
+    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(1), __webpack_require__(10)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
@@ -26746,7 +26746,7 @@ var unit = exports.unit = function unit(props, propName, componentName) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var content = __webpack_require__(116);
-var loader = __webpack_require__(17);
+var loader = __webpack_require__(19);
 
 if(typeof content === "string") content = [[module.i, content]];
 
@@ -26759,7 +26759,7 @@ if(content.locals) module.exports = content.locals;
 /* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(16)(false);
+exports = module.exports = __webpack_require__(18)(false);
 // imports
 
 
@@ -26794,8 +26794,8 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(119));
-__export(__webpack_require__(97));
-__export(__webpack_require__(52));
+__export(__webpack_require__(101));
+__export(__webpack_require__(56));
 
 
 
@@ -26806,10 +26806,10 @@ __export(__webpack_require__(52));
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(2);
-var ReactDom = __webpack_require__(10);
-var sp_webpart_base_1 = __webpack_require__(30);
-var PropertyFieldListPickerHost_1 = __webpack_require__(52);
+var React = __webpack_require__(1);
+var ReactDom = __webpack_require__(6);
+var sp_webpart_base_1 = __webpack_require__(33);
+var PropertyFieldListPickerHost_1 = __webpack_require__(56);
 var PropertyFieldListMultiPickerHost_1 = __webpack_require__(254);
 /**
  * Represents a PropertyFieldListPicker object
@@ -26948,7 +26948,7 @@ exports.PropertyFieldListPicker = PropertyFieldListPicker;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-tslib_1.__exportStar(__webpack_require__(53), exports);
+tslib_1.__exportStar(__webpack_require__(57), exports);
 
 
 /***/ }),
@@ -26959,23 +26959,23 @@ tslib_1.__exportStar(__webpack_require__(53), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Dropdown_types_1 = __webpack_require__(54);
-var Checkbox_1 = __webpack_require__(56);
-var Callout_1 = __webpack_require__(77);
-var Label_1 = __webpack_require__(41);
-var Button_1 = __webpack_require__(82);
+var React = __webpack_require__(1);
+var Dropdown_types_1 = __webpack_require__(58);
+var Checkbox_1 = __webpack_require__(60);
+var Callout_1 = __webpack_require__(81);
+var Label_1 = __webpack_require__(47);
+var Button_1 = __webpack_require__(86);
 var Panel_1 = __webpack_require__(236);
-var Icon_1 = __webpack_require__(20);
-var FocusZone_1 = __webpack_require__(84);
-var withResponsiveMode_1 = __webpack_require__(88);
-var Utilities_1 = __webpack_require__(1);
-var SelectableOption_types_1 = __webpack_require__(55);
+var Icon_1 = __webpack_require__(24);
+var FocusZone_1 = __webpack_require__(88);
+var withResponsiveMode_1 = __webpack_require__(92);
+var Utilities_1 = __webpack_require__(2);
+var SelectableOption_types_1 = __webpack_require__(59);
 var stylesImport = __webpack_require__(246);
 var styles = stylesImport;
-var Checkbox_styles_1 = __webpack_require__(75);
+var Checkbox_styles_1 = __webpack_require__(79);
 var Styling_1 = __webpack_require__(3);
-var KeytipData_1 = __webpack_require__(13);
+var KeytipData_1 = __webpack_require__(15);
 var Dropdown = /** @class */ (function (_super) {
     tslib_1.__extends(Dropdown, _super);
     function Dropdown(props) {
@@ -27572,12 +27572,12 @@ tslib_1.__exportStar(__webpack_require__(123), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var Icon_1 = __webpack_require__(20);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var Icon_1 = __webpack_require__(24);
 var Checkbox_classNames_1 = __webpack_require__(182);
-var Checkbox_styles_1 = __webpack_require__(75);
-var KeytipData_1 = __webpack_require__(13);
+var Checkbox_styles_1 = __webpack_require__(79);
+var KeytipData_1 = __webpack_require__(15);
 var Checkbox = /** @class */ (function (_super) {
     tslib_1.__extends(Checkbox, _super);
     /**
@@ -27682,16 +27682,16 @@ exports.Checkbox = Checkbox;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-tslib_1.__exportStar(__webpack_require__(57), exports);
+tslib_1.__exportStar(__webpack_require__(61), exports);
 tslib_1.__exportStar(__webpack_require__(125), exports);
-tslib_1.__exportStar(__webpack_require__(62), exports);
+tslib_1.__exportStar(__webpack_require__(66), exports);
 tslib_1.__exportStar(__webpack_require__(136), exports);
-tslib_1.__exportStar(__webpack_require__(35), exports);
+tslib_1.__exportStar(__webpack_require__(42), exports);
 tslib_1.__exportStar(__webpack_require__(137), exports);
 tslib_1.__exportStar(__webpack_require__(138), exports);
-tslib_1.__exportStar(__webpack_require__(24), exports);
+tslib_1.__exportStar(__webpack_require__(27), exports);
 tslib_1.__exportStar(__webpack_require__(139), exports);
-tslib_1.__exportStar(__webpack_require__(36), exports);
+tslib_1.__exportStar(__webpack_require__(43), exports);
 tslib_1.__exportStar(__webpack_require__(140), exports);
 tslib_1.__exportStar(__webpack_require__(141), exports);
 tslib_1.__exportStar(__webpack_require__(142), exports);
@@ -27701,25 +27701,25 @@ tslib_1.__exportStar(__webpack_require__(145), exports);
 tslib_1.__exportStar(__webpack_require__(146), exports);
 tslib_1.__exportStar(__webpack_require__(147), exports);
 tslib_1.__exportStar(__webpack_require__(148), exports);
-tslib_1.__exportStar(__webpack_require__(8), exports);
+tslib_1.__exportStar(__webpack_require__(11), exports);
 tslib_1.__exportStar(__webpack_require__(149), exports);
 tslib_1.__exportStar(__webpack_require__(150), exports);
-tslib_1.__exportStar(__webpack_require__(64), exports);
-tslib_1.__exportStar(__webpack_require__(34), exports);
+tslib_1.__exportStar(__webpack_require__(68), exports);
+tslib_1.__exportStar(__webpack_require__(41), exports);
 tslib_1.__exportStar(__webpack_require__(151), exports);
-tslib_1.__exportStar(__webpack_require__(63), exports);
-tslib_1.__exportStar(__webpack_require__(65), exports);
+tslib_1.__exportStar(__webpack_require__(67), exports);
+tslib_1.__exportStar(__webpack_require__(69), exports);
 tslib_1.__exportStar(__webpack_require__(153), exports);
 tslib_1.__exportStar(__webpack_require__(154), exports);
-tslib_1.__exportStar(__webpack_require__(32), exports);
+tslib_1.__exportStar(__webpack_require__(39), exports);
 tslib_1.__exportStar(__webpack_require__(155), exports);
 tslib_1.__exportStar(__webpack_require__(156), exports);
 tslib_1.__exportStar(__webpack_require__(157), exports);
 tslib_1.__exportStar(__webpack_require__(158), exports);
-tslib_1.__exportStar(__webpack_require__(58), exports);
+tslib_1.__exportStar(__webpack_require__(62), exports);
 tslib_1.__exportStar(__webpack_require__(160), exports);
 tslib_1.__exportStar(__webpack_require__(161), exports);
-tslib_1.__exportStar(__webpack_require__(33), exports);
+tslib_1.__exportStar(__webpack_require__(40), exports);
 
 
 /***/ }),
@@ -27729,9 +27729,9 @@ tslib_1.__exportStar(__webpack_require__(33), exports);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var EventGroup_1 = __webpack_require__(24);
-var scroll_1 = __webpack_require__(58);
-var dom_1 = __webpack_require__(8);
+var EventGroup_1 = __webpack_require__(27);
+var scroll_1 = __webpack_require__(62);
+var dom_1 = __webpack_require__(11);
 var SCROLL_ITERATION_DELAY = 16;
 var SCROLL_GUTTER_HEIGHT = 100;
 var MAX_SCROLL_VELOCITY = 15;
@@ -28011,8 +28011,8 @@ process.umask = function() { return 0; };
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var styleToClassName_1 = __webpack_require__(25);
-var extractStyleParts_1 = __webpack_require__(60);
+var styleToClassName_1 = __webpack_require__(28);
+var extractStyleParts_1 = __webpack_require__(64);
 /**
  * Concatination helper, which can merge class names together. Skips over falsey values.
  *
@@ -28160,9 +28160,9 @@ exports.provideUnits = provideUnits;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var extractStyleParts_1 = __webpack_require__(60);
-var concatStyleSets_1 = __webpack_require__(61);
-var styleToClassName_1 = __webpack_require__(25);
+var extractStyleParts_1 = __webpack_require__(64);
+var concatStyleSets_1 = __webpack_require__(65);
+var styleToClassName_1 = __webpack_require__(28);
 /**
  * Allows you to pass in 1 or more sets of areas which will return a merged
  * set of classes.
@@ -28215,8 +28215,8 @@ exports.mergeStyleSets = mergeStyleSets;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(12);
-var styleToClassName_1 = __webpack_require__(25);
+var Stylesheet_1 = __webpack_require__(14);
+var styleToClassName_1 = __webpack_require__(28);
 /**
  * Registers a font face.
  * @public
@@ -28234,8 +28234,8 @@ exports.fontFace = fontFace;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(12);
-var styleToClassName_1 = __webpack_require__(25);
+var Stylesheet_1 = __webpack_require__(14);
+var styleToClassName_1 = __webpack_require__(28);
 /**
  * Registers keyframe definitions.
  *
@@ -28265,7 +28265,7 @@ exports.keyframes = keyframes;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(8);
+var dom_1 = __webpack_require__(11);
 function initializeDir(window) {
     var win = (window || dom_1.getWindow());
     if (win && !win.__hasInitializedDir__) {
@@ -28288,7 +28288,7 @@ exports.initializeDir = initializeDir;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
+var React = __webpack_require__(1);
 function provideContext(contextTypes, mapPropsToContext) {
     var Provider = /** @class */ (function (_super) {
         tslib_1.__extends(Provider, _super);
@@ -28317,9 +28317,9 @@ exports.provideContext = provideContext;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var PropTypes = __webpack_require__(18);
-var BaseComponent_1 = __webpack_require__(62);
+var React = __webpack_require__(1);
+var PropTypes = __webpack_require__(10);
+var BaseComponent_1 = __webpack_require__(66);
 /**
  * The Customizer component allows for default props to be mixed into components which
  * are decorated with the customizable() decorator. This enables injection scenarios like:
@@ -28405,7 +28405,7 @@ function scopedSettingsMergeWith(scopedSettingsFromProps) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
+var React = __webpack_require__(1);
 /**
  * Utility component for delaying the render of a child component after a given delay. This component
  * requires a single child component; don't pass in many components. Wrap multiple components in a DIV
@@ -28892,7 +28892,7 @@ exports.autobind = autobind;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(6);
+var index_1 = __webpack_require__(9);
 /**
  * Creates a getClassNames function which calls getStyles given the props, and injects them
  * into mergeStyleSets.
@@ -28985,10 +28985,10 @@ exports.css = css;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var PropTypes = __webpack_require__(18);
-var Customizations_1 = __webpack_require__(35);
-var hoistStatics_1 = __webpack_require__(64);
+var React = __webpack_require__(1);
+var PropTypes = __webpack_require__(10);
+var Customizations_1 = __webpack_require__(42);
+var hoistStatics_1 = __webpack_require__(68);
 function customizable(scope, fields
 // tslint:disable-next-line:no-any
 ) {
@@ -29043,7 +29043,7 @@ exports.customizable = customizable;
 
 /* tslint:disable:no-string-literal */
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(8);
+var dom_1 = __webpack_require__(11);
 var IS_FOCUSABLE_ATTRIBUTE = 'data-is-focusable';
 var IS_VISIBLE_ATTRIBUTE = 'data-is-visible';
 var FOCUSZONE_ID_ATTRIBUTE = 'data-focuszone-id';
@@ -29725,7 +29725,7 @@ exports.hasOverflow = hasOverflow;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var object_1 = __webpack_require__(32);
+var object_1 = __webpack_require__(39);
 /**
  * An array of events that are allowed on every html element type.
  *
@@ -30025,9 +30025,9 @@ exports.setBaseUrl = setBaseUrl;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(8);
+var dom_1 = __webpack_require__(11);
 var sessionStorage_1 = __webpack_require__(159);
-var rtlifyRules_1 = __webpack_require__(59);
+var rtlifyRules_1 = __webpack_require__(63);
 var RTL_LOCAL_STORAGE_KEY = 'isRTL';
 // Default to undefined so that we initialize on first read.
 var _isRTL;
@@ -30174,8 +30174,8 @@ exports.format = format;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var index_1 = __webpack_require__(6);
+var React = __webpack_require__(1);
+var index_1 = __webpack_require__(9);
 /**
  * The styled HOC wrapper allows you to create a functional wrapper around a given component which will resolve
  * getStyles functional props, and mix customized props passed in using concatStyleSets. Example:
@@ -30214,8 +30214,8 @@ exports.styled = styled;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(163), exports);
-tslib_1.__exportStar(__webpack_require__(66), exports);
-tslib_1.__exportStar(__webpack_require__(67), exports);
+tslib_1.__exportStar(__webpack_require__(70), exports);
+tslib_1.__exportStar(__webpack_require__(71), exports);
 
 
 /***/ }),
@@ -30225,8 +30225,8 @@ tslib_1.__exportStar(__webpack_require__(67), exports);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
-var Icon_base_1 = __webpack_require__(66);
+var Utilities_1 = __webpack_require__(2);
+var Icon_base_1 = __webpack_require__(70);
 var Icon_styles_1 = __webpack_require__(181);
 /**
  * Icons are used for rendering an individual's avatar, presence and details.
@@ -30242,7 +30242,7 @@ exports.Icon = Utilities_1.styled(Icon_base_1.IconBase, Icon_styles_1.getStyles)
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Image_base_1 = __webpack_require__(165);
 var Image_styles_1 = __webpack_require__(166);
 exports.Image = Utilities_1.styled(Image_base_1.ImageBase, Image_styles_1.getStyles);
@@ -30256,9 +30256,9 @@ exports.Image = Utilities_1.styled(Image_base_1.ImageBase, Image_styles_1.getSty
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var Image_types_1 = __webpack_require__(68);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var Image_types_1 = __webpack_require__(72);
 var getClassNames = Utilities_1.classNamesFunction();
 var KEY_PREFIX = 'fabricImage';
 var ImageBase = /** @class */ (function (_super) {
@@ -30525,9 +30525,9 @@ exports.getStyles = function (props) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(168), exports);
-tslib_1.__exportStar(__webpack_require__(26), exports);
-tslib_1.__exportStar(__webpack_require__(37), exports);
-tslib_1.__exportStar(__webpack_require__(69), exports);
+tslib_1.__exportStar(__webpack_require__(29), exports);
+tslib_1.__exportStar(__webpack_require__(44), exports);
+tslib_1.__exportStar(__webpack_require__(73), exports);
 
 
 /***/ }),
@@ -30552,8 +30552,8 @@ exports.ColorClassNames = ColorClassNames_1.ColorClassNames;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(37);
-var index_2 = __webpack_require__(26);
+var index_1 = __webpack_require__(44);
+var index_2 = __webpack_require__(29);
 exports.AnimationClassNames = index_1.buildClassMap(index_2.AnimationStyles);
 
 
@@ -30564,7 +30564,7 @@ exports.AnimationClassNames = index_1.buildClassMap(index_2.AnimationStyles);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var MergeStyles_1 = __webpack_require__(69);
+var MergeStyles_1 = __webpack_require__(73);
 /**
  * Builds a class names object from a given map.
  *
@@ -30604,8 +30604,8 @@ exports.buildClassMap = buildClassMap;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(6);
-var icons_1 = __webpack_require__(70);
+var index_1 = __webpack_require__(9);
+var icons_1 = __webpack_require__(74);
 var defaultIconStyles = {
     display: 'inline-block'
 };
@@ -30639,7 +30639,7 @@ exports.getIconClassName = getIconClassName;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(6);
+var index_1 = __webpack_require__(9);
 /* Register the keyframes */
 var EASING_FUNCTION_1 = 'cubic-bezier(.1,.9,.2,1)';
 var EASING_FUNCTION_2 = 'cubic-bezier(.1,.25,.75,.9)';
@@ -30800,9 +30800,9 @@ function _createSlideOutY(toY) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var CommonStyles_1 = __webpack_require__(73);
-var initializeFocusRects_1 = __webpack_require__(34);
-var zIndexes_1 = __webpack_require__(74);
+var CommonStyles_1 = __webpack_require__(77);
+var initializeFocusRects_1 = __webpack_require__(41);
+var zIndexes_1 = __webpack_require__(78);
 /**
  * Generates a focus style which can be used to define an :after focus border.
  *
@@ -30891,7 +30891,7 @@ exports.hiddenContentStyle = {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var index_1 = __webpack_require__(6);
+var index_1 = __webpack_require__(9);
 var DEFAULT_DURATION = '14s';
 var DEFAULT_DELAY = '2s';
 var DEFAULT_ITERATION_COUNT = '1';
@@ -31003,10 +31003,10 @@ exports.getGlobalClassNames = getGlobalClassNames;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var Customizations_1 = __webpack_require__(35);
-var DefaultFontStyles_1 = __webpack_require__(71);
-var DefaultPalette_1 = __webpack_require__(38);
-var load_themed_styles_1 = __webpack_require__(39);
+var Customizations_1 = __webpack_require__(42);
+var DefaultFontStyles_1 = __webpack_require__(75);
+var DefaultPalette_1 = __webpack_require__(45);
+var load_themed_styles_1 = __webpack_require__(4);
 var _theme = {
     palette: DefaultPalette_1.DefaultPalette,
     semanticColors: _makeSemanticColorsFromPalette(DefaultPalette_1.DefaultPalette, false, false),
@@ -31238,8 +31238,8 @@ exports.noWrap = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(37);
-var index_2 = __webpack_require__(26);
+var index_1 = __webpack_require__(44);
+var index_2 = __webpack_require__(29);
 exports.FontClassNames = index_1.buildClassMap(index_2.DefaultFontStyles);
 
 
@@ -31250,9 +31250,9 @@ exports.FontClassNames = index_1.buildClassMap(index_2.DefaultFontStyles);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var index_1 = __webpack_require__(6);
-var DefaultPalette_1 = __webpack_require__(38);
-var index_2 = __webpack_require__(26);
+var index_1 = __webpack_require__(9);
+var DefaultPalette_1 = __webpack_require__(45);
+var index_2 = __webpack_require__(29);
 exports.ColorClassNames = {};
 for (var colorName in DefaultPalette_1.DefaultPalette) {
     if (DefaultPalette_1.DefaultPalette.hasOwnProperty(colorName)) {
@@ -31325,7 +31325,7 @@ exports.getStyles = function (props) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 exports.getClassNames = Utilities_1.memoizeFunction(function (styles, disabled, isChecked, isReversed, className) {
     return {
@@ -31376,7 +31376,7 @@ tslib_1.__exportStar(__webpack_require__(184), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var KeytipManager_1 = __webpack_require__(185);
 var KeytipUtils_1 = __webpack_require__(186);
 /**
@@ -31455,8 +31455,8 @@ exports.KeytipData = KeytipData;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var Utilities_1 = __webpack_require__(1);
-var KeytipConstants_1 = __webpack_require__(76);
+var Utilities_1 = __webpack_require__(2);
+var KeytipConstants_1 = __webpack_require__(80);
 /**
  * This class is responsible for handling registering, updating, and unregistering of keytips
  */
@@ -31632,8 +31632,8 @@ exports.KeytipManager = KeytipManager;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var KeytipConstants_1 = __webpack_require__(76);
-var Utilities_1 = __webpack_require__(1);
+var KeytipConstants_1 = __webpack_require__(80);
+var Utilities_1 = __webpack_require__(2);
 /**
  * Converts a whole set of KeySequences into one keytip ID, which will be the ID for the last keytip sequence specified
  * keySequences should not include the initial keytip 'start' sequence.
@@ -31707,7 +31707,7 @@ exports.getAriaDescribedBy = getAriaDescribedBy;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(188), exports);
-tslib_1.__exportStar(__webpack_require__(81), exports);
+tslib_1.__exportStar(__webpack_require__(85), exports);
 
 
 /***/ }),
@@ -31718,8 +31718,8 @@ tslib_1.__exportStar(__webpack_require__(81), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var CalloutContent_1 = __webpack_require__(189);
 var Layer_1 = __webpack_require__(197);
 var Callout = /** @class */ (function (_super) {
@@ -31748,7 +31748,7 @@ exports.Callout = Callout;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var CalloutContent_base_1 = __webpack_require__(190);
 var CalloutContent_styles_1 = __webpack_require__(196);
 exports.CalloutContent = Utilities_1.styled(CalloutContent_base_1.CalloutContentBase, CalloutContent_styles_1.getStyles);
@@ -31762,11 +31762,11 @@ exports.CalloutContent = Utilities_1.styled(CalloutContent_base_1.CalloutContent
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var positioning_1 = __webpack_require__(191);
-var Popup_1 = __webpack_require__(79);
-var Utilities_2 = __webpack_require__(1);
+var Popup_1 = __webpack_require__(83);
+var Utilities_2 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 var ANIMATIONS = (_a = {},
     _a[positioning_1.RectangleEdge.top] = Styling_1.AnimationClassNames.slideUpIn10,
@@ -32134,7 +32134,7 @@ tslib_1.__exportStar(__webpack_require__(192), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(193), exports);
-tslib_1.__exportStar(__webpack_require__(78), exports);
+tslib_1.__exportStar(__webpack_require__(82), exports);
 
 
 /***/ }),
@@ -32145,8 +32145,8 @@ tslib_1.__exportStar(__webpack_require__(78), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var Utilities_1 = __webpack_require__(1);
-var positioning_types_1 = __webpack_require__(78);
+var Utilities_1 = __webpack_require__(2);
+var positioning_types_1 = __webpack_require__(82);
 var Rectangle = /** @class */ (function (_super) {
     tslib_1.__extends(Rectangle, _super);
     function Rectangle() {
@@ -32813,8 +32813,8 @@ tslib_1.__exportStar(__webpack_require__(195), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 /**
  * This adds accessibility to Dialog and Panel controls
  */
@@ -33046,8 +33046,8 @@ tslib_1.__exportStar(__webpack_require__(198), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-tslib_1.__exportStar(__webpack_require__(80), exports);
-tslib_1.__exportStar(__webpack_require__(40), exports);
+tslib_1.__exportStar(__webpack_require__(84), exports);
+tslib_1.__exportStar(__webpack_require__(46), exports);
 tslib_1.__exportStar(__webpack_require__(204), exports);
 
 
@@ -33081,8 +33081,8 @@ tslib_1.__exportStar(__webpack_require__(201), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Fabric_styles_1 = __webpack_require__(202);
 var getClassNames = Utilities_1.classNamesFunction();
 var Fabric = /** @class */ (function (_super) {
@@ -33210,9 +33210,9 @@ exports.getStyles = function (props) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var Layer_base_1 = __webpack_require__(40);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var Layer_base_1 = __webpack_require__(46);
 var LayerHost = /** @class */ (function (_super) {
     tslib_1.__extends(LayerHost, _super);
     function LayerHost() {
@@ -33254,8 +33254,8 @@ tslib_1.__exportStar(__webpack_require__(206), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Label_classNames_1 = __webpack_require__(207);
 var Label = /** @class */ (function (_super) {
     tslib_1.__extends(Label, _super);
@@ -33281,7 +33281,7 @@ exports.Label = Label;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 exports.getLabelClassNames = Utilities_1.memoizeFunction(function (theme, className, disabled, required) {
     return Styling_1.mergeStyleSets({
@@ -33327,17 +33327,17 @@ exports.getLabelClassNames = Utilities_1.memoizeFunction(function (theme, classN
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-tslib_1.__exportStar(__webpack_require__(14), exports);
-tslib_1.__exportStar(__webpack_require__(89), exports);
+tslib_1.__exportStar(__webpack_require__(16), exports);
+tslib_1.__exportStar(__webpack_require__(93), exports);
 tslib_1.__exportStar(__webpack_require__(226), exports);
-tslib_1.__exportStar(__webpack_require__(42), exports);
+tslib_1.__exportStar(__webpack_require__(48), exports);
 tslib_1.__exportStar(__webpack_require__(231), exports);
 tslib_1.__exportStar(__webpack_require__(233), exports);
-tslib_1.__exportStar(__webpack_require__(91), exports);
-tslib_1.__exportStar(__webpack_require__(28), exports);
+tslib_1.__exportStar(__webpack_require__(95), exports);
+tslib_1.__exportStar(__webpack_require__(31), exports);
 tslib_1.__exportStar(__webpack_require__(234), exports);
-tslib_1.__exportStar(__webpack_require__(93), exports);
-tslib_1.__exportStar(__webpack_require__(92), exports);
+tslib_1.__exportStar(__webpack_require__(97), exports);
+tslib_1.__exportStar(__webpack_require__(96), exports);
 
 
 /***/ }),
@@ -33360,8 +33360,8 @@ tslib_1.__exportStar(__webpack_require__(210), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(211), exports);
-tslib_1.__exportStar(__webpack_require__(83), exports);
-tslib_1.__exportStar(__webpack_require__(22), exports);
+tslib_1.__exportStar(__webpack_require__(87), exports);
+tslib_1.__exportStar(__webpack_require__(26), exports);
 
 
 /***/ }),
@@ -33372,15 +33372,15 @@ tslib_1.__exportStar(__webpack_require__(22), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var ContextualMenu_types_1 = __webpack_require__(83);
-var FocusZone_1 = __webpack_require__(84);
-var ContextualMenu_classNames_1 = __webpack_require__(86);
-var Utilities_1 = __webpack_require__(1);
-var index_1 = __webpack_require__(21);
-var withResponsiveMode_1 = __webpack_require__(88);
-var Callout_1 = __webpack_require__(77);
-var ContextualMenuItem_1 = __webpack_require__(22);
+var React = __webpack_require__(1);
+var ContextualMenu_types_1 = __webpack_require__(87);
+var FocusZone_1 = __webpack_require__(88);
+var ContextualMenu_classNames_1 = __webpack_require__(90);
+var Utilities_1 = __webpack_require__(2);
+var index_1 = __webpack_require__(25);
+var withResponsiveMode_1 = __webpack_require__(92);
+var Callout_1 = __webpack_require__(81);
+var ContextualMenuItem_1 = __webpack_require__(26);
 var index_2 = __webpack_require__(217);
 function getSubmenuItems(item) {
     return item.subMenuProps ? item.subMenuProps.items : item.items;
@@ -34010,7 +34010,7 @@ exports.ContextualMenu = ContextualMenu;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(213), exports);
-tslib_1.__exportStar(__webpack_require__(85), exports);
+tslib_1.__exportStar(__webpack_require__(89), exports);
 
 
 /***/ }),
@@ -34021,9 +34021,9 @@ tslib_1.__exportStar(__webpack_require__(85), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var FocusZone_types_1 = __webpack_require__(85);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var FocusZone_types_1 = __webpack_require__(89);
+var Utilities_1 = __webpack_require__(2);
 var IS_FOCUSABLE_ATTRIBUTE = 'data-is-focusable';
 var IS_ENTER_DISABLED_ATTRIBUTE = 'data-disable-click-on-enter';
 var FOCUSZONE_ID_ATTRIBUTE = 'data-focuszone-id';
@@ -34679,7 +34679,7 @@ exports.FocusZone = FocusZone;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var ContextualMenuItemHeight = '32px';
 var getItemHighContrastStyles = Utilities_1.memoizeFunction(function () {
     return {
@@ -34931,7 +34931,7 @@ exports.isItemDisabled = isItemDisabled;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var BaseDecorator = /** @class */ (function (_super) {
     tslib_1.__extends(BaseDecorator, _super);
     function BaseDecorator(props) {
@@ -34972,7 +34972,7 @@ var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(218), exports);
 tslib_1.__exportStar(__webpack_require__(219), exports);
 tslib_1.__exportStar(__webpack_require__(220), exports);
-tslib_1.__exportStar(__webpack_require__(27), exports);
+tslib_1.__exportStar(__webpack_require__(30), exports);
 
 
 /***/ }),
@@ -34983,12 +34983,12 @@ tslib_1.__exportStar(__webpack_require__(27), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var ContextualMenuItemWrapper_1 = __webpack_require__(27);
-var KeytipData_1 = __webpack_require__(13);
-var index_1 = __webpack_require__(21);
-var ContextualMenuItem_1 = __webpack_require__(22);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var ContextualMenuItemWrapper_1 = __webpack_require__(30);
+var KeytipData_1 = __webpack_require__(15);
+var index_1 = __webpack_require__(25);
+var ContextualMenuItem_1 = __webpack_require__(26);
 var ContextualMenuAnchor = /** @class */ (function (_super) {
     tslib_1.__extends(ContextualMenuAnchor, _super);
     function ContextualMenuAnchor() {
@@ -35037,12 +35037,12 @@ exports.ContextualMenuAnchor = ContextualMenuAnchor;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var ContextualMenuItemWrapper_1 = __webpack_require__(27);
-var KeytipData_1 = __webpack_require__(13);
-var index_1 = __webpack_require__(21);
-var ContextualMenuItem_1 = __webpack_require__(22);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var ContextualMenuItemWrapper_1 = __webpack_require__(30);
+var KeytipData_1 = __webpack_require__(15);
+var index_1 = __webpack_require__(25);
+var ContextualMenuItem_1 = __webpack_require__(26);
 var ContextualMenuButton = /** @class */ (function (_super) {
     tslib_1.__extends(ContextualMenuButton, _super);
     function ContextualMenuButton() {
@@ -35112,14 +35112,14 @@ exports.ContextualMenuButton = ContextualMenuButton;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var ContextualMenuItem_1 = __webpack_require__(22);
-var ContextualMenu_classNames_1 = __webpack_require__(86);
-var KeytipData_1 = __webpack_require__(13);
-var index_1 = __webpack_require__(21);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var ContextualMenuItem_1 = __webpack_require__(26);
+var ContextualMenu_classNames_1 = __webpack_require__(90);
+var KeytipData_1 = __webpack_require__(15);
+var index_1 = __webpack_require__(25);
 var Divider_1 = __webpack_require__(221);
-var ContextualMenuItemWrapper_1 = __webpack_require__(27);
+var ContextualMenuItemWrapper_1 = __webpack_require__(30);
 var TouchIdleDelay = 500; /* ms */
 var ContextualMenuSplitButton = /** @class */ (function (_super) {
     tslib_1.__extends(ContextualMenuSplitButton, _super);
@@ -35310,8 +35310,8 @@ tslib_1.__exportStar(__webpack_require__(223), exports);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(2);
-var VerticalDivider_classNames_1 = __webpack_require__(87);
+var React = __webpack_require__(1);
+var VerticalDivider_classNames_1 = __webpack_require__(91);
 var Styling_1 = __webpack_require__(3);
 exports.VerticalDivider = function (props) {
     var theme = Styling_1.getTheme();
@@ -35328,7 +35328,7 @@ exports.VerticalDivider = function (props) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 exports.getBaseButtonClassNames = Utilities_1.memoizeFunction(function (styles, className, variantClassName, iconClassName, menuIconClassName, disabled, checked, expanded, isSplit) {
     var isExpanded = expanded && !isSplit;
@@ -35447,7 +35447,7 @@ exports.getBaseButtonClassNames = Utilities_1.memoizeFunction(function (styles, 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Styling_1 = __webpack_require__(3);
 exports.getClassNames = Utilities_1.memoizeFunction(function (styles, disabled, expanded, checked) {
     return {
@@ -35486,14 +35486,14 @@ exports.getClassNames = Utilities_1.memoizeFunction(function (styles, disabled, 
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
-var Button_types_1 = __webpack_require__(89);
-var DefaultButton_1 = __webpack_require__(28);
-var ActionButton_1 = __webpack_require__(42);
-var CompoundButton_1 = __webpack_require__(91);
-var IconButton_1 = __webpack_require__(92);
-var PrimaryButton_1 = __webpack_require__(93);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var Button_types_1 = __webpack_require__(93);
+var DefaultButton_1 = __webpack_require__(31);
+var ActionButton_1 = __webpack_require__(48);
+var CompoundButton_1 = __webpack_require__(95);
+var IconButton_1 = __webpack_require__(96);
+var PrimaryButton_1 = __webpack_require__(97);
 /**
  * This class is deprecated. Use the individual *Button components instead.
  * @deprecated
@@ -35538,10 +35538,10 @@ exports.Button = Button;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
-var BaseButton_styles_1 = __webpack_require__(15);
-var SplitButton_styles_1 = __webpack_require__(29);
-var ButtonThemes_1 = __webpack_require__(90);
+var Utilities_1 = __webpack_require__(2);
+var BaseButton_styles_1 = __webpack_require__(17);
+var SplitButton_styles_1 = __webpack_require__(32);
+var ButtonThemes_1 = __webpack_require__(94);
 var DEFAULT_BUTTON_HEIGHT = '32px';
 var DEFAULT_BUTTON_MINWIDTH = '80px';
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, primary) {
@@ -35568,8 +35568,8 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, p
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
-var BaseButton_styles_1 = __webpack_require__(15);
+var Utilities_1 = __webpack_require__(2);
+var BaseButton_styles_1 = __webpack_require__(17);
 var DEFAULT_BUTTON_HEIGHT = '40px';
 var DEFAULT_PADDING = '0 4px';
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
@@ -35642,10 +35642,10 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
-var BaseButton_styles_1 = __webpack_require__(15);
-var SplitButton_styles_1 = __webpack_require__(29);
-var ButtonThemes_1 = __webpack_require__(90);
+var Utilities_1 = __webpack_require__(2);
+var BaseButton_styles_1 = __webpack_require__(17);
+var SplitButton_styles_1 = __webpack_require__(32);
+var ButtonThemes_1 = __webpack_require__(94);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, primary) {
     var baseButtonStyles = BaseButton_styles_1.getStyles(theme);
     var splitButtonStyles = SplitButton_styles_1.getStyles(theme);
@@ -35746,9 +35746,9 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, p
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
-var BaseButton_styles_1 = __webpack_require__(15);
-var SplitButton_styles_1 = __webpack_require__(29);
+var Utilities_1 = __webpack_require__(2);
+var BaseButton_styles_1 = __webpack_require__(17);
+var SplitButton_styles_1 = __webpack_require__(32);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
     var baseButtonStyles = BaseButton_styles_1.getStyles(theme);
     var splitButtonStyles = SplitButton_styles_1.getStyles(theme);
@@ -35800,9 +35800,9 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var BaseButton_1 = __webpack_require__(14);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var BaseButton_1 = __webpack_require__(16);
+var Utilities_1 = __webpack_require__(2);
 var CommandBarButton_styles_1 = __webpack_require__(232);
 var CommandBarButton = /** @class */ (function (_super) {
     tslib_1.__extends(CommandBarButton, _super);
@@ -35834,9 +35834,9 @@ exports.CommandBarButton = CommandBarButton;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
-var BaseButton_styles_1 = __webpack_require__(15);
-var SplitButton_styles_1 = __webpack_require__(29);
+var Utilities_1 = __webpack_require__(2);
+var BaseButton_styles_1 = __webpack_require__(17);
+var SplitButton_styles_1 = __webpack_require__(32);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, focusInset, focusColor) {
     var baseButtonStyles = BaseButton_styles_1.getStyles(theme);
     var baseSplitButtonStyles = SplitButton_styles_1.getStyles(theme);
@@ -35964,7 +35964,7 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, f
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ActionButton_1 = __webpack_require__(42);
+var ActionButton_1 = __webpack_require__(48);
 exports.CommandButton = ActionButton_1.ActionButton;
 
 
@@ -35976,9 +35976,9 @@ exports.CommandButton = ActionButton_1.ActionButton;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var DefaultButton_1 = __webpack_require__(28);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var DefaultButton_1 = __webpack_require__(31);
+var Utilities_1 = __webpack_require__(2);
 var MessageBarButton_styles_1 = __webpack_require__(235);
 var MessageBarButton = /** @class */ (function (_super) {
     tslib_1.__extends(MessageBarButton, _super);
@@ -36005,8 +36005,8 @@ exports.MessageBarButton = MessageBarButton;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(3);
-var Utilities_1 = __webpack_require__(1);
-var BaseButton_styles_1 = __webpack_require__(15);
+var Utilities_1 = __webpack_require__(2);
+var BaseButton_styles_1 = __webpack_require__(17);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, focusInset, focusColor) {
     var baseButtonStyles = BaseButton_styles_1.getStyles(theme);
     var messageBarButtonStyles = {
@@ -36047,7 +36047,7 @@ tslib_1.__exportStar(__webpack_require__(237), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(238), exports);
-tslib_1.__exportStar(__webpack_require__(94), exports);
+tslib_1.__exportStar(__webpack_require__(98), exports);
 
 
 /***/ }),
@@ -36058,14 +36058,14 @@ tslib_1.__exportStar(__webpack_require__(94), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var index_1 = __webpack_require__(239);
-var Panel_types_1 = __webpack_require__(94);
-var Layer_1 = __webpack_require__(80);
+var Panel_types_1 = __webpack_require__(98);
+var Layer_1 = __webpack_require__(84);
 var Overlay_1 = __webpack_require__(241);
-var Popup_1 = __webpack_require__(79);
-var Button_1 = __webpack_require__(82);
+var Popup_1 = __webpack_require__(83);
+var Button_1 = __webpack_require__(86);
 var Styling_1 = __webpack_require__(3);
 var stylesImport = __webpack_require__(245);
 var styles = stylesImport;
@@ -36280,8 +36280,8 @@ tslib_1.__exportStar(__webpack_require__(240), exports);
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var FocusTrapZone = /** @class */ (function (_super) {
     tslib_1.__extends(FocusTrapZone, _super);
     function FocusTrapZone() {
@@ -36457,7 +36457,7 @@ tslib_1.__exportStar(__webpack_require__(242), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(243), exports);
-tslib_1.__exportStar(__webpack_require__(95), exports);
+tslib_1.__exportStar(__webpack_require__(99), exports);
 
 
 /***/ }),
@@ -36467,8 +36467,8 @@ tslib_1.__exportStar(__webpack_require__(95), exports);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
-var Overlay_base_1 = __webpack_require__(95);
+var Utilities_1 = __webpack_require__(2);
+var Overlay_base_1 = __webpack_require__(99);
 var Overlay_styles_1 = __webpack_require__(244);
 exports.Overlay = Utilities_1.styled(Overlay_base_1.OverlayBase, Overlay_styles_1.getStyles);
 
@@ -36529,7 +36529,7 @@ exports.getStyles = function (props) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 /* tslint:disable */
-var load_themed_styles_1 = __webpack_require__(39);
+var load_themed_styles_1 = __webpack_require__(4);
 load_themed_styles_1.loadStyles([{ "rawString": ".hiddenPanel_dafe1696{visibility:hidden}.root_dafe1696{pointer-events:none;position:absolute;top:0;left:0;right:0;bottom:0}.root_dafe1696 .overlay_dafe1696{pointer-events:none;opacity:1;cursor:pointer;-webkit-transition:opacity .367s cubic-bezier(0.1, 0.9, 0.2, 1);transition:opacity .367s cubic-bezier(0.1, 0.9, 0.2, 1)}.main_dafe1696{background-color:" }, { "theme": "white", "defaultValue": "#ffffff" }, { "rawString": ";position:absolute;width:100%;bottom:0;top:0;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}[dir='ltr'] .main_dafe1696{right:0}[dir='rtl'] .main_dafe1696{left:0}@media (min-width: 480px){.main_dafe1696{border-left:1px solid " }, { "theme": "neutralLight", "defaultValue": "#eaeaea" }, { "rawString": ";border-right:1px solid " }, { "theme": "neutralLight", "defaultValue": "#eaeaea" }, { "rawString": ";pointer-events:auto;width:340px}[dir='ltr'] .main_dafe1696{-webkit-box-shadow:-30px 0px 30px -30px rgba(0,0,0,0.2);box-shadow:-30px 0px 30px -30px rgba(0,0,0,0.2)}[dir='rtl'] .main_dafe1696{-webkit-box-shadow:30px 0px 30px -30px rgba(0,0,0,0.2);box-shadow:30px 0px 30px -30px rgba(0,0,0,0.2)}[dir='ltr'] .main_dafe1696{left:auto}[dir='rtl'] .main_dafe1696{right:auto}}.root_dafe1696.rootIsSmall_dafe1696 .main_dafe1696{width:272px}@media (min-width: 480px){.root_dafe1696.rootIsSmall_dafe1696 .main_dafe1696{width:340px}}.root_dafe1696.rootIsSmallLeft_dafe1696 .main_dafe1696{width:272px}[dir='ltr'] .root_dafe1696.rootIsSmallLeft_dafe1696 .main_dafe1696{right:auto}[dir='rtl'] .root_dafe1696.rootIsSmallLeft_dafe1696 .main_dafe1696{left:auto}[dir='ltr'] .root_dafe1696.rootIsSmallLeft_dafe1696 .main_dafe1696{left:0}[dir='rtl'] .root_dafe1696.rootIsSmallLeft_dafe1696 .main_dafe1696{right:0}[dir='ltr'] .root_dafe1696.rootIsSmallLeft_dafe1696 .main_dafe1696{-webkit-box-shadow:30px 0px 30px -30px rgba(0,0,0,0.2);box-shadow:30px 0px 30px -30px rgba(0,0,0,0.2)}[dir='rtl'] .root_dafe1696.rootIsSmallLeft_dafe1696 .main_dafe1696{-webkit-box-shadow:-30px 0px 30px -30px rgba(0,0,0,0.2);box-shadow:-30px 0px 30px -30px rgba(0,0,0,0.2)}.root_dafe1696.rootIsSmallFluid_dafe1696 .main_dafe1696{width:100%}@media (min-width: 768px){.root_dafe1696.rootIsMedium_dafe1696 .main_dafe1696,.root_dafe1696.rootIsLarge_dafe1696 .main_dafe1696,.root_dafe1696.rootIsXLarge_dafe1696 .main_dafe1696,.root_dafe1696.rootIsCustom_dafe1696 .main_dafe1696{width:auto}[dir='ltr'] .root_dafe1696.rootIsMedium_dafe1696 .main_dafe1696,[dir='ltr'] .root_dafe1696.rootIsLarge_dafe1696 .main_dafe1696,[dir='ltr'] .root_dafe1696.rootIsXLarge_dafe1696 .main_dafe1696,[dir='ltr'] .root_dafe1696.rootIsCustom_dafe1696 .main_dafe1696{left:48px}[dir='rtl'] .root_dafe1696.rootIsMedium_dafe1696 .main_dafe1696,[dir='rtl'] .root_dafe1696.rootIsLarge_dafe1696 .main_dafe1696,[dir='rtl'] .root_dafe1696.rootIsXLarge_dafe1696 .main_dafe1696,[dir='rtl'] .root_dafe1696.rootIsCustom_dafe1696 .main_dafe1696{right:48px}}@media (min-width: 1024px){.root_dafe1696.rootIsMedium_dafe1696 .main_dafe1696{width:643px}[dir='ltr'] .root_dafe1696.rootIsMedium_dafe1696 .main_dafe1696{left:auto}[dir='rtl'] .root_dafe1696.rootIsMedium_dafe1696 .main_dafe1696{right:auto}}@media (min-width: 1366px){[dir='ltr'] .root_dafe1696.rootIsLarge_dafe1696 .main_dafe1696{left:428px}[dir='rtl'] .root_dafe1696.rootIsLarge_dafe1696 .main_dafe1696{right:428px}}@media (min-width: 1366px){.root_dafe1696.rootIsLarge_dafe1696.rootIsFixed_dafe1696 .main_dafe1696{width:940px}[dir='ltr'] .root_dafe1696.rootIsLarge_dafe1696.rootIsFixed_dafe1696 .main_dafe1696{left:auto}[dir='rtl'] .root_dafe1696.rootIsLarge_dafe1696.rootIsFixed_dafe1696 .main_dafe1696{right:auto}}@media (min-width: 1366px){[dir='ltr'] .root_dafe1696.rootIsXLarge_dafe1696 .main_dafe1696{left:176px}[dir='rtl'] .root_dafe1696.rootIsXLarge_dafe1696 .main_dafe1696{right:176px}}@media (min-width: 1024px){[dir='ltr'] .root_dafe1696.rootIsCustom_dafe1696 .main_dafe1696{left:auto}[dir='rtl'] .root_dafe1696.rootIsCustom_dafe1696 .main_dafe1696{right:auto}}.root_dafe1696.rootIsOpen_dafe1696 .main_dafe1696{pointer-events:auto}.root_dafe1696.rootIsOpen_dafe1696 .overlay_dafe1696{cursor:pointer;pointer-events:auto}@media screen and (-ms-high-contrast: active){.root_dafe1696.rootIsOpen_dafe1696 .overlay_dafe1696{opacity:0}}.navigation_dafe1696{padding:0 5px;height:44px;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-pack:end;-ms-flex-pack:end;justify-content:flex-end}.contentInner_dafe1696{position:absolute;top:0;bottom:0;left:0;right:0;overflow-y:hidden;display:-webkit-box;display:-ms-flexbox;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-ms-flex-direction:column;flex-direction:column;-webkit-overflow-scrolling:touch;-webkit-transform:translateZ(0);transform:translateZ(0)}.rootHasCloseButton_dafe1696 .contentInner_dafe1696{top:44px}.header_dafe1696,.content_dafe1696,.footerInner_dafe1696{padding-left:16px;padding-right:16px}@media (min-width: 768px){.header_dafe1696,.content_dafe1696,.footerInner_dafe1696{padding-left:32px;padding-right:32px}}@media (min-width: 1366px){.header_dafe1696,.content_dafe1696,.footerInner_dafe1696{padding-left:40px;padding-right:40px}}.header_dafe1696{margin:14px 0;-webkit-box-flex:0;-ms-flex-positive:0;flex-grow:0}@media (min-width: 1024px){.header_dafe1696{margin-top:30px}}.content_dafe1696{margin-bottom:0;padding-bottom:20px;overflow-y:auto}.contentGrow_dafe1696{-webkit-box-flex:1;-ms-flex-positive:1;flex-grow:1}.footer_dafe1696{-webkit-box-flex:0;-ms-flex-positive:0;flex-grow:0;border-top:1px solid transparent;-webkit-transition:border .367s cubic-bezier(0.1, 0.25, 0.75, 0.9);transition:border .367s cubic-bezier(0.1, 0.25, 0.75, 0.9)}.footerInner_dafe1696{padding-bottom:20px;padding-top:20px}.footerIsSticky_dafe1696{background:" }, { "theme": "white", "defaultValue": "#ffffff" }, { "rawString": ";border-top-color:" }, { "theme": "neutralLight", "defaultValue": "#eaeaea" }, { "rawString": "}.headerText_dafe1696{font-size:21px;font-weight:100;color:" }, { "theme": "neutralPrimary", "defaultValue": "#333333" }, { "rawString": ";line-height:32px;margin:0}\n" }]);
 exports.hiddenPanel = "hiddenPanel_dafe1696";
 exports.root = "root_dafe1696";
@@ -36564,7 +36564,7 @@ exports.headerText = "headerText_dafe1696";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 /* tslint:disable */
-var load_themed_styles_1 = __webpack_require__(39);
+var load_themed_styles_1 = __webpack_require__(4);
 load_themed_styles_1.loadStyles([{ "rawString": ".root_cf442172{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-box-shadow:none;box-shadow:none;margin:0;padding:0;font-size:14px;font-weight:400;color:" }, { "theme": "neutralPrimary", "defaultValue": "#333333" }, { "rawString": ";position:relative;outline:0;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.root_cf442172:hover .title_cf442172,.root_cf442172:hover .caretDown_cf442172,.root_cf442172:focus .title_cf442172,.root_cf442172:focus .caretDown_cf442172,.root_cf442172:active .title_cf442172,.root_cf442172:active .caretDown_cf442172{color:" }, { "theme": "neutralDark", "defaultValue": "#212121" }, { "rawString": "}.root_cf442172:hover .titleIsPlaceHolder_cf442172,.root_cf442172:focus .titleIsPlaceHolder_cf442172,.root_cf442172:active .titleIsPlaceHolder_cf442172{color:" }, { "theme": "neutralSecondary", "defaultValue": "#666666" }, { "rawString": "}.root_cf442172:hover .title_cf442172{border-color:" }, { "theme": "neutralDark", "defaultValue": "#212121" }, { "rawString": "}@media screen and (-ms-high-contrast: active){.root_cf442172:hover .title_cf442172{border-color:Highlight}}.root_cf442172:hover .titleIsError_cf442172{border-color:" }, { "theme": "error", "defaultValue": "#a80000" }, { "rawString": "}.root_cf442172:active .title_cf442172{border-color:" }, { "theme": "themeDark", "defaultValue": "#005a9e" }, { "rawString": "}@media screen and (-ms-high-contrast: active){.root_cf442172:active .title_cf442172{border-color:Highlight}}.root_cf442172:active .titleIsError_cf442172{border-color:" }, { "theme": "error", "defaultValue": "#a80000" }, { "rawString": "}.root_cf442172:focus .title_cf442172{border-color:" }, { "theme": "themePrimary", "defaultValue": "#0078d4" }, { "rawString": "}@media screen and (-ms-high-contrast: active){.root_cf442172:focus .title_cf442172{background-color:Highlight;border-color:Highlight;color:HighlightText}}@media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: black-on-white){.root_cf442172:focus .title_cf442172{-ms-high-contrast-adjust:none}}.root_cf442172:focus .caretDown_cf442172{color:HighlightText}@media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: black-on-white){.root_cf442172:focus .caretDown_cf442172{-ms-high-contrast-adjust:none}}.root_cf442172:focus .titleIsError_cf442172{border-color:" }, { "theme": "error", "defaultValue": "#a80000" }, { "rawString": "}.root_cf442172 .titleIsError_cf442172{border-color:" }, { "theme": "error", "defaultValue": "#a80000" }, { "rawString": "}.root_cf442172 .ms-Label{display:inline-block;margin-bottom:8px}.root_cf442172.rootIsDisabled_cf442172 .title_cf442172{background-color:" }, { "theme": "neutralLighter", "defaultValue": "#f4f4f4" }, { "rawString": ";border:none;color:" }, { "theme": "neutralTertiary", "defaultValue": "#a6a6a6" }, { "rawString": ";cursor:default}@media screen and (-ms-high-contrast: active){.root_cf442172.rootIsDisabled_cf442172 .title_cf442172{border:1px solid GrayText;color:GrayText}}.root_cf442172.rootIsDisabled_cf442172 .title_cf442172.titleIsError_cf442172{border-color:" }, { "theme": "error", "defaultValue": "#a80000" }, { "rawString": "}.root_cf442172.rootIsDisabled_cf442172 .caretDown_cf442172{color:" }, { "theme": "neutralTertiary", "defaultValue": "#a6a6a6" }, { "rawString": "}@media screen and (-ms-high-contrast: active){.root_cf442172.rootIsDisabled_cf442172 .caretDown_cf442172{color:GrayText}}.listWrapper_cf442172:focus{outline:0}.caretDownWrapper_cf442172{position:absolute;top:1px;height:32px;line-height:30px}[dir='ltr'] .caretDownWrapper_cf442172{right:12px}[dir='rtl'] .caretDownWrapper_cf442172{left:12px}.caretDown_cf442172{color:" }, { "theme": "neutralSecondary", "defaultValue": "#666666" }, { "rawString": ";font-size:12px;pointer-events:none}.title_cf442172{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-box-shadow:none;box-shadow:none;margin:0;padding:0;background:" }, { "theme": "white", "defaultValue": "#ffffff" }, { "rawString": ";border:1px solid " }, { "theme": "neutralTertiary", "defaultValue": "#a6a6a6" }, { "rawString": ";cursor:pointer;display:block;height:32px;line-height:30px;padding:0 32px 0 12px;position:relative;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}html[dir='rtl'] .title_cf442172{padding:0 12px 0 32px}.title_cf442172.titleIsPlaceHolder_cf442172{color:" }, { "theme": "neutralSecondary", "defaultValue": "#666666" }, { "rawString": "}[dir='ltr'] .panel_cf442172 .ms-Panel-main{-webkit-box-shadow:-30px 0px 30px -30px rgba(0,0,0,0.2);box-shadow:-30px 0px 30px -30px rgba(0,0,0,0.2)}[dir='rtl'] .panel_cf442172 .ms-Panel-main{-webkit-box-shadow:30px 0px 30px -30px rgba(0,0,0,0.2);box-shadow:30px 0px 30px -30px rgba(0,0,0,0.2)}.panel_cf442172 .ms-Panel-contentInner{padding:0 0 20px}.callout_cf442172.callout_cf442172{-webkit-box-shadow:0 0px 2px 0px rgba(0,0,0,0.2);box-shadow:0 0px 2px 0px rgba(0,0,0,0.2);border:1px solid " }, { "theme": "neutralLight", "defaultValue": "#eaeaea" }, { "rawString": "}.errorMessage_cf442172{color:" }, { "theme": "error", "defaultValue": "#a80000" }, { "rawString": ";font-size:12px;font-weight:400;padding-top:5px}.items_cf442172{display:block}.item_cf442172{background:transparent;-webkit-box-sizing:border-box;box-sizing:border-box;cursor:pointer;display:block;width:100%;min-height:32px;line-height:20px;height:auto !important;padding:4px 16px !important;position:relative;border:1px solid transparent;word-wrap:break-word;overflow-wrap:break-word;text-align:left}@media screen and (-ms-high-contrast: active){.item_cf442172{border-color:Window}}.item_cf442172:hover{color:inherit}.item_cf442172:focus{background-color:" }, { "theme": "neutralLighter", "defaultValue": "#f4f4f4" }, { "rawString": "}@media screen and (-ms-high-contrast: active){.item_cf442172:focus{background-color:Highlight;border-color:Highlight;color:HighlightText}}@media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: black-on-white){.item_cf442172:focus{-ms-high-contrast-adjust:none}}.item_cf442172:active{background-color:" }, { "theme": "neutralLighter", "defaultValue": "#f4f4f4" }, { "rawString": ";color:" }, { "theme": "black", "defaultValue": "#000000" }, { "rawString": "}.item_cf442172.itemIsDisabled_cf442172{color:" }, { "theme": "neutralTertiary", "defaultValue": "#a6a6a6" }, { "rawString": ";cursor:default}.item_cf442172 .ms-Button-flexContainer{-webkit-box-pack:start;-ms-flex-pack:start;justify-content:flex-start}.item_cf442172.itemIsSelected_cf442172{background-color:" }, { "theme": "neutralQuaternaryAlt", "defaultValue": "#dadada" }, { "rawString": ";color:" }, { "theme": "black", "defaultValue": "#000000" }, { "rawString": "}@media screen and (-ms-high-contrast: active){.item_cf442172.itemIsSelected_cf442172{background-color:Highlight;border-color:Highlight;color:HighlightText}}@media screen and (-ms-high-contrast: active), screen and (-ms-high-contrast: black-on-white){.item_cf442172.itemIsSelected_cf442172{-ms-high-contrast-adjust:none}}.item_cf442172.itemIsSelected_cf442172.itemIsDisabled_cf442172{color:" }, { "theme": "neutralTertiary", "defaultValue": "#a6a6a6" }, { "rawString": ";background-color:transparent}.header_cf442172{font-size:14px;font-weight:400;font-weight:600;color:" }, { "theme": "themePrimary", "defaultValue": "#0078d4" }, { "rawString": ";background:none;background-color:transparent;border:none;height:32px;line-height:32px;cursor:default;padding:0px 16px;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}html[dir='ltr'] .header_cf442172{text-align:left}html[dir='rtl'] .header_cf442172{text-align:right}.divider_cf442172{height:1px;background-color:" }, { "theme": "bodyDivider", "defaultValue": "#eaeaea" }, { "rawString": "}.optionText_cf442172{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0px;max-width:100%;word-wrap:break-word;overflow-wrap:break-word;margin:1px}\n" }]);
 exports.root = "root_cf442172";
 exports.title = "title_cf442172";
@@ -36640,7 +36640,7 @@ exports.default = styles;
 /***/ (function(module, exports, __webpack_require__) {
 
 var content = __webpack_require__(250);
-var loader = __webpack_require__(17);
+var loader = __webpack_require__(19);
 
 if(typeof content === "string") content = [[module.i, content]];
 
@@ -36653,7 +36653,7 @@ if(content.locals) module.exports = content.locals;
 /* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(16)(false);
+exports = module.exports = __webpack_require__(18)(false);
 // imports
 
 
@@ -37275,14 +37275,14 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(2);
-var Label_1 = __webpack_require__(41);
+var React = __webpack_require__(1);
+var Label_1 = __webpack_require__(47);
 var Spinner_1 = __webpack_require__(255);
-var Utilities_1 = __webpack_require__(1);
-var Checkbox_1 = __webpack_require__(56);
-var SPListPickerService_1 = __webpack_require__(96);
-var FieldErrorMessage_1 = __webpack_require__(98);
-var telemetry = __webpack_require__(44);
+var Utilities_1 = __webpack_require__(2);
+var Checkbox_1 = __webpack_require__(60);
+var SPListPickerService_1 = __webpack_require__(100);
+var FieldErrorMessage_1 = __webpack_require__(102);
+var telemetry = __webpack_require__(50);
 /**
 * Renders the controls for PropertyFieldSPListMultiplePicker component
 */
@@ -37519,7 +37519,7 @@ tslib_1.__exportStar(__webpack_require__(256), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(257), exports);
-tslib_1.__exportStar(__webpack_require__(45), exports);
+tslib_1.__exportStar(__webpack_require__(51), exports);
 
 
 /***/ }),
@@ -37529,7 +37529,7 @@ tslib_1.__exportStar(__webpack_require__(45), exports);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
 var Spinner_base_1 = __webpack_require__(258);
 var Spinner_styles_1 = __webpack_require__(259);
 exports.Spinner = Utilities_1.styled(Spinner_base_1.SpinnerBase, Spinner_styles_1.getStyles);
@@ -37543,9 +37543,9 @@ exports.Spinner = Utilities_1.styled(Spinner_base_1.SpinnerBase, Spinner_styles_
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(2);
-var Spinner_types_1 = __webpack_require__(45);
-var Utilities_1 = __webpack_require__(1);
+var React = __webpack_require__(1);
+var Spinner_types_1 = __webpack_require__(51);
+var Utilities_1 = __webpack_require__(2);
 var getClassNames = Utilities_1.classNamesFunction();
 var SpinnerBase = /** @class */ (function (_super) {
     tslib_1.__extends(SpinnerBase, _super);
@@ -37594,7 +37594,7 @@ exports.SpinnerBase = SpinnerBase;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Spinner_types_1 = __webpack_require__(45);
+var Spinner_types_1 = __webpack_require__(51);
 var Styling_1 = __webpack_require__(3);
 var spinAnimation = Styling_1.keyframes({
     '0%': {
@@ -37700,7 +37700,7 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(262));
-__export(__webpack_require__(99));
+__export(__webpack_require__(103));
 
 
 
@@ -37719,10 +37719,10 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = __webpack_require__(2);
-var ReactDOM = __webpack_require__(10);
-var sp_webpart_base_1 = __webpack_require__(30);
-var PropertyFieldMultiSelectHost_1 = __webpack_require__(99);
+var React = __webpack_require__(1);
+var ReactDOM = __webpack_require__(6);
+var sp_webpart_base_1 = __webpack_require__(33);
+var PropertyFieldMultiSelectHost_1 = __webpack_require__(103);
 var lodash_1 = __webpack_require__(264);
 var PropertyFieldMultiSelectBuilder = (function () {
     function PropertyFieldMultiSelectBuilder(_targetProperty, _properties) {
@@ -54866,7 +54866,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_263__;
   }
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7), __webpack_require__(265)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8), __webpack_require__(265)(module)))
 
 /***/ }),
 /* 265 */

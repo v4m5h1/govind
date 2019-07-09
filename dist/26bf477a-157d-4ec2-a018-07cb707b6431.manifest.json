@@ -20,6 +20,18 @@
         "defaultPath": "lib/extensions/topNavigation/loc/en-us.js",
         "type": "localizedPath"
       },
+      "react": {
+        "type": "component",
+        "version": "16.7.0",
+        "id": "0d910c1c-13b9-4e1c-9aa4-b008c5e42d7d",
+        "failoverPath": "node_modules/react/dist/react.js"
+      },
+      "react-dom": {
+        "type": "component",
+        "version": "16.7.0",
+        "id": "aa0a46ec-1505-43cd-a44a-93f3a5aa460a",
+        "failoverPath": "node_modules/react-dom/dist/react-dom.js"
+      },
       "@microsoft/sp-core-library": {
         "type": "component",
         "version": "1.8.2",

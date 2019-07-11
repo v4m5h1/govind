@@ -154,17 +154,24 @@ export default class TopNavigation extends React.Component<
     return menuString;
   }
 
+  private dostuff = search => {
+    // window.location.href("");
+  };
+
   public render(): React.ReactElement<ITopNavigationProps> {
     return (
       <div className={styles.app}>
         <div className={styles.menuContainer}>
           <div className={styles.menu} id="menu">
+            <SearchBox
+              placeholder="Search"
+              onSearch={searchValue => this.dostuff}
+            />
             <ul
               dangerouslySetInnerHTML={{
                 __html: this.state.navigationElements
               }}
             />
-            <SearchBox />
           </div>
         </div>
       </div>

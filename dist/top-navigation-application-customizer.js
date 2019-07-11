@@ -1,4 +1,4 @@
-define("26bf477a-157d-4ec2-a018-07cb707b6431_0.0.1", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-http","@microsoft/decorators","@microsoft/sp-application-base","TopNavigationApplicationCustomizerStrings"], function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_49__, __WEBPACK_EXTERNAL_MODULE_267__, __WEBPACK_EXTERNAL_MODULE_268__, __WEBPACK_EXTERNAL_MODULE_269__) { return /******/ (function(modules) { // webpackBootstrap
+define("6318c17300d4c5c6f1d6a4effd3c42ad", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-http","@microsoft/decorators","@microsoft/sp-application-base","TopNavigationApplicationCustomizerStrings"], function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_49__, __WEBPACK_EXTERNAL_MODULE_267__, __WEBPACK_EXTERNAL_MODULE_268__, __WEBPACK_EXTERNAL_MODULE_269__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -75027,6 +75027,9 @@ var TopNavigation_TopNavigation = /** @class */ (function (_super) {
     __extends(TopNavigation, _super);
     function TopNavigation(props, state) {
         var _this = _super.call(this, props, state) || this;
+        _this.dostuff = function (search) {
+            // window.location.href("");
+        };
         _this.onInititialisation().then(function (r) {
             var menuItems = _this.generateMegaMenuLevel(_this._topMenuItems);
             _this.setState({
@@ -75141,13 +75144,14 @@ var TopNavigation_TopNavigation = /** @class */ (function (_super) {
         return menuString;
     };
     TopNavigation.prototype.render = function () {
+        var _this = this;
         return (external__react_["createElement"]("div", { className: TopNavigation_module_scss.app },
             external__react_["createElement"]("div", { className: TopNavigation_module_scss.menuContainer },
                 external__react_["createElement"]("div", { className: TopNavigation_module_scss.menu, id: "menu" },
+                    external__react_["createElement"](SearchBox, { placeholder: "Search", onSearch: function (searchValue) { return _this.dostuff; } }),
                     external__react_["createElement"]("ul", { dangerouslySetInnerHTML: {
                             __html: this.state.navigationElements
-                        } }),
-                    external__react_["createElement"](SearchBox, null)))));
+                        } })))));
     };
     return TopNavigation;
 }(external__react_["Component"]));
@@ -75231,7 +75235,8 @@ var TopNavigationApplicationCustomizer_TopNavigationApplicationCustomizer = /** 
                 pnpjs_es5["a" /* default */].setup({
                     defaultCachingStore: "session",
                     defaultCachingTimeoutSeconds: 900,
-                    globalCacheDisable: true // true to disable caching in case of debugging/testing
+                    globalCacheDisable: true,
+                    spfxContext: this.context
                 });
                 // Retrieve the menu items from taxonomy
                 // let termStoreService: SPTermStore.SPTermStoreService = new SPTermStore.SPTermStoreService(

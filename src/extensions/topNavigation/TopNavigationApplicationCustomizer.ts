@@ -50,7 +50,8 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
     pnp.setup({
       defaultCachingStore: "session",
       defaultCachingTimeoutSeconds: 900, //15min
-      globalCacheDisable: true // true to disable caching in case of debugging/testing
+      globalCacheDisable: true, // true to disable caching in case of debugging/testing
+      spfxContext: this.context
     });
 
     // Retrieve the menu items from taxonomy

@@ -54,6 +54,7 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
       spfxContext: this.context
     });
 
+    //test
     // Retrieve the menu items from taxonomy
     // let termStoreService: SPTermStore.SPTermStoreService = new SPTermStore.SPTermStoreService(
     //   spHttpClient: this.context.spHttpClient,

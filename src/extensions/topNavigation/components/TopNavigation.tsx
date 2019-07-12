@@ -4,7 +4,7 @@ import * as SPTermStore from "../services/SPTermStoreService";
 import styles from "../TopNavigation.module.scss";
 import pnp from "@pnp/pnpjs";
 import { ExtensionContext } from "@microsoft/sp-extension-base";
-import { SearchBox } from "office-ui-fabric-react";
+import { SearchBox, IconButton } from "office-ui-fabric-react";
 
 export interface ITopNavigationProps {
   TopMenuTermSet?: string;
@@ -34,7 +34,7 @@ export default class TopNavigation extends React.Component<
       this.initialiseScripts();
     });
     this.state = {
-      navigationElements: ""
+      navigationElements: null
     };
   }
 
@@ -132,30 +132,43 @@ export default class TopNavigation extends React.Component<
   }
 
   private generateMegaMenuLevel(levels: SPTermStore.ISPTermObject[]): any {
-    let menuString: string = "";
+    // let menuString: string = "";
 
-    for (let i: number = 0; i < levels.length; i++) {
-      let levelItem: SPTermStore.ISPTermObject = levels[i];
+    // for (let i: number = 0; i < levels.length; i++) {
+    //   let levelItem: SPTermStore.ISPTermObject = levels[i];
+    let menuString = levels.map((levelItem: SPTermStore.ISPTermObject) => {
       let url: string =
         typeof levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl ===
         "undefined"
           ? "#"
           : levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl;
-      menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
-      if (levelItem.terms.length != 0) {
-        menuString += "<ul>";
-        menuString += this.generateMegaMenuLevel(levelItem.terms);
-        menuString += "</ul>";
-      }
-      menuString += "</li>";
-    }
+      // menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
+      // if (levelItem.terms.length != 0) {
+      //   menuString += "<ul>";
+      //   menuString += this.generateMegaMenuLevel(levelItem.terms);
+      //   menuString += "</ul>";
+      // }
+      // menuString += "</li>";
+      let subTerms =
+        levelItem.terms.length != 0 ? (
+          <ul>{this.generateMegaMenuLevel(levelItem.terms)}</ul>
+        ) : null;
+      return (
+        <li>
+          <a href={url}>{levelItem.name}</a>
+          {subTerms}
+        </li>
+      );
+    });
 
     console.log(menuString);
     return menuString;
   }
 
-  private dostuff = search => {
-    // window.location.href("");
+  private search = searchValue => {
+    window.location.href = `${
+      this.props._context.pageContext.web.absoluteUrl
+    }/_layouts/15/search.aspx/siteall?q=${searchValue}`;
   };
 
   public render(): React.ReactElement<ITopNavigationProps> {
@@ -163,15 +176,25 @@ export default class TopNavigation extends React.Component<
       <div className={styles.app}>
         <div className={styles.menuContainer}>
           <div className={styles.menu} id="menu">
-            <SearchBox
-              placeholder="Search"
-              onSearch={searchValue => this.dostuff}
-            />
-            <ul
+            {/* <ul
               dangerouslySetInnerHTML={{
                 __html: this.state.navigationElements
               }}
-            />
+            /> */}
+            <ul>
+              {this.state.navigationElements}
+              <li className={styles.searchBox}>
+                <SearchBox
+                  placeholder=""
+                  onSearch={searchValue => this.search(searchValue)}
+                />
+              </li>
+              <li className={styles.iconButtons}>
+                <IconButton iconProps={{ iconName: "FeedbackRequestSolid" }} />
+                <IconButton iconProps={{ iconName: "Settings" }} />
+                <IconButton iconProps={{ iconName: "FavoriteStar" }} />
+              </li>
+            </ul>
           </div>
         </div>
       </div>

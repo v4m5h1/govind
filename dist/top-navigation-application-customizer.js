@@ -1,4 +1,4 @@
-define("6318c17300d4c5c6f1d6a4effd3c42ad", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-http","@microsoft/decorators","@microsoft/sp-application-base","TopNavigationApplicationCustomizerStrings"], function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_49__, __WEBPACK_EXTERNAL_MODULE_267__, __WEBPACK_EXTERNAL_MODULE_268__, __WEBPACK_EXTERNAL_MODULE_269__) { return /******/ (function(modules) { // webpackBootstrap
+define("26bf477a-157d-4ec2-a018-07cb707b6431_0.0.1", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-http","@microsoft/decorators","@microsoft/sp-application-base","TopNavigationApplicationCustomizerStrings"], function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_49__, __WEBPACK_EXTERNAL_MODULE_267__, __WEBPACK_EXTERNAL_MODULE_268__, __WEBPACK_EXTERNAL_MODULE_269__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -16779,14 +16779,16 @@ var SPTermStoreService_SPTermStoreService = /** @class */ (function () {
 /* tslint:disable */
 __webpack_require__(271);
 var TopNavigation_module_scss_styles = {
-    app: 'app_a5e30328',
-    menuContainer: 'menuContainer_a5e30328',
-    menuMobile: 'menuMobile_a5e30328',
-    menuDropdownIcon: 'menuDropdownIcon_a5e30328',
-    menu: 'menu_a5e30328',
-    'normal-sub': 'normal-sub_a5e30328',
-    normalSub: 'normalSub_a5e30328',
-    showOnMobile: 'showOnMobile_a5e30328',
+    app: 'app_ac04edc9',
+    menuContainer: 'menuContainer_ac04edc9',
+    menuMobile: 'menuMobile_ac04edc9',
+    menuDropdownIcon: 'menuDropdownIcon_ac04edc9',
+    menu: 'menu_ac04edc9',
+    'normal-sub': 'normal-sub_ac04edc9',
+    iconButtons: 'iconButtons_ac04edc9',
+    searchBox: 'searchBox_ac04edc9',
+    normalSub: 'normalSub_ac04edc9',
+    showOnMobile: 'showOnMobile_ac04edc9',
 };
 /* harmony default export */ var TopNavigation_module_scss = (TopNavigation_module_scss_styles);
 /* tslint:enable */ 
@@ -75027,8 +75029,8 @@ var TopNavigation_TopNavigation = /** @class */ (function (_super) {
     __extends(TopNavigation, _super);
     function TopNavigation(props, state) {
         var _this = _super.call(this, props, state) || this;
-        _this.dostuff = function (search) {
-            // window.location.href("");
+        _this.search = function (searchValue) {
+            window.location.href = _this.props._context.pageContext.web.absoluteUrl + "/_layouts/15/search.aspx/siteall?q=" + searchValue;
         };
         _this.onInititialisation().then(function (r) {
             var menuItems = _this.generateMegaMenuLevel(_this._topMenuItems);
@@ -75038,7 +75040,7 @@ var TopNavigation_TopNavigation = /** @class */ (function (_super) {
             _this.initialiseScripts();
         });
         _this.state = {
-            navigationElements: ""
+            navigationElements: null
         };
         return _this;
     }
@@ -75125,21 +75127,27 @@ var TopNavigation_TopNavigation = /** @class */ (function (_super) {
         });
     };
     TopNavigation.prototype.generateMegaMenuLevel = function (levels) {
-        var menuString = "";
-        for (var i = 0; i < levels.length; i++) {
-            var levelItem = levels[i];
+        // let menuString: string = "";
+        var _this = this;
+        // for (let i: number = 0; i < levels.length; i++) {
+        //   let levelItem: SPTermStore.ISPTermObject = levels[i];
+        var menuString = levels.map(function (levelItem) {
             var url = typeof levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl ===
                 "undefined"
                 ? "#"
                 : levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl;
-            menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
-            if (levelItem.terms.length != 0) {
-                menuString += "<ul>";
-                menuString += this.generateMegaMenuLevel(levelItem.terms);
-                menuString += "</ul>";
-            }
-            menuString += "</li>";
-        }
+            // menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
+            // if (levelItem.terms.length != 0) {
+            //   menuString += "<ul>";
+            //   menuString += this.generateMegaMenuLevel(levelItem.terms);
+            //   menuString += "</ul>";
+            // }
+            // menuString += "</li>";
+            var subTerms = levelItem.terms.length != 0 ? (external__react_["createElement"]("ul", null, _this.generateMegaMenuLevel(levelItem.terms))) : null;
+            return (external__react_["createElement"]("li", null,
+                external__react_["createElement"]("a", { href: url }, levelItem.name),
+                subTerms));
+        });
         console.log(menuString);
         return menuString;
     };
@@ -75148,10 +75156,14 @@ var TopNavigation_TopNavigation = /** @class */ (function (_super) {
         return (external__react_["createElement"]("div", { className: TopNavigation_module_scss.app },
             external__react_["createElement"]("div", { className: TopNavigation_module_scss.menuContainer },
                 external__react_["createElement"]("div", { className: TopNavigation_module_scss.menu, id: "menu" },
-                    external__react_["createElement"](SearchBox, { placeholder: "Search", onSearch: function (searchValue) { return _this.dostuff; } }),
-                    external__react_["createElement"]("ul", { dangerouslySetInnerHTML: {
-                            __html: this.state.navigationElements
-                        } })))));
+                    external__react_["createElement"]("ul", null,
+                        this.state.navigationElements,
+                        external__react_["createElement"]("li", { className: TopNavigation_module_scss.searchBox },
+                            external__react_["createElement"](SearchBox, { placeholder: "", onSearch: function (searchValue) { return _this.search(searchValue); } })),
+                        external__react_["createElement"]("li", { className: TopNavigation_module_scss.iconButtons },
+                            external__react_["createElement"](IconButton_IconButton, { iconProps: { iconName: "FeedbackRequestSolid" } }),
+                            external__react_["createElement"](IconButton_IconButton, { iconProps: { iconName: "Settings" } }),
+                            external__react_["createElement"](IconButton_IconButton, { iconProps: { iconName: "FavoriteStar" } })))))));
     };
     return TopNavigation;
 }(external__react_["Component"]));
@@ -75238,6 +75250,7 @@ var TopNavigationApplicationCustomizer_TopNavigationApplicationCustomizer = /** 
                     globalCacheDisable: true,
                     spfxContext: this.context
                 });
+                //test
                 // Retrieve the menu items from taxonomy
                 // let termStoreService: SPTermStore.SPTermStoreService = new SPTermStore.SPTermStoreService(
                 //   spHttpClient: this.context.spHttpClient,
@@ -86035,7 +86048,7 @@ exports = module.exports = __webpack_require__(18)(false);
 
 
 // module
-exports.push([module.i, ".app_a5e30328 .menuContainer_a5e30328,.app_a5e30328 .menuContainer_a5e30328 *{-webkit-box-sizing:border-box;box-sizing:border-box}.app_a5e30328 a{color:#333}.app_a5e30328 .menuContainer_a5e30328{width:100%;margin:0 auto;background:#e9e9e9}.app_a5e30328 .menuMobile_a5e30328{display:none;padding:20px}.app_a5e30328 .menuMobile_a5e30328:after{content:\"\\EF66\";font-family:FabricMDL2Icons;font-size:1.5rem;line-height:2.5rem;padding:0;float:right;position:relative;top:50%;-webkit-transform:translateY(-25%);transform:translateY(-25%)}.app_a5e30328 .menuDropdownIcon_a5e30328:before{content:\"\\E710\";font-family:FabricMDL2Icons;display:none;cursor:pointer;float:right;padding:1.5em 2em;background:#fff;color:#333}.app_a5e30328 .menuDropdownIcon_a5e30328 a:not(:only-child):after{color:#999;content:\" \\25BE\"}.app_a5e30328 .menuDropdownIcon_a5e30328 a:empty:after{content:none}.app_a5e30328 .menuDropdownIcon_a5e30328 li>ul{display:none}.app_a5e30328 .menu_a5e30328>ul{margin:0 auto;width:100%;list-style:none;padding:0;position:relative;-webkit-box-sizing:border-box;box-sizing:border-box}.app_a5e30328 .menu_a5e30328>ul:after,.app_a5e30328 .menu_a5e30328>ul:before{content:\"\";display:table}.app_a5e30328 .menu_a5e30328>ul:after{clear:both}.app_a5e30328 .menu_a5e30328>ul>li{float:left;background:#e9e9e9;padding:0;margin:0}.app_a5e30328 .menu_a5e30328>ul>li a{text-decoration:none;padding:.75em 2em;display:block}.app_a5e30328 .menu_a5e30328>ul>li a:hover{background:#f0f0f0}.app_a5e30328 .menu_a5e30328>ul>li>ul{display:none;width:100%;background:#f0f0f0;position:absolute;z-index:99;left:0;margin:0;list-style:none;-webkit-box-sizing:border-box;box-sizing:border-box}.app_a5e30328 .menu_a5e30328>ul>li>ul:after,.app_a5e30328 .menu_a5e30328>ul>li>ul:before{content:\"\";display:table}.app_a5e30328 .menu_a5e30328>ul>li>ul:after{clear:both}.app_a5e30328 .menu_a5e30328>ul>li>ul>li{margin:0;padding-bottom:0;list-style:none;width:20%;background:0 0;float:left}.app_a5e30328 .menu_a5e30328>ul>li>ul>li a{color:#777;padding:.2em 0;width:95%;display:block}.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul{padding:0;margin:10px 0 0;list-style:none;-webkit-box-sizing:border-box;box-sizing:border-box}.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul:after,.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul:before{content:\"\";display:table}.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul:after{clear:both}.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul>li{float:left;width:100%;padding:10px 0;margin:0;font-size:.8em}.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul>li a{border:0}.app_a5e30328 .menu_a5e30328>ul>li>ul.normal-sub_a5e30328{width:300px;left:auto;padding:10px 20px}.app_a5e30328 .menu_a5e30328>ul>li>ul.normal-sub_a5e30328>li{width:100%}.app_a5e30328 .menu_a5e30328>ul>li>ul.normal-sub_a5e30328>li a{border:0;padding:1em 0}@media only screen and (max-width:959px){.app_a5e30328 .menuContainer_a5e30328{width:100%}.app_a5e30328 .menuDropdownIcon_a5e30328:before,.app_a5e30328 .menuMobile_a5e30328{display:block}.app_a5e30328 .menu_a5e30328>ul{display:none}.app_a5e30328 .menu_a5e30328>ul>li{width:100%;float:none;display:block}.app_a5e30328 .menu_a5e30328>ul>li a{padding:1.5em;width:100%;display:block}.app_a5e30328 .menu_a5e30328>ul>li>ul{position:relative}.app_a5e30328 .menu_a5e30328>ul>li>ul.normalSub_a5e30328{width:100%}.app_a5e30328 .menu_a5e30328>ul>li>ul>li{float:none;width:100%;margin-top:20px}.app_a5e30328 .menu_a5e30328>ul>li>ul>li:first-child{margin:0}.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul{position:relative}.app_a5e30328 .menu_a5e30328>ul>li>ul>li>ul>li{float:none}.app_a5e30328 .menu_a5e30328 .showOnMobile_a5e30328{display:block}}", ""]);
+exports.push([module.i, ".app_ac04edc9 .menuContainer_ac04edc9,.app_ac04edc9 .menuContainer_ac04edc9 *{-webkit-box-sizing:border-box;box-sizing:border-box}.app_ac04edc9 a{color:#333}.app_ac04edc9 .menuContainer_ac04edc9{width:100%;margin:0 auto;background:#e9e9e9}.app_ac04edc9 .menuMobile_ac04edc9{display:none;padding:20px}.app_ac04edc9 .menuMobile_ac04edc9:after{content:\"\\EF66\";font-family:FabricMDL2Icons;font-size:1.5rem;line-height:2.5rem;padding:0;float:right;position:relative;top:50%;-webkit-transform:translateY(-25%);transform:translateY(-25%)}.app_ac04edc9 .menuDropdownIcon_ac04edc9:before{content:\"\\E710\";font-family:FabricMDL2Icons;display:none;cursor:pointer;float:right;padding:1.5em 2em;background:#fff;color:#333}.app_ac04edc9 .menuDropdownIcon_ac04edc9 a:not(:only-child):after{color:#999;content:\" \\25BE\"}.app_ac04edc9 .menuDropdownIcon_ac04edc9 a:empty:after{content:none}.app_ac04edc9 .menuDropdownIcon_ac04edc9 li>ul{display:none}.app_ac04edc9 .menu_ac04edc9>ul{margin:0 auto;width:100%;list-style:none;padding:0;position:relative;-webkit-box-sizing:border-box;box-sizing:border-box}.app_ac04edc9 .menu_ac04edc9>ul:after,.app_ac04edc9 .menu_ac04edc9>ul:before{content:\"\";display:table}.app_ac04edc9 .menu_ac04edc9>ul:after{clear:both}.app_ac04edc9 .menu_ac04edc9>ul>li{float:left;background:#e9e9e9;padding:0;margin:0}.app_ac04edc9 .menu_ac04edc9>ul>li a{text-decoration:none;padding:.75em 2em;display:block}.app_ac04edc9 .menu_ac04edc9>ul>li a:hover{background:#f0f0f0}.app_ac04edc9 .menu_ac04edc9>ul>li>ul{display:none;width:100%;background:#f0f0f0;position:absolute;z-index:99;left:0;margin:0;list-style:none;-webkit-box-sizing:border-box;box-sizing:border-box}.app_ac04edc9 .menu_ac04edc9>ul>li>ul:after,.app_ac04edc9 .menu_ac04edc9>ul>li>ul:before{content:\"\";display:table}.app_ac04edc9 .menu_ac04edc9>ul>li>ul:after{clear:both}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li{margin:0;padding-bottom:0;list-style:none;width:20%;background:0 0;float:left}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li a{color:#777;padding:.2em 0;width:95%;display:block}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul{padding:0;margin:10px 0 0;list-style:none;-webkit-box-sizing:border-box;box-sizing:border-box}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul:after,.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul:before{content:\"\";display:table}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul:after{clear:both}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul>li{float:left;width:100%;padding:10px 0;margin:0;font-size:.8em}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul>li a{border:0}.app_ac04edc9 .menu_ac04edc9>ul>li>ul.normal-sub_ac04edc9{width:300px;left:auto;padding:10px 20px}.app_ac04edc9 .menu_ac04edc9>ul>li>ul.normal-sub_ac04edc9>li{width:100%}.app_ac04edc9 .menu_ac04edc9>ul>li>ul.normal-sub_ac04edc9>li a{border:0;padding:1em 0}.app_ac04edc9 .iconButtons_ac04edc9{float:right!important;padding-right:20px!important;padding-top:2px!important}.app_ac04edc9 .searchBox_ac04edc9{padding-top:3px!important}@media only screen and (max-width:959px){.app_ac04edc9 .menuContainer_ac04edc9{width:100%}.app_ac04edc9 .menuDropdownIcon_ac04edc9:before,.app_ac04edc9 .menuMobile_ac04edc9{display:block}.app_ac04edc9 .menu_ac04edc9>ul{display:none}.app_ac04edc9 .menu_ac04edc9>ul>li{width:100%;float:none;display:block}.app_ac04edc9 .menu_ac04edc9>ul>li a{padding:1.5em;width:100%;display:block}.app_ac04edc9 .menu_ac04edc9>ul>li>ul{position:relative}.app_ac04edc9 .menu_ac04edc9>ul>li>ul.normalSub_ac04edc9{width:100%}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li{float:none;width:100%;margin-top:20px}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li:first-child{margin:0}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul{position:relative}.app_ac04edc9 .menu_ac04edc9>ul>li>ul>li>ul>li{float:none}.app_ac04edc9 .menu_ac04edc9 .showOnMobile_ac04edc9{display:block}}", ""]);
 
 // exports
 

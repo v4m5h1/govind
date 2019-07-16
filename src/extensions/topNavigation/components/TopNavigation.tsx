@@ -2,9 +2,16 @@ import * as React from "react";
 import * as jQuery from "jquery";
 import * as SPTermStore from "../services/SPTermStoreService";
 import styles from "../TopNavigation.module.scss";
-import pnp from "@pnp/pnpjs";
+import pnp, { Site, Web } from "@pnp/pnpjs";
 import { ExtensionContext } from "@microsoft/sp-extension-base";
-import { SearchBox, IconButton } from "office-ui-fabric-react";
+import {
+  SearchBox,
+  IconButton,
+  getId,
+  DefaultButton,
+  ContextualMenu
+} from "office-ui-fabric-react";
+import { Modal, IModalProps } from "office-ui-fabric-react/lib/Modal";
 
 export interface ITopNavigationProps {
   TopMenuTermSet?: string;
@@ -14,6 +21,8 @@ export interface ITopNavigationProps {
 
 export interface ITopNavigationState {
   navigationElements: string;
+  showModal: boolean;
+  settingsHtml: string;
 }
 
 const NAV_TERMS_KEY = "global-navigation-terms";
@@ -34,9 +43,25 @@ export default class TopNavigation extends React.Component<
       this.initialiseScripts();
     });
     this.state = {
-      navigationElements: null
+      showModal: false,
+      navigationElements: null,
+      settingsHtml: ""
     };
+    this.getTopNavConfig();
   }
+
+  private getTopNavConfig = () => {
+    let rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
+    rootSite.rootWeb.lists
+      .getByTitle("TopNav")
+      .items.get()
+      .then(its => {
+        let settingsItem = its.filter(it => it.Title == "settings");
+        this.setState({
+          settingsHtml: settingsItem[0]["html"]
+        });
+      });
+  };
 
   private async onInititialisation() {
     // Retrieve the menu items from taxonomy
@@ -171,6 +196,19 @@ export default class TopNavigation extends React.Component<
     }/_layouts/15/search.aspx/siteall?q=${searchValue}`;
   };
 
+  // Use getId() to ensure that the IDs are unique on the page.
+  // (It's also okay to use plain strings without getId() and manually ensure uniqueness.)
+  private _titleId: string = getId("title");
+  private _subtitleId: string = getId("subText");
+
+  private _showModal = (): void => {
+    this.setState({ showModal: true });
+  };
+
+  private _closeModal = (): void => {
+    this.setState({ showModal: false });
+  };
+
   public render(): React.ReactElement<ITopNavigationProps> {
     return (
       <div className={styles.app}>
@@ -190,12 +228,37 @@ export default class TopNavigation extends React.Component<
                 />
               </li>
               <li className={styles.iconButtons}>
-                <IconButton iconProps={{ iconName: "FeedbackRequestSolid" }} />
+                <IconButton
+                  iconProps={{ iconName: "FeedbackRequestSolid" }}
+                  onClick={this._showModal}
+                />
                 <IconButton iconProps={{ iconName: "Settings" }} />
                 <IconButton iconProps={{ iconName: "FavoriteStar" }} />
               </li>
             </ul>
           </div>
+          <Modal
+            titleAriaId={this._titleId}
+            subtitleAriaId={this._subtitleId}
+            isOpen={this.state.showModal}
+            onDismiss={this._closeModal}
+            // isModeless={true}
+            dragOptions={{
+              closeMenuItemText: "Close",
+              moveMenuItemText: "Move",
+              menu: ContextualMenu
+            }}
+          >
+            <div>
+              <span id={this._titleId}>Lorem Ipsum</span>
+            </div>
+            <div id={this._subtitleId}>
+              <DefaultButton onClick={this._closeModal} text="Close" />
+              <div
+                dangerouslySetInnerHTML={{ __html: this.state.settingsHtml }}
+              />
+            </div>
+          </Modal>
         </div>
       </div>
     );

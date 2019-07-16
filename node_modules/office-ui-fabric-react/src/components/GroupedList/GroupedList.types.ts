@@ -11,11 +11,17 @@ import { IGroupHeaderProps } from './GroupHeader.types';
 import { IGroupShowAllProps } from './GroupShowAll.types';
 import { IGroupFooterProps } from './GroupFooter.types';
 
+/**
+ * {@docCategory GroupedList}
+ */
 export enum CollapseAllVisibility {
   hidden = 0,
   visible = 1
 }
 
+/**
+ * {@docCategory GroupedList}
+ */
 export interface IGroupedList extends IList {
   /**
    * Ensures that the list content is updated. Call this in cases where the list prop updates don't change, but the list
@@ -30,6 +36,9 @@ export interface IGroupedList extends IList {
   toggleCollapseAll: (allCollapsed: boolean) => void;
 }
 
+/**
+ * {@docCategory GroupedList}
+ */
 export interface IGroupedListProps extends React.ClassAttributes<GroupedListBase> {
   /**
    * Theme that is passed in from Higher Order Component
@@ -104,17 +113,14 @@ export interface IGroupedListProps extends React.ClassAttributes<GroupedListBase
   onShouldVirtualize?: (props: IListProps) => boolean;
 
   /**
-   * Optional function which will be called to estimate the height (in pixels) of the given group.
-   *
-   * By default, scrolling through a large virtualized GroupedList will often "jump" due to the order
-   * in which heights are calculated. For more details, see https://github.com/OfficeDev/office-ui-fabric-react/issues/5094
-   *
-   * Pass this prop to ensure the list uses the computed height rather than cached DOM measurements,
-   * avoiding the scroll jumping issue.
+   * Optional function to override default group height calculation used by list virtualization.
    */
   getGroupHeight?: (group: IGroup, groupIndex: number) => number;
 }
 
+/**
+ * {@docCategory GroupedList}
+ */
 export interface IGroup {
   /**
    * Unique identifier for the group.
@@ -185,6 +191,9 @@ export interface IGroup {
   hasMoreData?: boolean;
 }
 
+/**
+ * {@docCategory GroupedList}
+ */
 export interface IGroupRenderProps {
   /** Boolean indicating if all groups are in collapsed state. */
   isAllGroupsCollapsed?: boolean;
@@ -232,6 +241,9 @@ export interface IGroupRenderProps {
   showEmptyGroups?: boolean;
 }
 
+/**
+ * {@docCategory GroupedList}
+ */
 export interface IGroupDividerProps {
   componentRef?: IRefObject<{}>;
 
@@ -310,6 +322,9 @@ export interface IGroupDividerProps {
   theme?: ITheme;
 }
 
+/**
+ * {@docCategory GroupedList}
+ */
 export type IGroupedListStyleProps = Required<Pick<IGroupedListProps, 'theme'>> &
   Pick<IGroupedListProps, 'className'> & {
     /** whether or not the group is collapsed */
@@ -319,6 +334,9 @@ export type IGroupedListStyleProps = Required<Pick<IGroupedListProps, 'theme'>> 
     compact?: boolean;
   };
 
+/**
+ * {@docCategory GroupedList}
+ */
 export interface IGroupedListStyles {
   root: IStyle;
   group: IStyle;

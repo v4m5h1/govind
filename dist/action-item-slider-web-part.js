@@ -8222,7 +8222,7 @@ var sp = new sp_addinhelpers_es5_SPRestAddIn();
 
 // CONCATENATED MODULE: ./node_modules/@pnp/pnpjs/dist/pnpjs.es5.js
 /* unused harmony export util */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return sp$1; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return sp$1; });
 /* unused harmony export graph */
 /* unused harmony export storage */
 /* unused harmony export config */
@@ -8558,8 +8558,7 @@ var sp = new sp_addinhelpers_es5_SPRestAddIn();
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
 /* unused concated harmony import null */
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["b" /* Site */]; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "a", function() { return sp_es5["b" /* Site */]; });
 /* unused concated harmony import null */
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
 /* unused concated harmony import null */
@@ -8802,7 +8801,7 @@ var Def = {
     util: util,
 };
 
-/* harmony default export */ var pnpjs_es5 = __webpack_exports__["a"] = (Def);
+/* harmony default export */ var pnpjs_es5 = __webpack_exports__["b"] = (Def);
 
 
 
@@ -25346,7 +25345,7 @@ var ActionItemSlider_ActionItemSlider = /** @class */ (function (_super) {
         _this.getPageDetails = function () {
             var _a;
             if (_this.state.listTitle !== "") {
-                (_a = pnpjs_es5["b" /* sp */].web.lists
+                (_a = pnpjs_es5["c" /* sp */].web.lists
                     .getByTitle(_this.state.listTitle)
                     .items).select.apply(_a, _this.state.selectedKeys).get()
                     .then(function (items) {
@@ -25374,7 +25373,7 @@ var ActionItemSlider_ActionItemSlider = /** @class */ (function (_super) {
         };
         // Set the List Title and the selected keys on Property change
         _this.getListTitleById = function (nxtProps) {
-            pnpjs_es5["b" /* sp */].web.lists
+            pnpjs_es5["c" /* sp */].web.lists
                 .getById(nxtProps.listIds)
                 .select("Title")
                 .get()
@@ -25484,7 +25483,7 @@ var ActionItemSliderWebPart_ActionItemSliderWebPart = /** @class */ (function (_
         var _this = this;
         return _super.prototype.onInit.call(this).then(function (_) {
             // other init code may be present
-            pnpjs_es5["b" /* sp */].setup({
+            pnpjs_es5["c" /* sp */].setup({
                 spfxContext: _this.context
             });
         });
@@ -25511,7 +25510,7 @@ var ActionItemSliderWebPart_ActionItemSliderWebPart = /** @class */ (function (_
         var _this = this;
         var options;
         var filter2 = "Hidden eq false and CanBeDeleted eq true";
-        pnpjs_es5["b" /* sp */].web.lists
+        pnpjs_es5["c" /* sp */].web.lists
             .getById(this.properties.lists)
             .fields.select("InternalName", "Title")
             .filter(filter2)

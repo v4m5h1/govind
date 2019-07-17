@@ -4,14 +4,8 @@ import * as SPTermStore from "../services/SPTermStoreService";
 import styles from "../TopNavigation.module.scss";
 import pnp, { Site, Web } from "@pnp/pnpjs";
 import { ExtensionContext } from "@microsoft/sp-extension-base";
-import {
-  SearchBox,
-  IconButton,
-  getId,
-  DefaultButton,
-  ContextualMenu
-} from "office-ui-fabric-react";
-import { Modal, IModalProps } from "office-ui-fabric-react/lib/Modal";
+import { SearchBox, IconButton, getId } from "office-ui-fabric-react";
+import Panels from "./Panels";
 
 export interface ITopNavigationProps {
   TopMenuTermSet?: string;
@@ -21,8 +15,9 @@ export interface ITopNavigationProps {
 
 export interface ITopNavigationState {
   navigationElements: string;
-  showModal: boolean;
-  settingsHtml: string;
+  _showFAQPanel: boolean;
+  _showSettingsPanel: boolean;
+  _showFavouritesPanel: boolean;
 }
 
 const NAV_TERMS_KEY = "global-navigation-terms";
@@ -43,25 +38,12 @@ export default class TopNavigation extends React.Component<
       this.initialiseScripts();
     });
     this.state = {
-      showModal: false,
       navigationElements: null,
-      settingsHtml: ""
+      _showFAQPanel: false,
+      _showSettingsPanel: false,
+      _showFavouritesPanel: false
     };
-    this.getTopNavConfig();
   }
-
-  private getTopNavConfig = () => {
-    let rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
-    rootSite.rootWeb.lists
-      .getByTitle("TopNav")
-      .items.get()
-      .then(its => {
-        let settingsItem = its.filter(it => it.Title == "settings");
-        this.setState({
-          settingsHtml: settingsItem[0]["html"]
-        });
-      });
-  };
 
   private async onInititialisation() {
     // Retrieve the menu items from taxonomy
@@ -201,12 +183,24 @@ export default class TopNavigation extends React.Component<
   private _titleId: string = getId("title");
   private _subtitleId: string = getId("subText");
 
-  private _showModal = (): void => {
-    this.setState({ showModal: true });
+  private _showFAQPanel = (): void => {
+    this.setState({ _showFAQPanel: true });
+  };
+  private _showSettingsPanel = (): void => {
+    this.setState({ _showSettingsPanel: true });
+  };
+  private _showFavouritesPanel = (): void => {
+    this.setState({ _showFavouritesPanel: true });
   };
 
-  private _closeModal = (): void => {
-    this.setState({ showModal: false });
+  private _closeFAQPanel = (): void => {
+    this.setState({ _showFAQPanel: false });
+  };
+  private _closeSettingsPanel = (): void => {
+    this.setState({ _showSettingsPanel: false });
+  };
+  private _closeFavouritesPanel = (): void => {
+    this.setState({ _showFavouritesPanel: false });
   };
 
   public render(): React.ReactElement<ITopNavigationProps> {
@@ -214,11 +208,6 @@ export default class TopNavigation extends React.Component<
       <div className={styles.app}>
         <div className={styles.menuContainer}>
           <div className={styles.menu} id="menu">
-            {/* <ul
-              dangerouslySetInnerHTML={{
-                __html: this.state.navigationElements
-              }}
-            /> */}
             <ul>
               {this.state.navigationElements}
               <li className={styles.searchBox}>
@@ -230,35 +219,30 @@ export default class TopNavigation extends React.Component<
               <li className={styles.iconButtons}>
                 <IconButton
                   iconProps={{ iconName: "FeedbackRequestSolid" }}
-                  onClick={this._showModal}
+                  onClick={this._showFAQPanel}
+                  ariaLabel="FAQs"
                 />
-                <IconButton iconProps={{ iconName: "Settings" }} />
-                <IconButton iconProps={{ iconName: "FavoriteStar" }} />
+                <IconButton
+                  iconProps={{ iconName: "Settings" }}
+                  ariaLabel="Settings"
+                  onClick={this._showSettingsPanel}
+                />
+                <IconButton
+                  iconProps={{ iconName: "FavoriteStar" }}
+                  ariaLabel="My Favrourites"
+                  onClick={this._showFavouritesPanel}
+                />
               </li>
             </ul>
           </div>
-          <Modal
-            titleAriaId={this._titleId}
-            subtitleAriaId={this._subtitleId}
-            isOpen={this.state.showModal}
-            onDismiss={this._closeModal}
-            // isModeless={true}
-            dragOptions={{
-              closeMenuItemText: "Close",
-              moveMenuItemText: "Move",
-              menu: ContextualMenu
-            }}
-          >
-            <div>
-              <span id={this._titleId}>Lorem Ipsum</span>
-            </div>
-            <div id={this._subtitleId}>
-              <DefaultButton onClick={this._closeModal} text="Close" />
-              <div
-                dangerouslySetInnerHTML={{ __html: this.state.settingsHtml }}
-              />
-            </div>
-          </Modal>
+          <Panels
+            _showFAQsPanel={this.state._showFAQPanel}
+            _showSettingsPanel={this.state._showSettingsPanel}
+            _showFavouritesPanel={this.state._showFavouritesPanel}
+            _closeFAQPanel={this._closeFAQPanel}
+            _closeSettingsPanel={this._closeSettingsPanel}
+            _closeFavouritesPanel={this._closeFavouritesPanel}
+          />
         </div>
       </div>
     );

@@ -32,7 +32,7 @@
     "@types/webpack-env": "1.13.1",
     "@uifabric/fluent-theme": "^0.16.9",
     "jquery": "^3.4.1",
-    "office-ui-fabric-react": "^6.195.1",
+    "office-ui-fabric-react": "6.143.0",
     "react": "16.7.0",
     "react-dom": "16.7.0",
     "react-responsive-carousel": "^3.1.33"

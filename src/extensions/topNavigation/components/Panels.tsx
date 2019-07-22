@@ -2,6 +2,7 @@ import * as React from "react";
 import { Panel, PanelType } from "office-ui-fabric-react";
 import { Site } from "@pnp/sp";
 import styles from "../TopNavigation.module.scss";
+import MyFavorites from "./MyFavorites";
 
 export interface IPanelsProps {
   _showFAQsPanel: boolean;
@@ -19,6 +20,12 @@ export interface IPanelsState {
   favouritesHtml: string;
 }
 
+// config site url here
+// const rootSite = new Site(
+//   "https://csharpsharepoint.sharepoint.com/sites/ModernCommunicationSite"
+// );
+
+const rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
 export default class Panels extends React.Component<
   IPanelsProps,
   IPanelsState
@@ -29,7 +36,6 @@ export default class Panels extends React.Component<
   }
 
   private getTopNavConfig = () => {
-    let rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub"); // config site url here
     rootSite.rootWeb.lists
       .getByTitle("TopNav")
       .items.get()
@@ -98,9 +104,10 @@ export default class Panels extends React.Component<
           onLightDismissClick={this.props._closeFavouritesPanel}
         >
           <div>
-            <div
+            {/* <div
               dangerouslySetInnerHTML={{ __html: this.state.favouritesHtml }}
-            />
+            /> */}
+            <MyFavorites configSite={rootSite} />
           </div>
         </Panel>
       </React.Fragment>

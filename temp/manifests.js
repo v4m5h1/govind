@@ -1110,6 +1110,83 @@ function getManifests() {
         }
       }
     }
+  },
+  {
+    "id": "f8b5df40-571b-4e9f-ad2a-f89d98d7aec0",
+    "alias": "MyFavoritesWebPart",
+    "componentType": "WebPart",
+    "version": "0.0.1",
+    "manifestVersion": 2,
+    "requiresCustomScript": false,
+    "supportedHosts": [
+      "SharePointWebPart"
+    ],
+    "preconfiguredEntries": [
+      {
+        "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+        "group": {
+          "default": "Other"
+        },
+        "title": {
+          "default": "my-favorites"
+        },
+        "description": {
+          "default": "my-favorites description"
+        },
+        "officeFabricIconFontName": "Page",
+        "properties": {
+          "description": "my-favorites"
+        }
+      }
+    ],
+    "loaderConfig": {
+      "entryModuleId": "my-favorites-web-part",
+      "internalModuleBaseUrls": [
+        "https://localhost:4321/"
+      ],
+      "scriptResources": {
+        "my-favorites-web-part": {
+          "type": "path",
+          "path": "dist/my-favorites-web-part.js"
+        },
+        "MyFavoritesWebPartStrings": {
+          "defaultPath": "lib/webparts/myFavorites/loc/en-us.js",
+          "type": "localizedPath"
+        },
+        "react": {
+          "type": "component",
+          "version": "16.7.0",
+          "id": "0d910c1c-13b9-4e1c-9aa4-b008c5e42d7d",
+          "failoverPath": "node_modules/react/dist/react.js"
+        },
+        "react-dom": {
+          "type": "component",
+          "version": "16.7.0",
+          "id": "aa0a46ec-1505-43cd-a44a-93f3a5aa460a",
+          "failoverPath": "node_modules/react-dom/dist/react-dom.js"
+        },
+        "@microsoft/sp-core-library": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "7263c7d0-1d6a-45ec-8d85-d4d1d234171b"
+        },
+        "@microsoft/sp-webpart-base": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "974a7777-0990-4136-8fa6-95d80114c2e0"
+        },
+        "@microsoft/sp-property-pane": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "f9e737b7-f0df-4597-ba8c-3060f82380db"
+        },
+        "@microsoft/sp-lodash-subset": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "73e1dc6c-8441-42cc-ad47-4bd3659f8a3a"
+        }
+      }
+    }
   }
 ];
 }

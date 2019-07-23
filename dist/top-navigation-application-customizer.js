@@ -75067,6 +75067,19 @@ var MyFavorites_MyFavorites = /** @class */ (function (_super) {
             linkTitle: "",
             linkUrl: ""
         };
+        _this.removeLink = function (itemId) {
+            _this.props.configSite.rootWeb.lists
+                .getByTitle("MyFavorites")
+                .items.getById(itemId)
+                .delete()
+                .then(function (_) {
+                _this.getMyLinks().then(function (lnks) {
+                    _this.setState({
+                        links: lnks
+                    });
+                });
+            });
+        };
         _this.getMyLinks = function () { return MyFavorites___awaiter(_this, void 0, void 0, function () {
             var currentUser, items;
             var _this = this;
@@ -75078,7 +75091,7 @@ var MyFavorites_MyFavorites = /** @class */ (function (_super) {
                         console.log(currentUser);
                         return [4 /*yield*/, this.props.configSite.rootWeb.lists
                                 .getByTitle("MyFavorites")
-                                .items.select("Title", "Url", "Editor/Id")
+                                .items.select("ID", "Title", "Url", "Editor/Id")
                                 .filter("Editor/Id eq " + currentUser.Id)
                                 .expand("Editor")
                                 .get()];
@@ -75088,7 +75101,7 @@ var MyFavorites_MyFavorites = /** @class */ (function (_super) {
                         return [2 /*return*/, items.map(function (it) {
                                 return (external__react_["createElement"]("div", null,
                                     external__react_["createElement"](Link, { className: MyFavorites_module_scss.link, href: it.Url, target: "_blank" }, it.Title),
-                                    external__react_["createElement"](IconButton_IconButton, { iconProps: { iconName: "RemoveLinkX" }, onClick: _this.toggleNewLinks })));
+                                    external__react_["createElement"](IconButton_IconButton, { className: MyFavorites_module_scss.link, iconProps: { iconName: "Cancel" }, onClick: function () { return _this.removeLink(it.ID); } })));
                             })];
                 }
             });

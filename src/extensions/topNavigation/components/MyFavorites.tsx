@@ -41,12 +41,26 @@ export default class MyFavorites extends React.Component<
     linkUrl: ""
   };
 
+  private removeLink = itemId => {
+    this.props.configSite.rootWeb.lists
+      .getByTitle("MyFavorites")
+      .items.getById(itemId)
+      .delete()
+      .then(_ => {
+        this.getMyLinks().then(lnks => {
+          this.setState({
+            links: lnks
+          });
+        });
+      });
+  };
+
   private getMyLinks = async () => {
     let currentUser = await this.props.configSite.rootWeb.currentUser.get();
     console.log(currentUser);
     let items = await this.props.configSite.rootWeb.lists
       .getByTitle("MyFavorites")
-      .items.select("Title", "Url", "Editor/Id")
+      .items.select("ID", "Title", "Url", "Editor/Id")
       .filter(`Editor/Id eq ${currentUser.Id}`)
       .expand("Editor")
       .get();
@@ -58,8 +72,9 @@ export default class MyFavorites extends React.Component<
             {it.Title}
           </Link>
           <IconButton
-            iconProps={{ iconName: "RemoveLinkX" }}
-            onClick={this.toggleNewLinks}
+            className={styles.link}
+            iconProps={{ iconName: "Cancel" }}
+            onClick={() => this.removeLink(it.ID)}
           />
         </div>
       );

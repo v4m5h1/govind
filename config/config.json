@@ -17,6 +17,14 @@
           "manifest": "./src/extensions/topNavigation/TopNavigationApplicationCustomizer.manifest.json"
         }
       ]
+    },
+    "stock-ticker-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/stockTicker/StockTickerWebPart.js",
+          "manifest": "./src/webparts/stockTicker/StockTickerWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -24,6 +32,7 @@
     "ActionItemSliderWebPartStrings": "lib/webparts/actionItemSlider/loc/{locale}.js",
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
     "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js",
-    "TopNavigationApplicationCustomizerStrings": "lib/extensions/topNavigation/loc/{locale}.js"
+    "TopNavigationApplicationCustomizerStrings": "lib/extensions/topNavigation/loc/{locale}.js",
+    "StockTickerWebPartStrings": "lib/webparts/stockTicker/loc/{locale}.js"
   }
 }

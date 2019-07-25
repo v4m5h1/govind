@@ -26,6 +26,7 @@ export interface IPanelsState {
 // );
 
 const rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
+
 export default class Panels extends React.Component<
   IPanelsProps,
   IPanelsState
@@ -42,10 +43,10 @@ export default class Panels extends React.Component<
       .then(its => {
         let faqsItem = its.filter(it => it.Title == "faqs");
         let settingsItem = its.filter(it => it.Title == "settings");
-        let favouritesItem = its.filter(it => it.Title == "favourites");
+        // let favouritesItem = its.filter(it => it.Title == "favourites");
         this.setState({
           settingsHtml: settingsItem[0]["html"],
-          favouritesHtml: favouritesItem[0]["html"],
+          // favouritesHtml: favouritesItem[0]["html"],
           faqsHtml: faqsItem[0]["html"]
         });
       });

@@ -18,7 +18,8 @@
       },
       "TopNavigationApplicationCustomizerStrings": {
         "defaultPath": "lib/extensions/topNavigation/loc/en-us.js",
-        "type": "localizedPath"
+        "type": "localizedPath",
+        "paths": {}
       },
       "react": {
         "type": "component",

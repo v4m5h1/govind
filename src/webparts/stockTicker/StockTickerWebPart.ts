@@ -28,30 +28,6 @@ export default class StockTickerWebPart extends BaseClientSideWebPart<
     });
   }
 
-  // method to retrieve the API Key for Alpha Vantage
-  private async getApiKey(): Promise<string> {
-    const apiKeyName: string = "PnP-Portal-AlphaVantage-API-Key";
-    // try to get the API Key from the local session storage
-    let apiKey: string = sessionStorage.getItem(apiKeyName);
-    // if it is not there, load it from the tenant properties
-    // and store its value in the session storage
-    if (!apiKey) {
-      const { sp } = await import(
-        /* webpackChunkName: 'pnp-sp' */
-        "@pnp/sp"
-      );
-      const storageEntity: StorageEntity = await sp.web.getStorageEntity(
-        apiKeyName
-      );
-      if (storageEntity && !storageEntity["odata.null"]) {
-        apiKey = storageEntity.Value;
-        sessionStorage.setItem(apiKeyName, apiKey);
-      }
-    }
-    // return the API Key value
-    return apiKey;
-  }
-
   public async render(): Promise<void> {
     // // get the API Key value
     // const apiKey: string = await this.getApiKey();

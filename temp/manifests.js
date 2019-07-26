@@ -993,8 +993,7 @@ function getManifests() {
         },
         "TopNavigationApplicationCustomizerStrings": {
           "defaultPath": "lib/extensions/topNavigation/loc/en-us.js",
-          "type": "localizedPath",
-          "paths": {}
+          "type": "localizedPath"
         },
         "react": {
           "type": "component",
@@ -1027,6 +1026,88 @@ function getManifests() {
           "type": "component",
           "version": "1.8.2",
           "id": "4df9bb86-ab0a-4aab-ab5f-48bf167048fb"
+        }
+      }
+    }
+  },
+  {
+    "id": "c7198b5b-fd38-4a03-913a-3d56a189ed82",
+    "alias": "StockTickerWebPart",
+    "componentType": "WebPart",
+    "version": "0.0.1",
+    "manifestVersion": 2,
+    "requiresCustomScript": false,
+    "supportedHosts": [
+      "SharePointWebPart"
+    ],
+    "preconfiguredEntries": [
+      {
+        "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+        "group": {
+          "default": "Other"
+        },
+        "title": {
+          "default": "stock-ticker"
+        },
+        "description": {
+          "default": "stock-ticker description"
+        },
+        "officeFabricIconFontName": "Page",
+        "properties": {
+          "description": "stock-ticker"
+        }
+      }
+    ],
+    "loaderConfig": {
+      "entryModuleId": "stock-ticker-web-part",
+      "internalModuleBaseUrls": [
+        "https://localhost:4321/"
+      ],
+      "scriptResources": {
+        "stock-ticker-web-part": {
+          "type": "path",
+          "path": "dist/stock-ticker-web-part.js"
+        },
+        "StockTickerWebPartStrings": {
+          "defaultPath": "lib/webparts/stockTicker/loc/en-us.js",
+          "type": "localizedPath"
+        },
+        "react": {
+          "type": "component",
+          "version": "16.7.0",
+          "id": "0d910c1c-13b9-4e1c-9aa4-b008c5e42d7d",
+          "failoverPath": "node_modules/react/dist/react.js"
+        },
+        "react-dom": {
+          "type": "component",
+          "version": "16.7.0",
+          "id": "aa0a46ec-1505-43cd-a44a-93f3a5aa460a",
+          "failoverPath": "node_modules/react-dom/dist/react-dom.js"
+        },
+        "@microsoft/sp-core-library": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "7263c7d0-1d6a-45ec-8d85-d4d1d234171b"
+        },
+        "@microsoft/sp-webpart-base": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "974a7777-0990-4136-8fa6-95d80114c2e0"
+        },
+        "@microsoft/sp-http": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "c07208f0-ea3b-4c1a-9965-ac1b825211a6"
+        },
+        "@microsoft/sp-property-pane": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "f9e737b7-f0df-4597-ba8c-3060f82380db"
+        },
+        "@microsoft/sp-lodash-subset": {
+          "type": "component",
+          "version": "1.8.2",
+          "id": "73e1dc6c-8441-42cc-ad47-4bd3659f8a3a"
         }
       }
     }
@@ -1071,56 +1152,11 @@ function getManifests() {
         },
         "ActionItemSliderWebPartStrings": {
           "defaultPath": "lib/webparts/actionItemSlider/loc/en-us.js",
-          "type": "localizedPath",
-          "paths": {}
+          "type": "localizedPath"
         },
         "PropertyControlStrings": {
           "defaultPath": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-          "type": "localizedPath",
-          "paths": {
-            "en-US": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "bn": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "chr": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "dv": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "div": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "en": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "fil": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "haw": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "iu": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "lo": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "moh": "node_modules/@pnp/spfx-property-controls/lib/loc/en-us.js",
-            "fr-FR": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "gsw": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "br": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "tzm-Tfng": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "co": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "fr": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "ff": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "lb": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "mg": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "oc": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "zgh": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "wo": "node_modules/@pnp/spfx-property-controls/lib/loc/fr-fr.js",
-            "nl-NL": "node_modules/@pnp/spfx-property-controls/lib/loc/nl-nl.js",
-            "nl": "node_modules/@pnp/spfx-property-controls/lib/loc/nl-nl.js",
-            "fy": "node_modules/@pnp/spfx-property-controls/lib/loc/nl-nl.js",
-            "ru-RU": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "ru": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "ba": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "be": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "ky": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "mn": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "sah": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "tg": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "tt": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "tk": "node_modules/@pnp/spfx-property-controls/lib/loc/ru-ru.js",
-            "zh-CN": "node_modules/@pnp/spfx-property-controls/lib/loc/zh-cn.js",
-            "zh": "node_modules/@pnp/spfx-property-controls/lib/loc/zh-cn.js",
-            "mn-Mong": "node_modules/@pnp/spfx-property-controls/lib/loc/zh-cn.js",
-            "bo": "node_modules/@pnp/spfx-property-controls/lib/loc/zh-cn.js",
-            "ug": "node_modules/@pnp/spfx-property-controls/lib/loc/zh-cn.js",
-            "ii": "node_modules/@pnp/spfx-property-controls/lib/loc/zh-cn.js"
-          }
+          "type": "localizedPath"
         },
         "react": {
           "type": "component",

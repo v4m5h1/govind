@@ -1,4 +1,4 @@
-define("cbb0f3a9-667f-4476-b520-341b0ed1d433_0.0.1", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-webpart-base","@microsoft/sp-http","@microsoft/sp-property-pane","ActionItemSliderWebPartStrings","PropertyControlStrings"], function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_12__, __WEBPACK_EXTERNAL_MODULE_23__, __WEBPACK_EXTERNAL_MODULE_33__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_108__, __WEBPACK_EXTERNAL_MODULE_265__) { return /******/ (function(modules) { // webpackBootstrap
+define("cbb0f3a9-667f-4476-b520-341b0ed1d433_0.0.1", ["react","react-dom","@microsoft/sp-core-library","@microsoft/sp-webpart-base","@microsoft/sp-http","@microsoft/sp-property-pane","ActionItemSliderWebPartStrings","PropertyControlStrings"], function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_12__, __WEBPACK_EXTERNAL_MODULE_25__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_108__, __WEBPACK_EXTERNAL_MODULE_265__) { return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -710,7 +710,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return jsS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return hOP; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return getHashCode; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js__ = __webpack_require__(29);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js__ = __webpack_require__(30);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_adal_angular_dist_adal_min_js__);
 /**
  * @license
@@ -1877,7 +1877,7 @@ if (true) {
   // By explicitly using `prop-types` you are opting into new development behavior.
   // http://fb.me/prop-types-in-prod
   var throwOnDirectAccess = true;
-  module.exports = __webpack_require__(25)(ReactIs.isElement, throwOnDirectAccess);
+  module.exports = __webpack_require__(27)(ReactIs.isElement, throwOnDirectAccess);
 } else {
   // By explicitly using `prop-types` you are opting into new production behavior.
   // http://fb.me/prop-types-in-prod
@@ -1902,7 +1902,7 @@ var fontFace_1 = __webpack_require__(135);
 exports.fontFace = fontFace_1.fontFace;
 var keyframes_1 = __webpack_require__(136);
 exports.keyframes = keyframes_1.keyframes;
-var Stylesheet_1 = __webpack_require__(19);
+var Stylesheet_1 = __webpack_require__(20);
 exports.InjectionMode = Stylesheet_1.InjectionMode;
 exports.Stylesheet = Stylesheet_1.Stylesheet;
 
@@ -3232,7 +3232,7 @@ function shouldUseCssText() {
 if (false) {
   module.exports = require('./cjs/react-is.production.min.js');
 } else {
-  module.exports = __webpack_require__(24);
+  module.exports = __webpack_require__(26);
 }
 
 
@@ -3257,6 +3257,223 @@ module.exports = ReactPropTypesSecret;
 
 /***/ }),
 /* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Sets the virtual parent of an element.
+ * Pass `undefined` as the `parent` to clear the virtual parent.
+ *
+ * @public
+ */
+function setVirtualParent(child, parent) {
+    var virtualChild = child;
+    var virtualParent = parent;
+    if (!virtualChild._virtual) {
+        virtualChild._virtual = {
+            children: []
+        };
+    }
+    var oldParent = virtualChild._virtual.parent;
+    if (oldParent && oldParent !== parent) {
+        // Remove the child from its old parent.
+        var index = oldParent._virtual.children.indexOf(virtualChild);
+        if (index > -1) {
+            oldParent._virtual.children.splice(index, 1);
+        }
+    }
+    virtualChild._virtual.parent = virtualParent || undefined;
+    if (virtualParent) {
+        if (!virtualParent._virtual) {
+            virtualParent._virtual = {
+                children: []
+            };
+        }
+        virtualParent._virtual.children.push(virtualChild);
+    }
+}
+exports.setVirtualParent = setVirtualParent;
+/**
+ * Gets the virtual parent given the child element, if it exists.
+ *
+ * @public
+ */
+function getVirtualParent(child) {
+    var parent;
+    if (child && isVirtualElement(child)) {
+        parent = child._virtual.parent;
+    }
+    return parent;
+}
+exports.getVirtualParent = getVirtualParent;
+/**
+ * Gets the element which is the parent of a given element.
+ * If `allowVirtuaParents` is `true`, this method prefers the virtual parent over
+ * real DOM parent when present.
+ *
+ * @public
+ */
+function getParent(child, allowVirtualParents) {
+    if (allowVirtualParents === void 0) { allowVirtualParents = true; }
+    return child && (allowVirtualParents && getVirtualParent(child) ||
+        child.parentNode && child.parentNode);
+}
+exports.getParent = getParent;
+/**
+ * Gets the elements which are child elements of the given element.
+ * If `allowVirtualChildren` is `true`, this method enumerates virtual child elements
+ * after the original children.
+ * @param parent
+ * @param allowVirtualChildren
+ */
+function getChildren(parent, allowVirtualChildren) {
+    if (allowVirtualChildren === void 0) { allowVirtualChildren = true; }
+    var children = [];
+    if (parent) {
+        for (var i = 0; i < parent.children.length; i++) {
+            children.push(parent.children.item(i));
+        }
+        if (allowVirtualChildren && isVirtualElement(parent)) {
+            children.push.apply(children, parent._virtual.children);
+        }
+    }
+    return children;
+}
+exports.getChildren = getChildren;
+/**
+ * Determines whether or not a parent element contains a given child element.
+ * If `allowVirtualParents` is true, this method may return `true` if the child
+ * has the parent in its virtual element hierarchy.
+ *
+ * @public
+ */
+function elementContains(parent, child, allowVirtualParents) {
+    if (allowVirtualParents === void 0) { allowVirtualParents = true; }
+    var isContained = false;
+    if (parent && child) {
+        if (allowVirtualParents) {
+            isContained = false;
+            while (child) {
+                var nextParent = getParent(child);
+                if (nextParent === parent) {
+                    isContained = true;
+                    break;
+                }
+                child = nextParent;
+            }
+        }
+        else if (parent.contains) {
+            isContained = parent.contains(child);
+        }
+    }
+    return isContained;
+}
+exports.elementContains = elementContains;
+var _isSSR = false;
+/**
+ * Helper to set ssr mode to simulate no window object returned from getWindow helper.
+ *
+ * @public
+ */
+function setSSR(isEnabled) {
+    _isSSR = isEnabled;
+}
+exports.setSSR = setSSR;
+/**
+ * Helper to get the window object.
+ *
+ * @public
+ */
+function getWindow(rootElement) {
+    if (_isSSR || typeof window === 'undefined') {
+        return undefined;
+    }
+    else {
+        return (rootElement &&
+            rootElement.ownerDocument &&
+            rootElement.ownerDocument.defaultView ?
+            rootElement.ownerDocument.defaultView :
+            window);
+    }
+}
+exports.getWindow = getWindow;
+/**
+ * Helper to get the document object.
+ *
+ * @public
+ */
+function getDocument(rootElement) {
+    if (_isSSR || typeof document === 'undefined') {
+        return undefined;
+    }
+    else {
+        return rootElement && rootElement.ownerDocument ? rootElement.ownerDocument : document;
+    }
+}
+exports.getDocument = getDocument;
+/**
+ * Helper to get bounding client rect, works with window.
+ *
+ * @public
+ */
+function getRect(element) {
+    var rect;
+    if (element) {
+        if (element === window) {
+            rect = {
+                left: 0,
+                top: 0,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                right: window.innerWidth,
+                bottom: window.innerHeight
+            };
+        }
+        else if (element.getBoundingClientRect) {
+            rect = element.getBoundingClientRect();
+        }
+    }
+    return rect;
+}
+exports.getRect = getRect;
+/**
+ * Finds the first parent element where the matchFunction returns true
+ * @param element element to start searching at
+ * @param matchFunction the function that determines if the element is a match
+ * @returns the matched element or null no match was found
+ */
+function findElementRecursive(element, matchFunction) {
+    if (!element || element === document.body) {
+        return null;
+    }
+    return matchFunction(element) ? element : findElementRecursive(getParent(element), matchFunction);
+}
+exports.findElementRecursive = findElementRecursive;
+/**
+ * Determines if an element, or any of its ancestors, contian the given attribute
+ * @param element - element to start searching at
+ * @param attribute - the attribute to search for
+ * @returns the value of the first instance found
+ */
+function elementContainsAttribute(element, attribute) {
+    var elementMatch = findElementRecursive(element, function (testElement) { return testElement.hasAttribute(attribute); });
+    return elementMatch && elementMatch.getAttribute(attribute);
+}
+exports.elementContainsAttribute = elementContainsAttribute;
+/**
+ * Determines whether or not an element has the virtual hierarchy extension.
+ *
+ * @public
+ */
+function isVirtualElement(element) {
+    return element && !!element._virtual;
+}
+
+
+/***/ }),
+/* 18 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -13360,2013 +13577,7 @@ var sp = new SPRest();
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(7)))
 
 /***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Sets the virtual parent of an element.
- * Pass `undefined` as the `parent` to clear the virtual parent.
- *
- * @public
- */
-function setVirtualParent(child, parent) {
-    var virtualChild = child;
-    var virtualParent = parent;
-    if (!virtualChild._virtual) {
-        virtualChild._virtual = {
-            children: []
-        };
-    }
-    var oldParent = virtualChild._virtual.parent;
-    if (oldParent && oldParent !== parent) {
-        // Remove the child from its old parent.
-        var index = oldParent._virtual.children.indexOf(virtualChild);
-        if (index > -1) {
-            oldParent._virtual.children.splice(index, 1);
-        }
-    }
-    virtualChild._virtual.parent = virtualParent || undefined;
-    if (virtualParent) {
-        if (!virtualParent._virtual) {
-            virtualParent._virtual = {
-                children: []
-            };
-        }
-        virtualParent._virtual.children.push(virtualChild);
-    }
-}
-exports.setVirtualParent = setVirtualParent;
-/**
- * Gets the virtual parent given the child element, if it exists.
- *
- * @public
- */
-function getVirtualParent(child) {
-    var parent;
-    if (child && isVirtualElement(child)) {
-        parent = child._virtual.parent;
-    }
-    return parent;
-}
-exports.getVirtualParent = getVirtualParent;
-/**
- * Gets the element which is the parent of a given element.
- * If `allowVirtuaParents` is `true`, this method prefers the virtual parent over
- * real DOM parent when present.
- *
- * @public
- */
-function getParent(child, allowVirtualParents) {
-    if (allowVirtualParents === void 0) { allowVirtualParents = true; }
-    return child && (allowVirtualParents && getVirtualParent(child) ||
-        child.parentNode && child.parentNode);
-}
-exports.getParent = getParent;
-/**
- * Gets the elements which are child elements of the given element.
- * If `allowVirtualChildren` is `true`, this method enumerates virtual child elements
- * after the original children.
- * @param parent
- * @param allowVirtualChildren
- */
-function getChildren(parent, allowVirtualChildren) {
-    if (allowVirtualChildren === void 0) { allowVirtualChildren = true; }
-    var children = [];
-    if (parent) {
-        for (var i = 0; i < parent.children.length; i++) {
-            children.push(parent.children.item(i));
-        }
-        if (allowVirtualChildren && isVirtualElement(parent)) {
-            children.push.apply(children, parent._virtual.children);
-        }
-    }
-    return children;
-}
-exports.getChildren = getChildren;
-/**
- * Determines whether or not a parent element contains a given child element.
- * If `allowVirtualParents` is true, this method may return `true` if the child
- * has the parent in its virtual element hierarchy.
- *
- * @public
- */
-function elementContains(parent, child, allowVirtualParents) {
-    if (allowVirtualParents === void 0) { allowVirtualParents = true; }
-    var isContained = false;
-    if (parent && child) {
-        if (allowVirtualParents) {
-            isContained = false;
-            while (child) {
-                var nextParent = getParent(child);
-                if (nextParent === parent) {
-                    isContained = true;
-                    break;
-                }
-                child = nextParent;
-            }
-        }
-        else if (parent.contains) {
-            isContained = parent.contains(child);
-        }
-    }
-    return isContained;
-}
-exports.elementContains = elementContains;
-var _isSSR = false;
-/**
- * Helper to set ssr mode to simulate no window object returned from getWindow helper.
- *
- * @public
- */
-function setSSR(isEnabled) {
-    _isSSR = isEnabled;
-}
-exports.setSSR = setSSR;
-/**
- * Helper to get the window object.
- *
- * @public
- */
-function getWindow(rootElement) {
-    if (_isSSR || typeof window === 'undefined') {
-        return undefined;
-    }
-    else {
-        return (rootElement &&
-            rootElement.ownerDocument &&
-            rootElement.ownerDocument.defaultView ?
-            rootElement.ownerDocument.defaultView :
-            window);
-    }
-}
-exports.getWindow = getWindow;
-/**
- * Helper to get the document object.
- *
- * @public
- */
-function getDocument(rootElement) {
-    if (_isSSR || typeof document === 'undefined') {
-        return undefined;
-    }
-    else {
-        return rootElement && rootElement.ownerDocument ? rootElement.ownerDocument : document;
-    }
-}
-exports.getDocument = getDocument;
-/**
- * Helper to get bounding client rect, works with window.
- *
- * @public
- */
-function getRect(element) {
-    var rect;
-    if (element) {
-        if (element === window) {
-            rect = {
-                left: 0,
-                top: 0,
-                width: window.innerWidth,
-                height: window.innerHeight,
-                right: window.innerWidth,
-                bottom: window.innerHeight
-            };
-        }
-        else if (element.getBoundingClientRect) {
-            rect = element.getBoundingClientRect();
-        }
-    }
-    return rect;
-}
-exports.getRect = getRect;
-/**
- * Finds the first parent element where the matchFunction returns true
- * @param element element to start searching at
- * @param matchFunction the function that determines if the element is a match
- * @returns the matched element or null no match was found
- */
-function findElementRecursive(element, matchFunction) {
-    if (!element || element === document.body) {
-        return null;
-    }
-    return matchFunction(element) ? element : findElementRecursive(getParent(element), matchFunction);
-}
-exports.findElementRecursive = findElementRecursive;
-/**
- * Determines if an element, or any of its ancestors, contian the given attribute
- * @param element - element to start searching at
- * @param attribute - the attribute to search for
- * @returns the value of the first instance found
- */
-function elementContainsAttribute(element, attribute) {
-    var elementMatch = findElementRecursive(element, function (testElement) { return testElement.hasAttribute(attribute); });
-    return elementMatch && elementMatch.getAttribute(attribute);
-}
-exports.elementContainsAttribute = elementContainsAttribute;
-/**
- * Determines whether or not an element has the virtual hierarchy extension.
- *
- * @public
- */
-function isVirtualElement(element) {
-    return element && !!element._virtual;
-}
-
-
-/***/ }),
 /* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(0);
-/**
- * Injection mode for the stylesheet.
- *
- * @public
- */
-var InjectionMode;
-(function (InjectionMode) {
-    /**
-     * Avoids style injection, use getRules() to read the styles.
-     */
-    InjectionMode[InjectionMode["none"] = 0] = "none";
-    /**
-     * Inserts rules using the insertRule api.
-     */
-    InjectionMode[InjectionMode["insertNode"] = 1] = "insertNode";
-    /**
-     * Appends rules using appendChild.
-     */
-    InjectionMode[InjectionMode["appendChild"] = 2] = "appendChild";
-})(InjectionMode = exports.InjectionMode || (exports.InjectionMode = {}));
-var STYLESHEET_SETTING = '__stylesheet__';
-var _stylesheet;
-/**
- * Represents the state of styles registered in the page. Abstracts
- * the surface for adding styles to the stylesheet, exposes helpers
- * for reading the styles registered in server rendered scenarios.
- *
- * @public
- */
-var Stylesheet = /** @class */ (function () {
-    function Stylesheet(config) {
-        this._rules = [];
-        this._rulesToInsert = [];
-        this._counter = 0;
-        this._keyToClassName = {};
-        // tslint:disable-next-line:no-any
-        this._classNameToArgs = {};
-        this._config = tslib_1.__assign({ injectionMode: 1 /* insertNode */, defaultPrefix: 'css' }, config);
-    }
-    /**
-     * Gets the singleton instance.
-     */
-    Stylesheet.getInstance = function () {
-        // tslint:disable-next-line:no-any
-        var win = typeof window !== 'undefined' ? window : {};
-        _stylesheet = win[STYLESHEET_SETTING];
-        if (!_stylesheet) {
-            // tslint:disable-next-line:no-string-literal
-            var fabricConfig = (win && win['FabricConfig']) || {};
-            _stylesheet = win[STYLESHEET_SETTING] = new Stylesheet(fabricConfig.mergeStyles);
-        }
-        return _stylesheet;
-    };
-    /**
-     * Configures the stylesheet.
-     */
-    Stylesheet.prototype.setConfig = function (config) {
-        this._config = tslib_1.__assign({}, this._config, config);
-    };
-    /**
-     * Generates a unique classname.
-     *
-     * @param displayName - Optional value to use as a prefix.
-     */
-    Stylesheet.prototype.getClassName = function (displayName) {
-        var prefix = displayName || this._config.defaultPrefix;
-        return prefix + "-" + this._counter++;
-    };
-    /**
-     * Used internally to cache information about a class which was
-     * registered with the stylesheet.
-     */
-    Stylesheet.prototype.cacheClassName = function (className, key, args, rules) {
-        this._keyToClassName[key] = className;
-        this._classNameToArgs[className] = {
-            args: args,
-            rules: rules
-        };
-    };
-    /**
-     * Gets the appropriate classname given a key which was previously
-     * registered using cacheClassName.
-     */
-    Stylesheet.prototype.classNameFromKey = function (key) {
-        return this._keyToClassName[key];
-    };
-    /**
-     * Gets the arguments associated with a given classname which was
-     * previously registered using cacheClassName.
-     */
-    Stylesheet.prototype.argsFromClassName = function (className) {
-        var entry = this._classNameToArgs[className];
-        return (entry && entry.args);
-    };
-    /**
-   * Gets the arguments associated with a given classname which was
-   * previously registered using cacheClassName.
-   */
-    Stylesheet.prototype.insertedRulesFromClassName = function (className) {
-        var entry = this._classNameToArgs[className];
-        return (entry && entry.rules);
-    };
-    /**
-     * Inserts a css rule into the stylesheet.
-     */
-    Stylesheet.prototype.insertRule = function (rule) {
-        var injectionMode = this._config.injectionMode;
-        var element = injectionMode !== 0 /* none */ ? this._getStyleElement() : undefined;
-        if (element) {
-            switch (this._config.injectionMode) {
-                case 1 /* insertNode */:
-                    var sheet = element.sheet;
-                    try {
-                        sheet.insertRule(rule, sheet.cssRules.length);
-                    }
-                    catch (e) {
-                        // The browser will throw exceptions on unsupported rules (such as a moz prefix in webkit.)
-                        // We need to swallow the exceptions for this scenario, otherwise we'd need to filter
-                        // which could be slower and bulkier.
-                    }
-                    break;
-                case 2 /* appendChild */:
-                    element.appendChild(document.createTextNode(rule));
-                    break;
-            }
-        }
-        else {
-            this._rules.push(rule);
-        }
-        if (this._config.onInsertRule) {
-            this._config.onInsertRule(rule);
-        }
-    };
-    /**
-     * Gets all rules registered with the stylesheet; only valid when
-     * using InsertionMode.none.
-     */
-    Stylesheet.prototype.getRules = function () {
-        return (this._rules.join('') || '') + (this._rulesToInsert.join('') || '');
-    };
-    /**
-     * Resets the internal state of the stylesheet. Only used in server
-     * rendered scenarios where we're using InsertionMode.none.
-     */
-    Stylesheet.prototype.reset = function () {
-        this._rules = [];
-        this._rulesToInsert = [];
-        this._counter = 0;
-        this._classNameToArgs = {};
-        this._keyToClassName = {};
-    };
-    // Forces the regeneration of incoming styles without totally resetting the stylesheet.
-    Stylesheet.prototype.resetKeys = function () {
-        this._keyToClassName = {};
-    };
-    Stylesheet.prototype._getStyleElement = function () {
-        var _this = this;
-        if (!this._styleElement && typeof document !== 'undefined') {
-            this._styleElement = this._createStyleElement();
-            // Reset the style element on the next frame.
-            window.requestAnimationFrame(function () {
-                _this._styleElement = undefined;
-            });
-        }
-        return this._styleElement;
-    };
-    Stylesheet.prototype._createStyleElement = function () {
-        var styleElement = document.createElement('style');
-        styleElement.setAttribute('data-merge-styles', 'true');
-        styleElement.type = 'text/css';
-        if (this._lastStyleElement && this._lastStyleElement.nextElementSibling) {
-            document.head.insertBefore(styleElement, this._lastStyleElement.nextElementSibling);
-        }
-        else {
-            document.head.appendChild(styleElement);
-        }
-        this._lastStyleElement = styleElement;
-        return styleElement;
-    };
-    return Stylesheet;
-}());
-exports.Stylesheet = Stylesheet;
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(0);
-tslib_1.__exportStar(__webpack_require__(185), exports);
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(0);
-var React = __webpack_require__(1);
-var Utilities_1 = __webpack_require__(2);
-var Icon_1 = __webpack_require__(30);
-var ContextualMenu_1 = __webpack_require__(211);
-var BaseButton_classNames_1 = __webpack_require__(226);
-var SplitButton_classNames_1 = __webpack_require__(227);
-var KeytipData_1 = __webpack_require__(20);
-var TouchIdleDelay = 500; /* ms */
-var BaseButton = /** @class */ (function (_super) {
-    tslib_1.__extends(BaseButton, _super);
-    function BaseButton(props, rootClassName) {
-        var _this = _super.call(this, props) || this;
-        _this._buttonElement = Utilities_1.createRef();
-        _this._splitButtonContainer = Utilities_1.createRef();
-        _this._onRenderIcon = function (buttonProps, defaultRender) {
-            var iconProps = _this.props.iconProps;
-            if (iconProps) {
-                return (React.createElement(Icon_1.Icon, tslib_1.__assign({}, iconProps, { className: _this._classNames.icon })));
-            }
-            return null;
-        };
-        _this._onRenderTextContents = function () {
-            var _a = _this.props, text = _a.text, children = _a.children, _b = _a.secondaryText, secondaryText = _b === void 0 ? _this.props.description : _b, _c = _a.onRenderText, onRenderText = _c === void 0 ? _this._onRenderText : _c, _d = _a.onRenderDescription, onRenderDescription = _d === void 0 ? _this._onRenderDescription : _d;
-            if (text || typeof (children) === 'string' || secondaryText) {
-                return (React.createElement("div", { className: _this._classNames.textContainer },
-                    onRenderText(_this.props, _this._onRenderText),
-                    onRenderDescription(_this.props, _this._onRenderDescription)));
-            }
-            return ([
-                onRenderText(_this.props, _this._onRenderText),
-                onRenderDescription(_this.props, _this._onRenderDescription)
-            ]);
-        };
-        _this._onRenderText = function () {
-            var text = _this.props.text;
-            var children = _this.props.children;
-            // For backwards compat, we should continue to take in the text content from children.
-            if (text === undefined && typeof (children) === 'string') {
-                text = children;
-            }
-            if (_this._hasText()) {
-                return (React.createElement("div", { key: _this._labelId, className: _this._classNames.label, id: _this._labelId }, text));
-            }
-            return null;
-        };
-        _this._onRenderChildren = function () {
-            var children = _this.props.children;
-            // If children is just a string, either it or the text will be rendered via onRenderLabel
-            // If children is another component, it will be rendered after text
-            if (typeof (children) === 'string') {
-                return null;
-            }
-            return children;
-        };
-        _this._onRenderDescription = function (props) {
-            var _a = props.secondaryText, secondaryText = _a === void 0 ? _this.props.description : _a;
-            // ms-Button-description is only shown when the button type is compound.
-            // In other cases it will not be displayed.
-            return (secondaryText) ? (React.createElement("div", { key: _this._descriptionId, className: _this._classNames.description, id: _this._descriptionId }, secondaryText)) : (null);
-        };
-        _this._onRenderAriaDescription = function () {
-            var ariaDescription = _this.props.ariaDescription;
-            // If ariaDescription is given, descriptionId will be assigned to ariaDescriptionSpan,
-            // otherwise it will be assigned to descriptionSpan.
-            return ariaDescription ? (React.createElement("span", { className: _this._classNames.screenReaderText, id: _this._ariaDescriptionId }, ariaDescription)) : (null);
-        };
-        _this._onRenderMenuIcon = function (props) {
-            var menuIconProps = _this.props.menuIconProps;
-            return (React.createElement(Icon_1.Icon, tslib_1.__assign({ iconName: 'ChevronDown' }, menuIconProps, { className: _this._classNames.menuIcon })));
-        };
-        _this._onRenderMenu = function (menuProps) {
-            var _a = menuProps.onDismiss, onDismiss = _a === void 0 ? _this._dismissMenu : _a;
-            // the accessible menu label (accessible name) has a relationship to the button.
-            // If the menu props do not specify an explicit value for aria-label or aria-labelledBy,
-            // AND the button has text, we'll set the menu aria-labelledBy to the text element id.
-            if (!menuProps.ariaLabel && !menuProps.labelElementId && _this._hasText()) {
-                menuProps = tslib_1.__assign({}, menuProps, { labelElementId: _this._labelId });
-            }
-            return (React.createElement(ContextualMenu_1.ContextualMenu, tslib_1.__assign({ id: _this._labelId + '-menu', directionalHint: 4 /* bottomLeftEdge */ }, menuProps, { shouldFocusOnContainer: _this.state.menuProps ? _this.state.menuProps.shouldFocusOnContainer : undefined, className: Utilities_1.css('ms-BaseButton-menuhost', menuProps.className), target: _this._isSplitButton ? _this._splitButtonContainer.current : _this._buttonElement.current, onDismiss: onDismiss })));
-        };
-        _this._dismissMenu = function () {
-            var menuProps = null;
-            if (_this.props.persistMenu && _this.state.menuProps) {
-                menuProps = _this.state.menuProps;
-                menuProps.hidden = true;
-            }
-            _this.setState({ menuProps: menuProps });
-        };
-        _this._openMenu = function (shouldFocusOnContainer) {
-            if (_this.props.menuProps) {
-                var menuProps = tslib_1.__assign({}, _this.props.menuProps, { shouldFocusOnContainer: shouldFocusOnContainer });
-                if (_this.props.persistMenu) {
-                    menuProps.hidden = false;
-                }
-                _this.setState({ menuProps: menuProps });
-            }
-        };
-        _this._onToggleMenu = function (shouldFocusOnContainer) {
-            if (_this._splitButtonContainer.current) {
-                _this._splitButtonContainer.current.focus();
-            }
-            var currentMenuProps = _this.state.menuProps;
-            if (_this.props.persistMenu) {
-                currentMenuProps && currentMenuProps.hidden ? _this._openMenu(shouldFocusOnContainer) : _this._dismissMenu();
-            }
-            else {
-                currentMenuProps ? _this._dismissMenu() : _this._openMenu(shouldFocusOnContainer);
-            }
-        };
-        _this._onSplitButtonPrimaryClick = function (ev) {
-            if (_this._isExpanded) {
-                _this._dismissMenu();
-            }
-            if (!_this._processingTouch && _this.props.onClick) {
-                _this.props.onClick(ev);
-            }
-            else if (_this._processingTouch) {
-                _this._onMenuClick(ev);
-            }
-        };
-        _this._onMouseDown = function (ev) {
-            if (_this.props.onMouseDown) {
-                _this.props.onMouseDown(ev);
-            }
-            ev.preventDefault();
-        };
-        _this._onSplitButtonContainerKeyDown = function (ev) {
-            if (ev.which === 13 /* enter */) {
-                if (_this._buttonElement.current) {
-                    _this._buttonElement.current.click();
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                }
-            }
-            else {
-                _this._onMenuKeyDown(ev);
-            }
-        };
-        _this._onMenuKeyDown = function (ev) {
-            if (_this.props.disabled) {
-                return;
-            }
-            if (_this.props.onKeyDown) {
-                _this.props.onKeyDown(ev);
-            }
-            if (!ev.defaultPrevented && _this._isValidMenuOpenKey(ev)) {
-                var onMenuClick = _this.props.onMenuClick;
-                if (onMenuClick) {
-                    onMenuClick(ev, _this);
-                }
-                _this._onToggleMenu(false);
-                ev.preventDefault();
-                ev.stopPropagation();
-            }
-        };
-        _this._onTouchStart = function () {
-            if (_this._isSplitButton && _this._splitButtonContainer.value && !('onpointerdown' in _this._splitButtonContainer.value)) {
-                _this._handleTouchAndPointerEvent();
-            }
-        };
-        _this._onMenuClick = function (ev) {
-            var onMenuClick = _this.props.onMenuClick;
-            if (onMenuClick) {
-                onMenuClick(ev, _this);
-            }
-            if (!ev.defaultPrevented) {
-                // When Edge + Narrator are used together (regardless of if the button is in a form or not), pressing
-                // "Enter" fires this method and not _onMenuKeyDown. Checking ev.nativeEvent.detail differentiates
-                // between a real click event and a keypress event.
-                var shouldFocusOnContainer = ev.nativeEvent.detail !== 0;
-                _this._onToggleMenu(shouldFocusOnContainer);
-                ev.preventDefault();
-                ev.stopPropagation();
-            }
-        };
-        _this._warnConditionallyRequiredProps(['menuProps', 'onClick'], 'split', _this.props.split);
-        _this._warnDeprecations({
-            rootProps: undefined,
-            'description': 'secondaryText'
-        });
-        _this._labelId = Utilities_1.getId();
-        _this._descriptionId = Utilities_1.getId();
-        _this._ariaDescriptionId = Utilities_1.getId();
-        var menuProps = null;
-        if (props.persistMenu && props.menuProps) {
-            menuProps = props.menuProps;
-            menuProps.hidden = true;
-        }
-        _this.state = {
-            menuProps: menuProps
-        };
-        return _this;
-    }
-    Object.defineProperty(BaseButton.prototype, "_isSplitButton", {
-        get: function () {
-            return (!!this.props.menuProps && !!this.props.onClick) && this.props.split === true;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(BaseButton.prototype, "_isExpanded", {
-        get: function () {
-            if (this.props.persistMenu) {
-                return !this.state.menuProps.hidden;
-            }
-            return !!this.state.menuProps;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    BaseButton.prototype.render = function () {
-        var _a = this.props, ariaDescription = _a.ariaDescription, ariaLabel = _a.ariaLabel, ariaHidden = _a.ariaHidden, className = _a.className, disabled = _a.disabled, primaryDisabled = _a.primaryDisabled, _b = _a.secondaryText, secondaryText = _b === void 0 ? this.props.description : _b, href = _a.href, iconProps = _a.iconProps, menuIconProps = _a.menuIconProps, styles = _a.styles, text = _a.text, checked = _a.checked, variantClassName = _a.variantClassName, theme = _a.theme, getClassNames = _a.getClassNames;
-        var menuProps = this.state.menuProps;
-        // Button is disabled if the whole button (in case of splitbutton is disabled) or if the primary action is disabled
-        var isPrimaryButtonDisabled = (disabled || primaryDisabled);
-        this._classNames = getClassNames ? getClassNames(theme, className, variantClassName, iconProps && iconProps.className, menuIconProps && menuIconProps.className, isPrimaryButtonDisabled, checked, !!menuProps, this.props.split) : BaseButton_classNames_1.getBaseButtonClassNames(styles, className, variantClassName, iconProps && iconProps.className, menuIconProps && menuIconProps.className, isPrimaryButtonDisabled, checked, !!menuProps, this.props.split);
-        var _c = this, _ariaDescriptionId = _c._ariaDescriptionId, _labelId = _c._labelId, _descriptionId = _c._descriptionId;
-        // Anchor tag cannot be disabled hence in disabled state rendering
-        // anchor button as normal button
-        var renderAsAnchor = !isPrimaryButtonDisabled && !!href;
-        var tag = renderAsAnchor ? 'a' : 'button';
-        var nativeProps = Utilities_1.getNativeProps(Utilities_1.assign(renderAsAnchor ? {} : { type: 'button' }, this.props.rootProps, this.props), renderAsAnchor ? Utilities_1.anchorProperties : Utilities_1.buttonProperties, [
-            'disabled' // let disabled buttons be focused and styled as disabled.
-        ]);
-        // Check for ariaDescription, secondaryText or aria-describedby in the native props to determine source of aria-describedby
-        // otherwise default to null.
-        var ariaDescribedBy;
-        if (ariaDescription) {
-            ariaDescribedBy = _ariaDescriptionId;
-        }
-        else if (secondaryText) {
-            ariaDescribedBy = _descriptionId;
-        }
-        else if (nativeProps['aria-describedby']) {
-            ariaDescribedBy = nativeProps['aria-describedby'];
-        }
-        else {
-            ariaDescribedBy = null;
-        }
-        // If an explicit ariaLabel is given, use that as the label and we're done.
-        // If an explicit aria-labelledby is given, use that and we're done.
-        // If any kind of description is given (which will end up as an aria-describedby attribute),
-        // set the labelledby element. Otherwise, the button is labeled implicitly by the descendent
-        // text on the button (if it exists). Never set both aria-label and aria-labelledby.
-        var ariaLabelledBy = null;
-        if (!ariaLabel) {
-            if (nativeProps['aria-labelledby']) {
-                ariaLabelledBy = nativeProps['aria-labelledby'];
-            }
-            else if (ariaDescribedBy) {
-                ariaLabelledBy = text ? _labelId : null;
-            }
-        }
-        var buttonProps = Utilities_1.assign(nativeProps, {
-            className: this._classNames.root,
-            ref: this._buttonElement,
-            'disabled': isPrimaryButtonDisabled,
-            'aria-label': ariaLabel,
-            'aria-labelledby': ariaLabelledBy,
-            'aria-describedby': ariaDescribedBy,
-            'data-is-focusable': (this.props['data-is-focusable'] === false || disabled || this._isSplitButton) ? false : true,
-            'aria-pressed': checked
-        });
-        if (ariaHidden) {
-            buttonProps['aria-hidden'] = true;
-        }
-        if (this._isSplitButton) {
-            return (this._onRenderSplitButtonContent(tag, buttonProps));
-        }
-        else if (this.props.menuProps) {
-            Utilities_1.assign(buttonProps, {
-                'onKeyDown': this._onMenuKeyDown,
-                'onClick': this._onMenuClick,
-                'aria-expanded': this._isExpanded,
-                'aria-owns': this.state.menuProps ? this._labelId + '-menu' : null,
-                'aria-haspopup': true
-            });
-        }
-        return this._onRenderContent(tag, buttonProps);
-    };
-    BaseButton.prototype.componentDidMount = function () {
-        // For split buttons, touching anywhere in the button should drop the dropdown, which should contain the primary action.
-        // This gives more hit target space for touch environments. We're setting the onpointerdown here, because React
-        // does not support Pointer events yet.
-        if (this._isSplitButton && this._splitButtonContainer.value && 'onpointerdown' in this._splitButtonContainer.value) {
-            this._events.on(this._splitButtonContainer.value, 'pointerdown', this._onPointerDown, true);
-        }
-    };
-    BaseButton.prototype.componentDidUpdate = function (prevProps, prevState) {
-        // If Button's menu was closed, run onAfterMenuDismiss
-        if (this.props.onAfterMenuDismiss && prevState.menuProps && !this.state.menuProps) {
-            this.props.onAfterMenuDismiss();
-        }
-    };
-    BaseButton.prototype.focus = function () {
-        if (this._isSplitButton && this._splitButtonContainer.current) {
-            this._splitButtonContainer.current.focus();
-        }
-        else if (this._buttonElement.current) {
-            this._buttonElement.current.focus();
-        }
-    };
-    BaseButton.prototype.dismissMenu = function () {
-        this._dismissMenu();
-    };
-    BaseButton.prototype.openMenu = function () {
-        this._openMenu();
-    };
-    BaseButton.prototype._onRenderContent = function (tag, buttonProps) {
-        var _this = this;
-        var props = this.props;
-        var Tag = tag;
-        var menuIconProps = props.menuIconProps, menuProps = props.menuProps, _a = props.onRenderIcon, onRenderIcon = _a === void 0 ? this._onRenderIcon : _a, _b = props.onRenderAriaDescription, onRenderAriaDescription = _b === void 0 ? this._onRenderAriaDescription : _b, _c = props.onRenderChildren, onRenderChildren = _c === void 0 ? this._onRenderChildren : _c, _d = props.onRenderMenu, onRenderMenu = _d === void 0 ? this._onRenderMenu : _d, _e = props.onRenderMenuIcon, onRenderMenuIcon = _e === void 0 ? this._onRenderMenuIcon : _e, disabled = props.disabled;
-        var keytipProps = props.keytipProps;
-        if (keytipProps && menuProps) {
-            keytipProps = tslib_1.__assign({}, keytipProps, { hasMenu: true });
-        }
-        var Content = (
-        // If we're making a split button, we won't put the keytip here
-        React.createElement(KeytipData_1.KeytipData, { keytipProps: !this._isSplitButton ? keytipProps : undefined, ariaDescribedBy: buttonProps['aria-describedby'], disabled: disabled }, function (keytipAttributes) { return (React.createElement(Tag, tslib_1.__assign({}, buttonProps, keytipAttributes),
-            React.createElement("div", { className: _this._classNames.flexContainer },
-                onRenderIcon(props, _this._onRenderIcon),
-                _this._onRenderTextContents(),
-                onRenderAriaDescription(props, _this._onRenderAriaDescription),
-                onRenderChildren(props, _this._onRenderChildren),
-                !_this._isSplitButton && (menuProps || menuIconProps || _this.props.onRenderMenuIcon) && onRenderMenuIcon(_this.props, _this._onRenderMenuIcon),
-                _this.state.menuProps && !_this.state.menuProps.doNotLayer && onRenderMenu(menuProps, _this._onRenderMenu)))); }));
-        if (menuProps && menuProps.doNotLayer) {
-            return (React.createElement("div", { style: { display: 'inline-block' } },
-                Content,
-                this.state.menuProps && onRenderMenu(menuProps, this._onRenderMenu)));
-        }
-        return Content;
-    };
-    BaseButton.prototype._hasText = function () {
-        // _onRenderTextContents and _onRenderText do not perform the same checks. Below is parity with what _onRenderText used to have
-        // before the refactor that introduced this function. _onRenderTextContents does not require props.text to be undefined in order
-        // for props.children to be used as a fallback. Purely a code maintainability/reuse issue, but logged as Issue #4979
-        return this.props.text !== null && (this.props.text !== undefined || typeof (this.props.children) === 'string');
-    };
-    BaseButton.prototype._onRenderSplitButtonContent = function (tag, buttonProps) {
-        var _this = this;
-        var _a = this.props, _b = _a.styles, styles = _b === void 0 ? {} : _b, disabled = _a.disabled, checked = _a.checked, getSplitButtonClassNames = _a.getSplitButtonClassNames, primaryDisabled = _a.primaryDisabled, menuProps = _a.menuProps;
-        var keytipProps = this.props.keytipProps;
-        var classNames = getSplitButtonClassNames ? getSplitButtonClassNames(!!disabled, !!this.state.menuProps, !!checked) : styles && SplitButton_classNames_1.getClassNames(styles, !!disabled, !!this.state.menuProps, !!checked);
-        Utilities_1.assign(buttonProps, {
-            onClick: undefined,
-            tabIndex: -1,
-            'data-is-focusable': false
-        });
-        var ariaDescribedBy = buttonProps.ariaDescription || '';
-        if (keytipProps && menuProps) {
-            keytipProps = tslib_1.__assign({}, keytipProps, { hasMenu: true });
-        }
-        return (React.createElement(KeytipData_1.KeytipData, { keytipProps: keytipProps, disabled: disabled }, function (keytipAttributes) { return (React.createElement("div", { "data-ktp-target": keytipAttributes['data-ktp-target'], role: 'button', "aria-labelledby": buttonProps.ariaLabel, "aria-disabled": disabled, "aria-haspopup": true, "aria-expanded": _this._isExpanded, "aria-pressed": _this.props.checked, "aria-describedby": ariaDescribedBy + (keytipAttributes['aria-describedby'] || ''), className: classNames && classNames.splitButtonContainer, onKeyDown: _this._onSplitButtonContainerKeyDown, onTouchStart: _this._onTouchStart, ref: _this._splitButtonContainer, "data-is-focusable": true, onClick: !disabled && !primaryDisabled ? _this._onSplitButtonPrimaryClick : undefined, tabIndex: !disabled ? 0 : undefined },
-            React.createElement("span", { style: { 'display': 'flex' } },
-                _this._onRenderContent(tag, buttonProps),
-                _this._onRenderSplitButtonMenuButton(classNames, keytipAttributes),
-                _this._onRenderSplitButtonDivider(classNames)))); }));
-    };
-    BaseButton.prototype._onRenderSplitButtonDivider = function (classNames) {
-        if (classNames && classNames.divider) {
-            return React.createElement("span", { className: classNames.divider });
-        }
-        return null;
-    };
-    BaseButton.prototype._onRenderSplitButtonMenuButton = function (classNames, keytipAttributes) {
-        var menuIconProps = this.props.menuIconProps;
-        var splitButtonAriaLabel = this.props.splitButtonAriaLabel;
-        if (menuIconProps === undefined) {
-            menuIconProps = {
-                iconName: 'ChevronDown'
-            };
-        }
-        var splitButtonProps = {
-            'styles': classNames,
-            'checked': this.props.checked,
-            'disabled': this.props.disabled,
-            'onClick': this._onMenuClick,
-            'menuProps': undefined,
-            'iconProps': menuIconProps,
-            'ariaLabel': splitButtonAriaLabel,
-            'aria-haspopup': true,
-            'aria-expanded': this._isExpanded,
-            'data-is-focusable': false
-        };
-        // Add data-ktp-execute-target to the split button if the keytip is defined
-        return (React.createElement(BaseButton, tslib_1.__assign({}, splitButtonProps, { "data-ktp-execute-target": keytipAttributes['data-ktp-execute-target'], onMouseDown: this._onMouseDown, tabIndex: -1 })));
-    };
-    BaseButton.prototype._onPointerDown = function (ev) {
-        if (ev.pointerType === 'touch') {
-            this._handleTouchAndPointerEvent();
-            ev.preventDefault();
-            ev.stopImmediatePropagation();
-        }
-    };
-    BaseButton.prototype._handleTouchAndPointerEvent = function () {
-        var _this = this;
-        // If we already have an existing timeeout from a previous touch and pointer event
-        // cancel that timeout so we can set a nwe one.
-        if (this._lastTouchTimeoutId !== undefined) {
-            this._async.clearTimeout(this._lastTouchTimeoutId);
-            this._lastTouchTimeoutId = undefined;
-        }
-        this._processingTouch = true;
-        this._lastTouchTimeoutId = this._async.setTimeout(function () {
-            _this._processingTouch = false;
-            _this._lastTouchTimeoutId = undefined;
-        }, TouchIdleDelay);
-    };
-    /**
-     * Returns if the user hits a valid keyboard key to open the menu
-     * @param ev - the keyboard event
-     * @returns True if user clicks on custom trigger key if enabled or alt + down arrow if not. False otherwise.
-     */
-    BaseButton.prototype._isValidMenuOpenKey = function (ev) {
-        if (this.props.menuTriggerKeyCode) {
-            return ev.which === this.props.menuTriggerKeyCode;
-        }
-        else if (this.props.menuProps) {
-            return ev.which === 40 /* down */ && (ev.altKey || ev.metaKey);
-        }
-        // Note: When enter is pressed, we will let the event continue to propagate
-        // to trigger the onClick event on the button
-        return false;
-    };
-    BaseButton.defaultProps = {
-        baseClassName: 'ms-Button',
-        styles: {},
-        split: false,
-    };
-    return BaseButton;
-}(Utilities_1.BaseComponent));
-exports.BaseButton = BaseButton;
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Utilities_1 = __webpack_require__(2);
-var Styling_1 = __webpack_require__(4);
-var noOutline = {
-    outline: 0
-};
-var iconStyle = {
-    fontSize: Styling_1.FontSizes.icon,
-    margin: '0 4px',
-    height: '16px',
-    lineHeight: '16px',
-    textAlign: 'center',
-    verticalAlign: 'middle',
-    flexShrink: 0
-};
-/**
- * Gets the base button styles. Note: because it is a base class to be used with the `mergeRules`
- * helper, it should have values for all class names in the interface. This let `mergeRules` optimize
- * mixing class names together.
- */
-exports.getStyles = Utilities_1.memoizeFunction(function (theme) {
-    var semanticColors = theme.semanticColors;
-    var border = semanticColors.buttonBorder;
-    var disabledBackground = semanticColors.disabledBackground;
-    var disabledText = semanticColors.disabledText;
-    var buttonHighContrastFocus = {
-        left: -2,
-        top: -2,
-        bottom: -2,
-        right: -2,
-        border: 'none',
-        outlineColor: 'ButtonText'
-    };
-    return {
-        root: [
-            Styling_1.getFocusStyle(theme, -1, 'relative', buttonHighContrastFocus),
-            theme.fonts.medium,
-            {
-                boxSizing: 'border-box',
-                border: '1px solid ' + border,
-                userSelect: 'none',
-                display: 'inline-block',
-                textDecoration: 'none',
-                textAlign: 'center',
-                cursor: 'pointer',
-                verticalAlign: 'top',
-                padding: '0 16px',
-                borderRadius: 0
-            }
-        ],
-        rootDisabled: {
-            backgroundColor: disabledBackground,
-            color: disabledText,
-            cursor: 'default',
-            pointerEvents: 'none',
-            selectors: {
-                ':hover': noOutline,
-                ':focus': noOutline
-            }
-        },
-        iconDisabled: {
-            color: disabledText
-        },
-        menuIconDisabled: {
-            color: disabledText
-        },
-        flexContainer: {
-            display: 'flex',
-            height: '100%',
-            flexWrap: 'nowrap',
-            justifyContent: 'center',
-            alignItems: 'center'
-        },
-        textContainer: {
-            flexGrow: 1
-        },
-        icon: iconStyle,
-        menuIcon: [
-            iconStyle,
-            {
-                fontSize: Styling_1.FontSizes.small
-            }
-        ],
-        label: {
-            margin: '0 4px',
-            lineHeight: '100%'
-        },
-        screenReaderText: Styling_1.hiddenContentStyle
-    };
-});
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_23__;
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/** @license React v16.8.6
- * react-is.development.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-
-
-if (true) {
-  (function() {
-'use strict';
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
-// nor polyfill, then a plain number is used for performance.
-var hasSymbol = typeof Symbol === 'function' && Symbol.for;
-
-var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
-var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
-var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
-var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
-var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
-var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
-var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;
-var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
-var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
-var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
-var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
-var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
-var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
-
-function isValidElementType(type) {
-  return typeof type === 'string' || typeof type === 'function' ||
-  // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
-  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);
-}
-
-/**
- * Forked from fbjs/warning:
- * https://github.com/facebook/fbjs/blob/e66ba20ad5be433eb54423f2b097d829324d9de6/packages/fbjs/src/__forks__/warning.js
- *
- * Only change is we use console.warn instead of console.error,
- * and do nothing when 'console' is not supported.
- * This really simplifies the code.
- * ---
- * Similar to invariant but only logs a warning if the condition is not met.
- * This can be used to log issues in development environments in critical
- * paths. Removing the logging code for production environments will keep the
- * same logic and follow the same code paths.
- */
-
-var lowPriorityWarning = function () {};
-
-{
-  var printWarning = function (format) {
-    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    var argIndex = 0;
-    var message = 'Warning: ' + format.replace(/%s/g, function () {
-      return args[argIndex++];
-    });
-    if (typeof console !== 'undefined') {
-      console.warn(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-
-  lowPriorityWarning = function (condition, format) {
-    if (format === undefined) {
-      throw new Error('`lowPriorityWarning(condition, format, ...args)` requires a warning ' + 'message argument');
-    }
-    if (!condition) {
-      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-        args[_key2 - 2] = arguments[_key2];
-      }
-
-      printWarning.apply(undefined, [format].concat(args));
-    }
-  };
-}
-
-var lowPriorityWarning$1 = lowPriorityWarning;
-
-function typeOf(object) {
-  if (typeof object === 'object' && object !== null) {
-    var $$typeof = object.$$typeof;
-    switch ($$typeof) {
-      case REACT_ELEMENT_TYPE:
-        var type = object.type;
-
-        switch (type) {
-          case REACT_ASYNC_MODE_TYPE:
-          case REACT_CONCURRENT_MODE_TYPE:
-          case REACT_FRAGMENT_TYPE:
-          case REACT_PROFILER_TYPE:
-          case REACT_STRICT_MODE_TYPE:
-          case REACT_SUSPENSE_TYPE:
-            return type;
-          default:
-            var $$typeofType = type && type.$$typeof;
-
-            switch ($$typeofType) {
-              case REACT_CONTEXT_TYPE:
-              case REACT_FORWARD_REF_TYPE:
-              case REACT_PROVIDER_TYPE:
-                return $$typeofType;
-              default:
-                return $$typeof;
-            }
-        }
-      case REACT_LAZY_TYPE:
-      case REACT_MEMO_TYPE:
-      case REACT_PORTAL_TYPE:
-        return $$typeof;
-    }
-  }
-
-  return undefined;
-}
-
-// AsyncMode is deprecated along with isAsyncMode
-var AsyncMode = REACT_ASYNC_MODE_TYPE;
-var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
-var ContextConsumer = REACT_CONTEXT_TYPE;
-var ContextProvider = REACT_PROVIDER_TYPE;
-var Element = REACT_ELEMENT_TYPE;
-var ForwardRef = REACT_FORWARD_REF_TYPE;
-var Fragment = REACT_FRAGMENT_TYPE;
-var Lazy = REACT_LAZY_TYPE;
-var Memo = REACT_MEMO_TYPE;
-var Portal = REACT_PORTAL_TYPE;
-var Profiler = REACT_PROFILER_TYPE;
-var StrictMode = REACT_STRICT_MODE_TYPE;
-var Suspense = REACT_SUSPENSE_TYPE;
-
-var hasWarnedAboutDeprecatedIsAsyncMode = false;
-
-// AsyncMode should be deprecated
-function isAsyncMode(object) {
-  {
-    if (!hasWarnedAboutDeprecatedIsAsyncMode) {
-      hasWarnedAboutDeprecatedIsAsyncMode = true;
-      lowPriorityWarning$1(false, 'The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
-    }
-  }
-  return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
-}
-function isConcurrentMode(object) {
-  return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
-}
-function isContextConsumer(object) {
-  return typeOf(object) === REACT_CONTEXT_TYPE;
-}
-function isContextProvider(object) {
-  return typeOf(object) === REACT_PROVIDER_TYPE;
-}
-function isElement(object) {
-  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
-}
-function isForwardRef(object) {
-  return typeOf(object) === REACT_FORWARD_REF_TYPE;
-}
-function isFragment(object) {
-  return typeOf(object) === REACT_FRAGMENT_TYPE;
-}
-function isLazy(object) {
-  return typeOf(object) === REACT_LAZY_TYPE;
-}
-function isMemo(object) {
-  return typeOf(object) === REACT_MEMO_TYPE;
-}
-function isPortal(object) {
-  return typeOf(object) === REACT_PORTAL_TYPE;
-}
-function isProfiler(object) {
-  return typeOf(object) === REACT_PROFILER_TYPE;
-}
-function isStrictMode(object) {
-  return typeOf(object) === REACT_STRICT_MODE_TYPE;
-}
-function isSuspense(object) {
-  return typeOf(object) === REACT_SUSPENSE_TYPE;
-}
-
-exports.typeOf = typeOf;
-exports.AsyncMode = AsyncMode;
-exports.ConcurrentMode = ConcurrentMode;
-exports.ContextConsumer = ContextConsumer;
-exports.ContextProvider = ContextProvider;
-exports.Element = Element;
-exports.ForwardRef = ForwardRef;
-exports.Fragment = Fragment;
-exports.Lazy = Lazy;
-exports.Memo = Memo;
-exports.Portal = Portal;
-exports.Profiler = Profiler;
-exports.StrictMode = StrictMode;
-exports.Suspense = Suspense;
-exports.isValidElementType = isValidElementType;
-exports.isAsyncMode = isAsyncMode;
-exports.isConcurrentMode = isConcurrentMode;
-exports.isContextConsumer = isContextConsumer;
-exports.isContextProvider = isContextProvider;
-exports.isElement = isElement;
-exports.isForwardRef = isForwardRef;
-exports.isFragment = isFragment;
-exports.isLazy = isLazy;
-exports.isMemo = isMemo;
-exports.isPortal = isPortal;
-exports.isProfiler = isProfiler;
-exports.isStrictMode = isStrictMode;
-exports.isSuspense = isSuspense;
-  })();
-}
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var ReactIs = __webpack_require__(15);
-var assign = __webpack_require__(26);
-
-var ReactPropTypesSecret = __webpack_require__(16);
-var checkPropTypes = __webpack_require__(27);
-
-var has = Function.call.bind(Object.prototype.hasOwnProperty);
-var printWarning = function() {};
-
-if (true) {
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-}
-
-function emptyFunctionThatReturnsNull() {
-  return null;
-}
-
-module.exports = function(isValidElement, throwOnDirectAccess) {
-  /* global Symbol */
-  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
-  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
-
-  /**
-   * Returns the iterator method function contained on the iterable object.
-   *
-   * Be sure to invoke the function with the iterable as context:
-   *
-   *     var iteratorFn = getIteratorFn(myIterable);
-   *     if (iteratorFn) {
-   *       var iterator = iteratorFn.call(myIterable);
-   *       ...
-   *     }
-   *
-   * @param {?object} maybeIterable
-   * @return {?function}
-   */
-  function getIteratorFn(maybeIterable) {
-    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
-    if (typeof iteratorFn === 'function') {
-      return iteratorFn;
-    }
-  }
-
-  /**
-   * Collection of methods that allow declaration and validation of props that are
-   * supplied to React components. Example usage:
-   *
-   *   var Props = require('ReactPropTypes');
-   *   var MyArticle = React.createClass({
-   *     propTypes: {
-   *       // An optional string prop named "description".
-   *       description: Props.string,
-   *
-   *       // A required enum prop named "category".
-   *       category: Props.oneOf(['News','Photos']).isRequired,
-   *
-   *       // A prop named "dialog" that requires an instance of Dialog.
-   *       dialog: Props.instanceOf(Dialog).isRequired
-   *     },
-   *     render: function() { ... }
-   *   });
-   *
-   * A more formal specification of how these methods are used:
-   *
-   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
-   *   decl := ReactPropTypes.{type}(.isRequired)?
-   *
-   * Each and every declaration produces a function with the same signature. This
-   * allows the creation of custom validation functions. For example:
-   *
-   *  var MyLink = React.createClass({
-   *    propTypes: {
-   *      // An optional string or URI prop named "href".
-   *      href: function(props, propName, componentName) {
-   *        var propValue = props[propName];
-   *        if (propValue != null && typeof propValue !== 'string' &&
-   *            !(propValue instanceof URI)) {
-   *          return new Error(
-   *            'Expected a string or an URI for ' + propName + ' in ' +
-   *            componentName
-   *          );
-   *        }
-   *      }
-   *    },
-   *    render: function() {...}
-   *  });
-   *
-   * @internal
-   */
-
-  var ANONYMOUS = '<<anonymous>>';
-
-  // Important!
-  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
-  var ReactPropTypes = {
-    array: createPrimitiveTypeChecker('array'),
-    bool: createPrimitiveTypeChecker('boolean'),
-    func: createPrimitiveTypeChecker('function'),
-    number: createPrimitiveTypeChecker('number'),
-    object: createPrimitiveTypeChecker('object'),
-    string: createPrimitiveTypeChecker('string'),
-    symbol: createPrimitiveTypeChecker('symbol'),
-
-    any: createAnyTypeChecker(),
-    arrayOf: createArrayOfTypeChecker,
-    element: createElementTypeChecker(),
-    elementType: createElementTypeTypeChecker(),
-    instanceOf: createInstanceTypeChecker,
-    node: createNodeChecker(),
-    objectOf: createObjectOfTypeChecker,
-    oneOf: createEnumTypeChecker,
-    oneOfType: createUnionTypeChecker,
-    shape: createShapeTypeChecker,
-    exact: createStrictShapeTypeChecker,
-  };
-
-  /**
-   * inlined Object.is polyfill to avoid requiring consumers ship their own
-   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
-   */
-  /*eslint-disable no-self-compare*/
-  function is(x, y) {
-    // SameValue algorithm
-    if (x === y) {
-      // Steps 1-5, 7-10
-      // Steps 6.b-6.e: +0 != -0
-      return x !== 0 || 1 / x === 1 / y;
-    } else {
-      // Step 6.a: NaN == NaN
-      return x !== x && y !== y;
-    }
-  }
-  /*eslint-enable no-self-compare*/
-
-  /**
-   * We use an Error-like object for backward compatibility as people may call
-   * PropTypes directly and inspect their output. However, we don't use real
-   * Errors anymore. We don't inspect their stack anyway, and creating them
-   * is prohibitively expensive if they are created too often, such as what
-   * happens in oneOfType() for any type before the one that matched.
-   */
-  function PropTypeError(message) {
-    this.message = message;
-    this.stack = '';
-  }
-  // Make `instanceof Error` still work for returned errors.
-  PropTypeError.prototype = Error.prototype;
-
-  function createChainableTypeChecker(validate) {
-    if (true) {
-      var manualPropTypeCallCache = {};
-      var manualPropTypeWarningCount = 0;
-    }
-    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
-      componentName = componentName || ANONYMOUS;
-      propFullName = propFullName || propName;
-
-      if (secret !== ReactPropTypesSecret) {
-        if (throwOnDirectAccess) {
-          // New behavior only for users of `prop-types` package
-          var err = new Error(
-            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
-            'Use `PropTypes.checkPropTypes()` to call them. ' +
-            'Read more at http://fb.me/use-check-prop-types'
-          );
-          err.name = 'Invariant Violation';
-          throw err;
-        } else if ("dev" !== 'production' && typeof console !== 'undefined') {
-          // Old behavior for people using React.PropTypes
-          var cacheKey = componentName + ':' + propName;
-          if (
-            !manualPropTypeCallCache[cacheKey] &&
-            // Avoid spamming the console because they are often not actionable except for lib authors
-            manualPropTypeWarningCount < 3
-          ) {
-            printWarning(
-              'You are manually calling a React.PropTypes validation ' +
-              'function for the `' + propFullName + '` prop on `' + componentName  + '`. This is deprecated ' +
-              'and will throw in the standalone `prop-types` package. ' +
-              'You may be seeing this warning due to a third-party PropTypes ' +
-              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
-            );
-            manualPropTypeCallCache[cacheKey] = true;
-            manualPropTypeWarningCount++;
-          }
-        }
-      }
-      if (props[propName] == null) {
-        if (isRequired) {
-          if (props[propName] === null) {
-            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
-          }
-          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
-        }
-        return null;
-      } else {
-        return validate(props, propName, componentName, location, propFullName);
-      }
-    }
-
-    var chainedCheckType = checkType.bind(null, false);
-    chainedCheckType.isRequired = checkType.bind(null, true);
-
-    return chainedCheckType;
-  }
-
-  function createPrimitiveTypeChecker(expectedType) {
-    function validate(props, propName, componentName, location, propFullName, secret) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== expectedType) {
-        // `propValue` being instance of, say, date/regexp, pass the 'object'
-        // check, but we can offer a more precise error message here rather than
-        // 'of type `object`'.
-        var preciseType = getPreciseType(propValue);
-
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createAnyTypeChecker() {
-    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
-  }
-
-  function createArrayOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
-      }
-      var propValue = props[propName];
-      if (!Array.isArray(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
-      }
-      for (var i = 0; i < propValue.length; i++) {
-        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
-        if (error instanceof Error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!isValidElement(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createElementTypeTypeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      if (!ReactIs.isValidElementType(propValue)) {
-        var propType = getPropType(propValue);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createInstanceTypeChecker(expectedClass) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!(props[propName] instanceof expectedClass)) {
-        var expectedClassName = expectedClass.name || ANONYMOUS;
-        var actualClassName = getClassName(props[propName]);
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createEnumTypeChecker(expectedValues) {
-    if (!Array.isArray(expectedValues)) {
-      if (true) {
-        if (arguments.length > 1) {
-          printWarning(
-            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
-            'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).'
-          );
-        } else {
-          printWarning('Invalid argument supplied to oneOf, expected an array.');
-        }
-      }
-      return emptyFunctionThatReturnsNull;
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      for (var i = 0; i < expectedValues.length; i++) {
-        if (is(propValue, expectedValues[i])) {
-          return null;
-        }
-      }
-
-      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
-        var type = getPreciseType(value);
-        if (type === 'symbol') {
-          return String(value);
-        }
-        return value;
-      });
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createObjectOfTypeChecker(typeChecker) {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (typeof typeChecker !== 'function') {
-        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
-      }
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
-      }
-      for (var key in propValue) {
-        if (has(propValue, key)) {
-          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-          if (error instanceof Error) {
-            return error;
-          }
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createUnionTypeChecker(arrayOfTypeCheckers) {
-    if (!Array.isArray(arrayOfTypeCheckers)) {
-       true ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
-      return emptyFunctionThatReturnsNull;
-    }
-
-    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-      var checker = arrayOfTypeCheckers[i];
-      if (typeof checker !== 'function') {
-        printWarning(
-          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
-          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
-        );
-        return emptyFunctionThatReturnsNull;
-      }
-    }
-
-    function validate(props, propName, componentName, location, propFullName) {
-      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
-        var checker = arrayOfTypeCheckers[i];
-        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
-          return null;
-        }
-      }
-
-      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createNodeChecker() {
-    function validate(props, propName, componentName, location, propFullName) {
-      if (!isNode(props[propName])) {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      for (var key in shapeTypes) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          continue;
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-    return createChainableTypeChecker(validate);
-  }
-
-  function createStrictShapeTypeChecker(shapeTypes) {
-    function validate(props, propName, componentName, location, propFullName) {
-      var propValue = props[propName];
-      var propType = getPropType(propValue);
-      if (propType !== 'object') {
-        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
-      }
-      // We need to check all keys in case some are required but missing from
-      // props.
-      var allKeys = assign({}, props[propName], shapeTypes);
-      for (var key in allKeys) {
-        var checker = shapeTypes[key];
-        if (!checker) {
-          return new PropTypeError(
-            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
-            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
-            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
-          );
-        }
-        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
-        if (error) {
-          return error;
-        }
-      }
-      return null;
-    }
-
-    return createChainableTypeChecker(validate);
-  }
-
-  function isNode(propValue) {
-    switch (typeof propValue) {
-      case 'number':
-      case 'string':
-      case 'undefined':
-        return true;
-      case 'boolean':
-        return !propValue;
-      case 'object':
-        if (Array.isArray(propValue)) {
-          return propValue.every(isNode);
-        }
-        if (propValue === null || isValidElement(propValue)) {
-          return true;
-        }
-
-        var iteratorFn = getIteratorFn(propValue);
-        if (iteratorFn) {
-          var iterator = iteratorFn.call(propValue);
-          var step;
-          if (iteratorFn !== propValue.entries) {
-            while (!(step = iterator.next()).done) {
-              if (!isNode(step.value)) {
-                return false;
-              }
-            }
-          } else {
-            // Iterator will provide entry [k,v] tuples rather than values.
-            while (!(step = iterator.next()).done) {
-              var entry = step.value;
-              if (entry) {
-                if (!isNode(entry[1])) {
-                  return false;
-                }
-              }
-            }
-          }
-        } else {
-          return false;
-        }
-
-        return true;
-      default:
-        return false;
-    }
-  }
-
-  function isSymbol(propType, propValue) {
-    // Native Symbol.
-    if (propType === 'symbol') {
-      return true;
-    }
-
-    // falsy value can't be a Symbol
-    if (!propValue) {
-      return false;
-    }
-
-    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
-    if (propValue['@@toStringTag'] === 'Symbol') {
-      return true;
-    }
-
-    // Fallback for non-spec compliant Symbols which are polyfilled.
-    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
-      return true;
-    }
-
-    return false;
-  }
-
-  // Equivalent of `typeof` but with special handling for array and regexp.
-  function getPropType(propValue) {
-    var propType = typeof propValue;
-    if (Array.isArray(propValue)) {
-      return 'array';
-    }
-    if (propValue instanceof RegExp) {
-      // Old webkits (at least until Android 4.0) return 'function' rather than
-      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
-      // passes PropTypes.object.
-      return 'object';
-    }
-    if (isSymbol(propType, propValue)) {
-      return 'symbol';
-    }
-    return propType;
-  }
-
-  // This handles more types than `getPropType`. Only used for error messages.
-  // See `createPrimitiveTypeChecker`.
-  function getPreciseType(propValue) {
-    if (typeof propValue === 'undefined' || propValue === null) {
-      return '' + propValue;
-    }
-    var propType = getPropType(propValue);
-    if (propType === 'object') {
-      if (propValue instanceof Date) {
-        return 'date';
-      } else if (propValue instanceof RegExp) {
-        return 'regexp';
-      }
-    }
-    return propType;
-  }
-
-  // Returns a string that is postfixed to a warning about an invalid type.
-  // For example, "undefined" or "of type array"
-  function getPostfixForTypeWarning(value) {
-    var type = getPreciseType(value);
-    switch (type) {
-      case 'array':
-      case 'object':
-        return 'an ' + type;
-      case 'boolean':
-      case 'date':
-      case 'regexp':
-        return 'a ' + type;
-      default:
-        return type;
-    }
-  }
-
-  // Returns class name of the object, if any.
-  function getClassName(propValue) {
-    if (!propValue.constructor || !propValue.constructor.name) {
-      return ANONYMOUS;
-    }
-    return propValue.constructor.name;
-  }
-
-  ReactPropTypes.checkPropTypes = checkPropTypes;
-  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
-  ReactPropTypes.PropTypes = ReactPropTypes;
-
-  return ReactPropTypes;
-};
-
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-
-
-/* eslint-disable no-unused-vars */
-var getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !==
-				'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (err) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-module.exports = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (getOwnPropertySymbols) {
-			symbols = getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-
-
-var printWarning = function() {};
-
-if (true) {
-  var ReactPropTypesSecret = __webpack_require__(16);
-  var loggedTypeFailures = {};
-  var has = Function.call.bind(Object.prototype.hasOwnProperty);
-
-  printWarning = function(text) {
-    var message = 'Warning: ' + text;
-    if (typeof console !== 'undefined') {
-      console.error(message);
-    }
-    try {
-      // --- Welcome to debugging React ---
-      // This error was thrown as a convenience so that you can use this stack
-      // to find the callsite that caused this warning to fire.
-      throw new Error(message);
-    } catch (x) {}
-  };
-}
-
-/**
- * Assert that the values match with the type specs.
- * Error messages are memorized and will only be shown once.
- *
- * @param {object} typeSpecs Map of name to a ReactPropType
- * @param {object} values Runtime values that need to be type-checked
- * @param {string} location e.g. "prop", "context", "child context"
- * @param {string} componentName Name of the component for error messages.
- * @param {?Function} getStack Returns the component stack.
- * @private
- */
-function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
-  if (true) {
-    for (var typeSpecName in typeSpecs) {
-      if (has(typeSpecs, typeSpecName)) {
-        var error;
-        // Prop type validation may throw. In case they do, we don't want to
-        // fail the render phase where it didn't fail before. So we log it.
-        // After these have been cleaned up, we'll let them throw.
-        try {
-          // This is intentionally an invariant that gets caught. It's the same
-          // behavior as without this statement except with a better message.
-          if (typeof typeSpecs[typeSpecName] !== 'function') {
-            var err = Error(
-              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
-              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'
-            );
-            err.name = 'Invariant Violation';
-            throw err;
-          }
-          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
-        } catch (ex) {
-          error = ex;
-        }
-        if (error && !(error instanceof Error)) {
-          printWarning(
-            (componentName || 'React class') + ': type specification of ' +
-            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
-            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
-            'You may have forgotten to pass an argument to the type checker ' +
-            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
-            'shape all require an argument).'
-          );
-        }
-        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
-          // Only monitor this failure once because there tends to be a lot of the
-          // same error.
-          loggedTypeFailures[error.message] = true;
-
-          var stack = getStack ? getStack() : '';
-
-          printWarning(
-            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
-          );
-        }
-      }
-    }
-  }
-}
-
-/**
- * Resets warning cache when testing.
- *
- * @private
- */
-checkPropTypes.resetWarningCache = function() {
-  if (true) {
-    loggedTypeFailures = {};
-  }
-}
-
-module.exports = checkPropTypes;
-
-
-/***/ }),
-/* 28 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -19204,7 +17415,7 @@ var graph = new GraphRest("v1.0");
 
 
 // EXTERNAL MODULE: ./node_modules/@pnp/sp/dist/sp.es5.js
-var sp_es5 = __webpack_require__(17);
+var sp_es5 = __webpack_require__(18);
 
 // CONCATENATED MODULE: ./node_modules/@pnp/sp-addinhelpers/dist/sp-addinhelpers.es5.js
 /**
@@ -19370,7 +17581,7 @@ var sp = new sp_addinhelpers_es5_SPRestAddIn();
 
 // CONCATENATED MODULE: ./node_modules/@pnp/pnpjs/dist/pnpjs.es5.js
 /* unused harmony export util */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return sp$1; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return sp$1; });
 /* unused harmony export graph */
 /* unused harmony export storage */
 /* unused harmony export config */
@@ -19420,8 +17631,7 @@ var sp = new sp_addinhelpers_es5_SPRestAddIn();
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["g" /* extend */]; });
 /* unused concated harmony import null */
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["p" /* isUrlAbsolute */]; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["x" /* stringIsNullOrEmpty */]; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "d", function() { return common_es5["x" /* stringIsNullOrEmpty */]; });
 /* unused concated harmony import null */
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return common_es5["h" /* getAttrValueFromString */]; });
 /* unused concated harmony import null */
@@ -19706,8 +17916,7 @@ var sp = new sp_addinhelpers_es5_SPRestAddIn();
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
 /* unused concated harmony import null */
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
-/* unused concated harmony import null */
-/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return sp_es5["b" /* Site */]; });
+/* concated harmony reexport */__webpack_require__.d(__webpack_exports__, "a", function() { return sp_es5["b" /* Site */]; });
 /* unused concated harmony import null */
 /* concated harmony reexport */__webpack_require__.d(__webpack_exports__, false, function() { return /* unused reexport */undefined; });
 /* unused concated harmony import null */
@@ -19950,12 +18159,1802 @@ var Def = {
     util: util,
 };
 
-/* harmony default export */ var pnpjs_es5 = __webpack_exports__["a"] = (Def);
+/* harmony default export */ var pnpjs_es5 = __webpack_exports__["b"] = (Def);
 
 
 
 /***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = __webpack_require__(0);
+/**
+ * Injection mode for the stylesheet.
+ *
+ * @public
+ */
+var InjectionMode;
+(function (InjectionMode) {
+    /**
+     * Avoids style injection, use getRules() to read the styles.
+     */
+    InjectionMode[InjectionMode["none"] = 0] = "none";
+    /**
+     * Inserts rules using the insertRule api.
+     */
+    InjectionMode[InjectionMode["insertNode"] = 1] = "insertNode";
+    /**
+     * Appends rules using appendChild.
+     */
+    InjectionMode[InjectionMode["appendChild"] = 2] = "appendChild";
+})(InjectionMode = exports.InjectionMode || (exports.InjectionMode = {}));
+var STYLESHEET_SETTING = '__stylesheet__';
+var _stylesheet;
+/**
+ * Represents the state of styles registered in the page. Abstracts
+ * the surface for adding styles to the stylesheet, exposes helpers
+ * for reading the styles registered in server rendered scenarios.
+ *
+ * @public
+ */
+var Stylesheet = /** @class */ (function () {
+    function Stylesheet(config) {
+        this._rules = [];
+        this._rulesToInsert = [];
+        this._counter = 0;
+        this._keyToClassName = {};
+        // tslint:disable-next-line:no-any
+        this._classNameToArgs = {};
+        this._config = tslib_1.__assign({ injectionMode: 1 /* insertNode */, defaultPrefix: 'css' }, config);
+    }
+    /**
+     * Gets the singleton instance.
+     */
+    Stylesheet.getInstance = function () {
+        // tslint:disable-next-line:no-any
+        var win = typeof window !== 'undefined' ? window : {};
+        _stylesheet = win[STYLESHEET_SETTING];
+        if (!_stylesheet) {
+            // tslint:disable-next-line:no-string-literal
+            var fabricConfig = (win && win['FabricConfig']) || {};
+            _stylesheet = win[STYLESHEET_SETTING] = new Stylesheet(fabricConfig.mergeStyles);
+        }
+        return _stylesheet;
+    };
+    /**
+     * Configures the stylesheet.
+     */
+    Stylesheet.prototype.setConfig = function (config) {
+        this._config = tslib_1.__assign({}, this._config, config);
+    };
+    /**
+     * Generates a unique classname.
+     *
+     * @param displayName - Optional value to use as a prefix.
+     */
+    Stylesheet.prototype.getClassName = function (displayName) {
+        var prefix = displayName || this._config.defaultPrefix;
+        return prefix + "-" + this._counter++;
+    };
+    /**
+     * Used internally to cache information about a class which was
+     * registered with the stylesheet.
+     */
+    Stylesheet.prototype.cacheClassName = function (className, key, args, rules) {
+        this._keyToClassName[key] = className;
+        this._classNameToArgs[className] = {
+            args: args,
+            rules: rules
+        };
+    };
+    /**
+     * Gets the appropriate classname given a key which was previously
+     * registered using cacheClassName.
+     */
+    Stylesheet.prototype.classNameFromKey = function (key) {
+        return this._keyToClassName[key];
+    };
+    /**
+     * Gets the arguments associated with a given classname which was
+     * previously registered using cacheClassName.
+     */
+    Stylesheet.prototype.argsFromClassName = function (className) {
+        var entry = this._classNameToArgs[className];
+        return (entry && entry.args);
+    };
+    /**
+   * Gets the arguments associated with a given classname which was
+   * previously registered using cacheClassName.
+   */
+    Stylesheet.prototype.insertedRulesFromClassName = function (className) {
+        var entry = this._classNameToArgs[className];
+        return (entry && entry.rules);
+    };
+    /**
+     * Inserts a css rule into the stylesheet.
+     */
+    Stylesheet.prototype.insertRule = function (rule) {
+        var injectionMode = this._config.injectionMode;
+        var element = injectionMode !== 0 /* none */ ? this._getStyleElement() : undefined;
+        if (element) {
+            switch (this._config.injectionMode) {
+                case 1 /* insertNode */:
+                    var sheet = element.sheet;
+                    try {
+                        sheet.insertRule(rule, sheet.cssRules.length);
+                    }
+                    catch (e) {
+                        // The browser will throw exceptions on unsupported rules (such as a moz prefix in webkit.)
+                        // We need to swallow the exceptions for this scenario, otherwise we'd need to filter
+                        // which could be slower and bulkier.
+                    }
+                    break;
+                case 2 /* appendChild */:
+                    element.appendChild(document.createTextNode(rule));
+                    break;
+            }
+        }
+        else {
+            this._rules.push(rule);
+        }
+        if (this._config.onInsertRule) {
+            this._config.onInsertRule(rule);
+        }
+    };
+    /**
+     * Gets all rules registered with the stylesheet; only valid when
+     * using InsertionMode.none.
+     */
+    Stylesheet.prototype.getRules = function () {
+        return (this._rules.join('') || '') + (this._rulesToInsert.join('') || '');
+    };
+    /**
+     * Resets the internal state of the stylesheet. Only used in server
+     * rendered scenarios where we're using InsertionMode.none.
+     */
+    Stylesheet.prototype.reset = function () {
+        this._rules = [];
+        this._rulesToInsert = [];
+        this._counter = 0;
+        this._classNameToArgs = {};
+        this._keyToClassName = {};
+    };
+    // Forces the regeneration of incoming styles without totally resetting the stylesheet.
+    Stylesheet.prototype.resetKeys = function () {
+        this._keyToClassName = {};
+    };
+    Stylesheet.prototype._getStyleElement = function () {
+        var _this = this;
+        if (!this._styleElement && typeof document !== 'undefined') {
+            this._styleElement = this._createStyleElement();
+            // Reset the style element on the next frame.
+            window.requestAnimationFrame(function () {
+                _this._styleElement = undefined;
+            });
+        }
+        return this._styleElement;
+    };
+    Stylesheet.prototype._createStyleElement = function () {
+        var styleElement = document.createElement('style');
+        styleElement.setAttribute('data-merge-styles', 'true');
+        styleElement.type = 'text/css';
+        if (this._lastStyleElement && this._lastStyleElement.nextElementSibling) {
+            document.head.insertBefore(styleElement, this._lastStyleElement.nextElementSibling);
+        }
+        else {
+            document.head.appendChild(styleElement);
+        }
+        this._lastStyleElement = styleElement;
+        return styleElement;
+    };
+    return Stylesheet;
+}());
+exports.Stylesheet = Stylesheet;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = __webpack_require__(0);
+tslib_1.__exportStar(__webpack_require__(185), exports);
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var tslib_1 = __webpack_require__(0);
+var React = __webpack_require__(1);
+var Utilities_1 = __webpack_require__(2);
+var Icon_1 = __webpack_require__(31);
+var ContextualMenu_1 = __webpack_require__(211);
+var BaseButton_classNames_1 = __webpack_require__(226);
+var SplitButton_classNames_1 = __webpack_require__(227);
+var KeytipData_1 = __webpack_require__(21);
+var TouchIdleDelay = 500; /* ms */
+var BaseButton = /** @class */ (function (_super) {
+    tslib_1.__extends(BaseButton, _super);
+    function BaseButton(props, rootClassName) {
+        var _this = _super.call(this, props) || this;
+        _this._buttonElement = Utilities_1.createRef();
+        _this._splitButtonContainer = Utilities_1.createRef();
+        _this._onRenderIcon = function (buttonProps, defaultRender) {
+            var iconProps = _this.props.iconProps;
+            if (iconProps) {
+                return (React.createElement(Icon_1.Icon, tslib_1.__assign({}, iconProps, { className: _this._classNames.icon })));
+            }
+            return null;
+        };
+        _this._onRenderTextContents = function () {
+            var _a = _this.props, text = _a.text, children = _a.children, _b = _a.secondaryText, secondaryText = _b === void 0 ? _this.props.description : _b, _c = _a.onRenderText, onRenderText = _c === void 0 ? _this._onRenderText : _c, _d = _a.onRenderDescription, onRenderDescription = _d === void 0 ? _this._onRenderDescription : _d;
+            if (text || typeof (children) === 'string' || secondaryText) {
+                return (React.createElement("div", { className: _this._classNames.textContainer },
+                    onRenderText(_this.props, _this._onRenderText),
+                    onRenderDescription(_this.props, _this._onRenderDescription)));
+            }
+            return ([
+                onRenderText(_this.props, _this._onRenderText),
+                onRenderDescription(_this.props, _this._onRenderDescription)
+            ]);
+        };
+        _this._onRenderText = function () {
+            var text = _this.props.text;
+            var children = _this.props.children;
+            // For backwards compat, we should continue to take in the text content from children.
+            if (text === undefined && typeof (children) === 'string') {
+                text = children;
+            }
+            if (_this._hasText()) {
+                return (React.createElement("div", { key: _this._labelId, className: _this._classNames.label, id: _this._labelId }, text));
+            }
+            return null;
+        };
+        _this._onRenderChildren = function () {
+            var children = _this.props.children;
+            // If children is just a string, either it or the text will be rendered via onRenderLabel
+            // If children is another component, it will be rendered after text
+            if (typeof (children) === 'string') {
+                return null;
+            }
+            return children;
+        };
+        _this._onRenderDescription = function (props) {
+            var _a = props.secondaryText, secondaryText = _a === void 0 ? _this.props.description : _a;
+            // ms-Button-description is only shown when the button type is compound.
+            // In other cases it will not be displayed.
+            return (secondaryText) ? (React.createElement("div", { key: _this._descriptionId, className: _this._classNames.description, id: _this._descriptionId }, secondaryText)) : (null);
+        };
+        _this._onRenderAriaDescription = function () {
+            var ariaDescription = _this.props.ariaDescription;
+            // If ariaDescription is given, descriptionId will be assigned to ariaDescriptionSpan,
+            // otherwise it will be assigned to descriptionSpan.
+            return ariaDescription ? (React.createElement("span", { className: _this._classNames.screenReaderText, id: _this._ariaDescriptionId }, ariaDescription)) : (null);
+        };
+        _this._onRenderMenuIcon = function (props) {
+            var menuIconProps = _this.props.menuIconProps;
+            return (React.createElement(Icon_1.Icon, tslib_1.__assign({ iconName: 'ChevronDown' }, menuIconProps, { className: _this._classNames.menuIcon })));
+        };
+        _this._onRenderMenu = function (menuProps) {
+            var _a = menuProps.onDismiss, onDismiss = _a === void 0 ? _this._dismissMenu : _a;
+            // the accessible menu label (accessible name) has a relationship to the button.
+            // If the menu props do not specify an explicit value for aria-label or aria-labelledBy,
+            // AND the button has text, we'll set the menu aria-labelledBy to the text element id.
+            if (!menuProps.ariaLabel && !menuProps.labelElementId && _this._hasText()) {
+                menuProps = tslib_1.__assign({}, menuProps, { labelElementId: _this._labelId });
+            }
+            return (React.createElement(ContextualMenu_1.ContextualMenu, tslib_1.__assign({ id: _this._labelId + '-menu', directionalHint: 4 /* bottomLeftEdge */ }, menuProps, { shouldFocusOnContainer: _this.state.menuProps ? _this.state.menuProps.shouldFocusOnContainer : undefined, className: Utilities_1.css('ms-BaseButton-menuhost', menuProps.className), target: _this._isSplitButton ? _this._splitButtonContainer.current : _this._buttonElement.current, onDismiss: onDismiss })));
+        };
+        _this._dismissMenu = function () {
+            var menuProps = null;
+            if (_this.props.persistMenu && _this.state.menuProps) {
+                menuProps = _this.state.menuProps;
+                menuProps.hidden = true;
+            }
+            _this.setState({ menuProps: menuProps });
+        };
+        _this._openMenu = function (shouldFocusOnContainer) {
+            if (_this.props.menuProps) {
+                var menuProps = tslib_1.__assign({}, _this.props.menuProps, { shouldFocusOnContainer: shouldFocusOnContainer });
+                if (_this.props.persistMenu) {
+                    menuProps.hidden = false;
+                }
+                _this.setState({ menuProps: menuProps });
+            }
+        };
+        _this._onToggleMenu = function (shouldFocusOnContainer) {
+            if (_this._splitButtonContainer.current) {
+                _this._splitButtonContainer.current.focus();
+            }
+            var currentMenuProps = _this.state.menuProps;
+            if (_this.props.persistMenu) {
+                currentMenuProps && currentMenuProps.hidden ? _this._openMenu(shouldFocusOnContainer) : _this._dismissMenu();
+            }
+            else {
+                currentMenuProps ? _this._dismissMenu() : _this._openMenu(shouldFocusOnContainer);
+            }
+        };
+        _this._onSplitButtonPrimaryClick = function (ev) {
+            if (_this._isExpanded) {
+                _this._dismissMenu();
+            }
+            if (!_this._processingTouch && _this.props.onClick) {
+                _this.props.onClick(ev);
+            }
+            else if (_this._processingTouch) {
+                _this._onMenuClick(ev);
+            }
+        };
+        _this._onMouseDown = function (ev) {
+            if (_this.props.onMouseDown) {
+                _this.props.onMouseDown(ev);
+            }
+            ev.preventDefault();
+        };
+        _this._onSplitButtonContainerKeyDown = function (ev) {
+            if (ev.which === 13 /* enter */) {
+                if (_this._buttonElement.current) {
+                    _this._buttonElement.current.click();
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+            }
+            else {
+                _this._onMenuKeyDown(ev);
+            }
+        };
+        _this._onMenuKeyDown = function (ev) {
+            if (_this.props.disabled) {
+                return;
+            }
+            if (_this.props.onKeyDown) {
+                _this.props.onKeyDown(ev);
+            }
+            if (!ev.defaultPrevented && _this._isValidMenuOpenKey(ev)) {
+                var onMenuClick = _this.props.onMenuClick;
+                if (onMenuClick) {
+                    onMenuClick(ev, _this);
+                }
+                _this._onToggleMenu(false);
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+        };
+        _this._onTouchStart = function () {
+            if (_this._isSplitButton && _this._splitButtonContainer.value && !('onpointerdown' in _this._splitButtonContainer.value)) {
+                _this._handleTouchAndPointerEvent();
+            }
+        };
+        _this._onMenuClick = function (ev) {
+            var onMenuClick = _this.props.onMenuClick;
+            if (onMenuClick) {
+                onMenuClick(ev, _this);
+            }
+            if (!ev.defaultPrevented) {
+                // When Edge + Narrator are used together (regardless of if the button is in a form or not), pressing
+                // "Enter" fires this method and not _onMenuKeyDown. Checking ev.nativeEvent.detail differentiates
+                // between a real click event and a keypress event.
+                var shouldFocusOnContainer = ev.nativeEvent.detail !== 0;
+                _this._onToggleMenu(shouldFocusOnContainer);
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+        };
+        _this._warnConditionallyRequiredProps(['menuProps', 'onClick'], 'split', _this.props.split);
+        _this._warnDeprecations({
+            rootProps: undefined,
+            'description': 'secondaryText'
+        });
+        _this._labelId = Utilities_1.getId();
+        _this._descriptionId = Utilities_1.getId();
+        _this._ariaDescriptionId = Utilities_1.getId();
+        var menuProps = null;
+        if (props.persistMenu && props.menuProps) {
+            menuProps = props.menuProps;
+            menuProps.hidden = true;
+        }
+        _this.state = {
+            menuProps: menuProps
+        };
+        return _this;
+    }
+    Object.defineProperty(BaseButton.prototype, "_isSplitButton", {
+        get: function () {
+            return (!!this.props.menuProps && !!this.props.onClick) && this.props.split === true;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BaseButton.prototype, "_isExpanded", {
+        get: function () {
+            if (this.props.persistMenu) {
+                return !this.state.menuProps.hidden;
+            }
+            return !!this.state.menuProps;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    BaseButton.prototype.render = function () {
+        var _a = this.props, ariaDescription = _a.ariaDescription, ariaLabel = _a.ariaLabel, ariaHidden = _a.ariaHidden, className = _a.className, disabled = _a.disabled, primaryDisabled = _a.primaryDisabled, _b = _a.secondaryText, secondaryText = _b === void 0 ? this.props.description : _b, href = _a.href, iconProps = _a.iconProps, menuIconProps = _a.menuIconProps, styles = _a.styles, text = _a.text, checked = _a.checked, variantClassName = _a.variantClassName, theme = _a.theme, getClassNames = _a.getClassNames;
+        var menuProps = this.state.menuProps;
+        // Button is disabled if the whole button (in case of splitbutton is disabled) or if the primary action is disabled
+        var isPrimaryButtonDisabled = (disabled || primaryDisabled);
+        this._classNames = getClassNames ? getClassNames(theme, className, variantClassName, iconProps && iconProps.className, menuIconProps && menuIconProps.className, isPrimaryButtonDisabled, checked, !!menuProps, this.props.split) : BaseButton_classNames_1.getBaseButtonClassNames(styles, className, variantClassName, iconProps && iconProps.className, menuIconProps && menuIconProps.className, isPrimaryButtonDisabled, checked, !!menuProps, this.props.split);
+        var _c = this, _ariaDescriptionId = _c._ariaDescriptionId, _labelId = _c._labelId, _descriptionId = _c._descriptionId;
+        // Anchor tag cannot be disabled hence in disabled state rendering
+        // anchor button as normal button
+        var renderAsAnchor = !isPrimaryButtonDisabled && !!href;
+        var tag = renderAsAnchor ? 'a' : 'button';
+        var nativeProps = Utilities_1.getNativeProps(Utilities_1.assign(renderAsAnchor ? {} : { type: 'button' }, this.props.rootProps, this.props), renderAsAnchor ? Utilities_1.anchorProperties : Utilities_1.buttonProperties, [
+            'disabled' // let disabled buttons be focused and styled as disabled.
+        ]);
+        // Check for ariaDescription, secondaryText or aria-describedby in the native props to determine source of aria-describedby
+        // otherwise default to null.
+        var ariaDescribedBy;
+        if (ariaDescription) {
+            ariaDescribedBy = _ariaDescriptionId;
+        }
+        else if (secondaryText) {
+            ariaDescribedBy = _descriptionId;
+        }
+        else if (nativeProps['aria-describedby']) {
+            ariaDescribedBy = nativeProps['aria-describedby'];
+        }
+        else {
+            ariaDescribedBy = null;
+        }
+        // If an explicit ariaLabel is given, use that as the label and we're done.
+        // If an explicit aria-labelledby is given, use that and we're done.
+        // If any kind of description is given (which will end up as an aria-describedby attribute),
+        // set the labelledby element. Otherwise, the button is labeled implicitly by the descendent
+        // text on the button (if it exists). Never set both aria-label and aria-labelledby.
+        var ariaLabelledBy = null;
+        if (!ariaLabel) {
+            if (nativeProps['aria-labelledby']) {
+                ariaLabelledBy = nativeProps['aria-labelledby'];
+            }
+            else if (ariaDescribedBy) {
+                ariaLabelledBy = text ? _labelId : null;
+            }
+        }
+        var buttonProps = Utilities_1.assign(nativeProps, {
+            className: this._classNames.root,
+            ref: this._buttonElement,
+            'disabled': isPrimaryButtonDisabled,
+            'aria-label': ariaLabel,
+            'aria-labelledby': ariaLabelledBy,
+            'aria-describedby': ariaDescribedBy,
+            'data-is-focusable': (this.props['data-is-focusable'] === false || disabled || this._isSplitButton) ? false : true,
+            'aria-pressed': checked
+        });
+        if (ariaHidden) {
+            buttonProps['aria-hidden'] = true;
+        }
+        if (this._isSplitButton) {
+            return (this._onRenderSplitButtonContent(tag, buttonProps));
+        }
+        else if (this.props.menuProps) {
+            Utilities_1.assign(buttonProps, {
+                'onKeyDown': this._onMenuKeyDown,
+                'onClick': this._onMenuClick,
+                'aria-expanded': this._isExpanded,
+                'aria-owns': this.state.menuProps ? this._labelId + '-menu' : null,
+                'aria-haspopup': true
+            });
+        }
+        return this._onRenderContent(tag, buttonProps);
+    };
+    BaseButton.prototype.componentDidMount = function () {
+        // For split buttons, touching anywhere in the button should drop the dropdown, which should contain the primary action.
+        // This gives more hit target space for touch environments. We're setting the onpointerdown here, because React
+        // does not support Pointer events yet.
+        if (this._isSplitButton && this._splitButtonContainer.value && 'onpointerdown' in this._splitButtonContainer.value) {
+            this._events.on(this._splitButtonContainer.value, 'pointerdown', this._onPointerDown, true);
+        }
+    };
+    BaseButton.prototype.componentDidUpdate = function (prevProps, prevState) {
+        // If Button's menu was closed, run onAfterMenuDismiss
+        if (this.props.onAfterMenuDismiss && prevState.menuProps && !this.state.menuProps) {
+            this.props.onAfterMenuDismiss();
+        }
+    };
+    BaseButton.prototype.focus = function () {
+        if (this._isSplitButton && this._splitButtonContainer.current) {
+            this._splitButtonContainer.current.focus();
+        }
+        else if (this._buttonElement.current) {
+            this._buttonElement.current.focus();
+        }
+    };
+    BaseButton.prototype.dismissMenu = function () {
+        this._dismissMenu();
+    };
+    BaseButton.prototype.openMenu = function () {
+        this._openMenu();
+    };
+    BaseButton.prototype._onRenderContent = function (tag, buttonProps) {
+        var _this = this;
+        var props = this.props;
+        var Tag = tag;
+        var menuIconProps = props.menuIconProps, menuProps = props.menuProps, _a = props.onRenderIcon, onRenderIcon = _a === void 0 ? this._onRenderIcon : _a, _b = props.onRenderAriaDescription, onRenderAriaDescription = _b === void 0 ? this._onRenderAriaDescription : _b, _c = props.onRenderChildren, onRenderChildren = _c === void 0 ? this._onRenderChildren : _c, _d = props.onRenderMenu, onRenderMenu = _d === void 0 ? this._onRenderMenu : _d, _e = props.onRenderMenuIcon, onRenderMenuIcon = _e === void 0 ? this._onRenderMenuIcon : _e, disabled = props.disabled;
+        var keytipProps = props.keytipProps;
+        if (keytipProps && menuProps) {
+            keytipProps = tslib_1.__assign({}, keytipProps, { hasMenu: true });
+        }
+        var Content = (
+        // If we're making a split button, we won't put the keytip here
+        React.createElement(KeytipData_1.KeytipData, { keytipProps: !this._isSplitButton ? keytipProps : undefined, ariaDescribedBy: buttonProps['aria-describedby'], disabled: disabled }, function (keytipAttributes) { return (React.createElement(Tag, tslib_1.__assign({}, buttonProps, keytipAttributes),
+            React.createElement("div", { className: _this._classNames.flexContainer },
+                onRenderIcon(props, _this._onRenderIcon),
+                _this._onRenderTextContents(),
+                onRenderAriaDescription(props, _this._onRenderAriaDescription),
+                onRenderChildren(props, _this._onRenderChildren),
+                !_this._isSplitButton && (menuProps || menuIconProps || _this.props.onRenderMenuIcon) && onRenderMenuIcon(_this.props, _this._onRenderMenuIcon),
+                _this.state.menuProps && !_this.state.menuProps.doNotLayer && onRenderMenu(menuProps, _this._onRenderMenu)))); }));
+        if (menuProps && menuProps.doNotLayer) {
+            return (React.createElement("div", { style: { display: 'inline-block' } },
+                Content,
+                this.state.menuProps && onRenderMenu(menuProps, this._onRenderMenu)));
+        }
+        return Content;
+    };
+    BaseButton.prototype._hasText = function () {
+        // _onRenderTextContents and _onRenderText do not perform the same checks. Below is parity with what _onRenderText used to have
+        // before the refactor that introduced this function. _onRenderTextContents does not require props.text to be undefined in order
+        // for props.children to be used as a fallback. Purely a code maintainability/reuse issue, but logged as Issue #4979
+        return this.props.text !== null && (this.props.text !== undefined || typeof (this.props.children) === 'string');
+    };
+    BaseButton.prototype._onRenderSplitButtonContent = function (tag, buttonProps) {
+        var _this = this;
+        var _a = this.props, _b = _a.styles, styles = _b === void 0 ? {} : _b, disabled = _a.disabled, checked = _a.checked, getSplitButtonClassNames = _a.getSplitButtonClassNames, primaryDisabled = _a.primaryDisabled, menuProps = _a.menuProps;
+        var keytipProps = this.props.keytipProps;
+        var classNames = getSplitButtonClassNames ? getSplitButtonClassNames(!!disabled, !!this.state.menuProps, !!checked) : styles && SplitButton_classNames_1.getClassNames(styles, !!disabled, !!this.state.menuProps, !!checked);
+        Utilities_1.assign(buttonProps, {
+            onClick: undefined,
+            tabIndex: -1,
+            'data-is-focusable': false
+        });
+        var ariaDescribedBy = buttonProps.ariaDescription || '';
+        if (keytipProps && menuProps) {
+            keytipProps = tslib_1.__assign({}, keytipProps, { hasMenu: true });
+        }
+        return (React.createElement(KeytipData_1.KeytipData, { keytipProps: keytipProps, disabled: disabled }, function (keytipAttributes) { return (React.createElement("div", { "data-ktp-target": keytipAttributes['data-ktp-target'], role: 'button', "aria-labelledby": buttonProps.ariaLabel, "aria-disabled": disabled, "aria-haspopup": true, "aria-expanded": _this._isExpanded, "aria-pressed": _this.props.checked, "aria-describedby": ariaDescribedBy + (keytipAttributes['aria-describedby'] || ''), className: classNames && classNames.splitButtonContainer, onKeyDown: _this._onSplitButtonContainerKeyDown, onTouchStart: _this._onTouchStart, ref: _this._splitButtonContainer, "data-is-focusable": true, onClick: !disabled && !primaryDisabled ? _this._onSplitButtonPrimaryClick : undefined, tabIndex: !disabled ? 0 : undefined },
+            React.createElement("span", { style: { 'display': 'flex' } },
+                _this._onRenderContent(tag, buttonProps),
+                _this._onRenderSplitButtonMenuButton(classNames, keytipAttributes),
+                _this._onRenderSplitButtonDivider(classNames)))); }));
+    };
+    BaseButton.prototype._onRenderSplitButtonDivider = function (classNames) {
+        if (classNames && classNames.divider) {
+            return React.createElement("span", { className: classNames.divider });
+        }
+        return null;
+    };
+    BaseButton.prototype._onRenderSplitButtonMenuButton = function (classNames, keytipAttributes) {
+        var menuIconProps = this.props.menuIconProps;
+        var splitButtonAriaLabel = this.props.splitButtonAriaLabel;
+        if (menuIconProps === undefined) {
+            menuIconProps = {
+                iconName: 'ChevronDown'
+            };
+        }
+        var splitButtonProps = {
+            'styles': classNames,
+            'checked': this.props.checked,
+            'disabled': this.props.disabled,
+            'onClick': this._onMenuClick,
+            'menuProps': undefined,
+            'iconProps': menuIconProps,
+            'ariaLabel': splitButtonAriaLabel,
+            'aria-haspopup': true,
+            'aria-expanded': this._isExpanded,
+            'data-is-focusable': false
+        };
+        // Add data-ktp-execute-target to the split button if the keytip is defined
+        return (React.createElement(BaseButton, tslib_1.__assign({}, splitButtonProps, { "data-ktp-execute-target": keytipAttributes['data-ktp-execute-target'], onMouseDown: this._onMouseDown, tabIndex: -1 })));
+    };
+    BaseButton.prototype._onPointerDown = function (ev) {
+        if (ev.pointerType === 'touch') {
+            this._handleTouchAndPointerEvent();
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+        }
+    };
+    BaseButton.prototype._handleTouchAndPointerEvent = function () {
+        var _this = this;
+        // If we already have an existing timeeout from a previous touch and pointer event
+        // cancel that timeout so we can set a nwe one.
+        if (this._lastTouchTimeoutId !== undefined) {
+            this._async.clearTimeout(this._lastTouchTimeoutId);
+            this._lastTouchTimeoutId = undefined;
+        }
+        this._processingTouch = true;
+        this._lastTouchTimeoutId = this._async.setTimeout(function () {
+            _this._processingTouch = false;
+            _this._lastTouchTimeoutId = undefined;
+        }, TouchIdleDelay);
+    };
+    /**
+     * Returns if the user hits a valid keyboard key to open the menu
+     * @param ev - the keyboard event
+     * @returns True if user clicks on custom trigger key if enabled or alt + down arrow if not. False otherwise.
+     */
+    BaseButton.prototype._isValidMenuOpenKey = function (ev) {
+        if (this.props.menuTriggerKeyCode) {
+            return ev.which === this.props.menuTriggerKeyCode;
+        }
+        else if (this.props.menuProps) {
+            return ev.which === 40 /* down */ && (ev.altKey || ev.metaKey);
+        }
+        // Note: When enter is pressed, we will let the event continue to propagate
+        // to trigger the onClick event on the button
+        return false;
+    };
+    BaseButton.defaultProps = {
+        baseClassName: 'ms-Button',
+        styles: {},
+        split: false,
+    };
+    return BaseButton;
+}(Utilities_1.BaseComponent));
+exports.BaseButton = BaseButton;
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Utilities_1 = __webpack_require__(2);
+var Styling_1 = __webpack_require__(4);
+var noOutline = {
+    outline: 0
+};
+var iconStyle = {
+    fontSize: Styling_1.FontSizes.icon,
+    margin: '0 4px',
+    height: '16px',
+    lineHeight: '16px',
+    textAlign: 'center',
+    verticalAlign: 'middle',
+    flexShrink: 0
+};
+/**
+ * Gets the base button styles. Note: because it is a base class to be used with the `mergeRules`
+ * helper, it should have values for all class names in the interface. This let `mergeRules` optimize
+ * mixing class names together.
+ */
+exports.getStyles = Utilities_1.memoizeFunction(function (theme) {
+    var semanticColors = theme.semanticColors;
+    var border = semanticColors.buttonBorder;
+    var disabledBackground = semanticColors.disabledBackground;
+    var disabledText = semanticColors.disabledText;
+    var buttonHighContrastFocus = {
+        left: -2,
+        top: -2,
+        bottom: -2,
+        right: -2,
+        border: 'none',
+        outlineColor: 'ButtonText'
+    };
+    return {
+        root: [
+            Styling_1.getFocusStyle(theme, -1, 'relative', buttonHighContrastFocus),
+            theme.fonts.medium,
+            {
+                boxSizing: 'border-box',
+                border: '1px solid ' + border,
+                userSelect: 'none',
+                display: 'inline-block',
+                textDecoration: 'none',
+                textAlign: 'center',
+                cursor: 'pointer',
+                verticalAlign: 'top',
+                padding: '0 16px',
+                borderRadius: 0
+            }
+        ],
+        rootDisabled: {
+            backgroundColor: disabledBackground,
+            color: disabledText,
+            cursor: 'default',
+            pointerEvents: 'none',
+            selectors: {
+                ':hover': noOutline,
+                ':focus': noOutline
+            }
+        },
+        iconDisabled: {
+            color: disabledText
+        },
+        menuIconDisabled: {
+            color: disabledText
+        },
+        flexContainer: {
+            display: 'flex',
+            height: '100%',
+            flexWrap: 'nowrap',
+            justifyContent: 'center',
+            alignItems: 'center'
+        },
+        textContainer: {
+            flexGrow: 1
+        },
+        icon: iconStyle,
+        menuIcon: [
+            iconStyle,
+            {
+                fontSize: Styling_1.FontSizes.small
+            }
+        ],
+        label: {
+            margin: '0 4px',
+            lineHeight: '100%'
+        },
+        screenReaderText: Styling_1.hiddenContentStyle
+    };
+});
+
+
+/***/ }),
+/* 24 */,
+/* 25 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_25__;
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/** @license React v16.8.6
+ * react-is.development.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+
+
+if (true) {
+  (function() {
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+// The Symbol used to tag the ReactElement-like types. If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+var hasSymbol = typeof Symbol === 'function' && Symbol.for;
+
+var REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;
+var REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;
+var REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;
+var REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;
+var REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;
+var REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;
+var REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;
+var REACT_ASYNC_MODE_TYPE = hasSymbol ? Symbol.for('react.async_mode') : 0xeacf;
+var REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;
+var REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;
+var REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;
+var REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;
+var REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;
+
+function isValidElementType(type) {
+  return typeof type === 'string' || typeof type === 'function' ||
+  // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.
+  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);
+}
+
+/**
+ * Forked from fbjs/warning:
+ * https://github.com/facebook/fbjs/blob/e66ba20ad5be433eb54423f2b097d829324d9de6/packages/fbjs/src/__forks__/warning.js
+ *
+ * Only change is we use console.warn instead of console.error,
+ * and do nothing when 'console' is not supported.
+ * This really simplifies the code.
+ * ---
+ * Similar to invariant but only logs a warning if the condition is not met.
+ * This can be used to log issues in development environments in critical
+ * paths. Removing the logging code for production environments will keep the
+ * same logic and follow the same code paths.
+ */
+
+var lowPriorityWarning = function () {};
+
+{
+  var printWarning = function (format) {
+    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
+    var argIndex = 0;
+    var message = 'Warning: ' + format.replace(/%s/g, function () {
+      return args[argIndex++];
+    });
+    if (typeof console !== 'undefined') {
+      console.warn(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+
+  lowPriorityWarning = function (condition, format) {
+    if (format === undefined) {
+      throw new Error('`lowPriorityWarning(condition, format, ...args)` requires a warning ' + 'message argument');
+    }
+    if (!condition) {
+      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+        args[_key2 - 2] = arguments[_key2];
+      }
+
+      printWarning.apply(undefined, [format].concat(args));
+    }
+  };
+}
+
+var lowPriorityWarning$1 = lowPriorityWarning;
+
+function typeOf(object) {
+  if (typeof object === 'object' && object !== null) {
+    var $$typeof = object.$$typeof;
+    switch ($$typeof) {
+      case REACT_ELEMENT_TYPE:
+        var type = object.type;
+
+        switch (type) {
+          case REACT_ASYNC_MODE_TYPE:
+          case REACT_CONCURRENT_MODE_TYPE:
+          case REACT_FRAGMENT_TYPE:
+          case REACT_PROFILER_TYPE:
+          case REACT_STRICT_MODE_TYPE:
+          case REACT_SUSPENSE_TYPE:
+            return type;
+          default:
+            var $$typeofType = type && type.$$typeof;
+
+            switch ($$typeofType) {
+              case REACT_CONTEXT_TYPE:
+              case REACT_FORWARD_REF_TYPE:
+              case REACT_PROVIDER_TYPE:
+                return $$typeofType;
+              default:
+                return $$typeof;
+            }
+        }
+      case REACT_LAZY_TYPE:
+      case REACT_MEMO_TYPE:
+      case REACT_PORTAL_TYPE:
+        return $$typeof;
+    }
+  }
+
+  return undefined;
+}
+
+// AsyncMode is deprecated along with isAsyncMode
+var AsyncMode = REACT_ASYNC_MODE_TYPE;
+var ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
+var ContextConsumer = REACT_CONTEXT_TYPE;
+var ContextProvider = REACT_PROVIDER_TYPE;
+var Element = REACT_ELEMENT_TYPE;
+var ForwardRef = REACT_FORWARD_REF_TYPE;
+var Fragment = REACT_FRAGMENT_TYPE;
+var Lazy = REACT_LAZY_TYPE;
+var Memo = REACT_MEMO_TYPE;
+var Portal = REACT_PORTAL_TYPE;
+var Profiler = REACT_PROFILER_TYPE;
+var StrictMode = REACT_STRICT_MODE_TYPE;
+var Suspense = REACT_SUSPENSE_TYPE;
+
+var hasWarnedAboutDeprecatedIsAsyncMode = false;
+
+// AsyncMode should be deprecated
+function isAsyncMode(object) {
+  {
+    if (!hasWarnedAboutDeprecatedIsAsyncMode) {
+      hasWarnedAboutDeprecatedIsAsyncMode = true;
+      lowPriorityWarning$1(false, 'The ReactIs.isAsyncMode() alias has been deprecated, ' + 'and will be removed in React 17+. Update your code to use ' + 'ReactIs.isConcurrentMode() instead. It has the exact same API.');
+    }
+  }
+  return isConcurrentMode(object) || typeOf(object) === REACT_ASYNC_MODE_TYPE;
+}
+function isConcurrentMode(object) {
+  return typeOf(object) === REACT_CONCURRENT_MODE_TYPE;
+}
+function isContextConsumer(object) {
+  return typeOf(object) === REACT_CONTEXT_TYPE;
+}
+function isContextProvider(object) {
+  return typeOf(object) === REACT_PROVIDER_TYPE;
+}
+function isElement(object) {
+  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+}
+function isForwardRef(object) {
+  return typeOf(object) === REACT_FORWARD_REF_TYPE;
+}
+function isFragment(object) {
+  return typeOf(object) === REACT_FRAGMENT_TYPE;
+}
+function isLazy(object) {
+  return typeOf(object) === REACT_LAZY_TYPE;
+}
+function isMemo(object) {
+  return typeOf(object) === REACT_MEMO_TYPE;
+}
+function isPortal(object) {
+  return typeOf(object) === REACT_PORTAL_TYPE;
+}
+function isProfiler(object) {
+  return typeOf(object) === REACT_PROFILER_TYPE;
+}
+function isStrictMode(object) {
+  return typeOf(object) === REACT_STRICT_MODE_TYPE;
+}
+function isSuspense(object) {
+  return typeOf(object) === REACT_SUSPENSE_TYPE;
+}
+
+exports.typeOf = typeOf;
+exports.AsyncMode = AsyncMode;
+exports.ConcurrentMode = ConcurrentMode;
+exports.ContextConsumer = ContextConsumer;
+exports.ContextProvider = ContextProvider;
+exports.Element = Element;
+exports.ForwardRef = ForwardRef;
+exports.Fragment = Fragment;
+exports.Lazy = Lazy;
+exports.Memo = Memo;
+exports.Portal = Portal;
+exports.Profiler = Profiler;
+exports.StrictMode = StrictMode;
+exports.Suspense = Suspense;
+exports.isValidElementType = isValidElementType;
+exports.isAsyncMode = isAsyncMode;
+exports.isConcurrentMode = isConcurrentMode;
+exports.isContextConsumer = isContextConsumer;
+exports.isContextProvider = isContextProvider;
+exports.isElement = isElement;
+exports.isForwardRef = isForwardRef;
+exports.isFragment = isFragment;
+exports.isLazy = isLazy;
+exports.isMemo = isMemo;
+exports.isPortal = isPortal;
+exports.isProfiler = isProfiler;
+exports.isStrictMode = isStrictMode;
+exports.isSuspense = isSuspense;
+  })();
+}
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var ReactIs = __webpack_require__(15);
+var assign = __webpack_require__(28);
+
+var ReactPropTypesSecret = __webpack_require__(16);
+var checkPropTypes = __webpack_require__(29);
+
+var has = Function.call.bind(Object.prototype.hasOwnProperty);
+var printWarning = function() {};
+
+if (true) {
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+
+function emptyFunctionThatReturnsNull() {
+  return null;
+}
+
+module.exports = function(isValidElement, throwOnDirectAccess) {
+  /* global Symbol */
+  var ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;
+  var FAUX_ITERATOR_SYMBOL = '@@iterator'; // Before Symbol spec.
+
+  /**
+   * Returns the iterator method function contained on the iterable object.
+   *
+   * Be sure to invoke the function with the iterable as context:
+   *
+   *     var iteratorFn = getIteratorFn(myIterable);
+   *     if (iteratorFn) {
+   *       var iterator = iteratorFn.call(myIterable);
+   *       ...
+   *     }
+   *
+   * @param {?object} maybeIterable
+   * @return {?function}
+   */
+  function getIteratorFn(maybeIterable) {
+    var iteratorFn = maybeIterable && (ITERATOR_SYMBOL && maybeIterable[ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL]);
+    if (typeof iteratorFn === 'function') {
+      return iteratorFn;
+    }
+  }
+
+  /**
+   * Collection of methods that allow declaration and validation of props that are
+   * supplied to React components. Example usage:
+   *
+   *   var Props = require('ReactPropTypes');
+   *   var MyArticle = React.createClass({
+   *     propTypes: {
+   *       // An optional string prop named "description".
+   *       description: Props.string,
+   *
+   *       // A required enum prop named "category".
+   *       category: Props.oneOf(['News','Photos']).isRequired,
+   *
+   *       // A prop named "dialog" that requires an instance of Dialog.
+   *       dialog: Props.instanceOf(Dialog).isRequired
+   *     },
+   *     render: function() { ... }
+   *   });
+   *
+   * A more formal specification of how these methods are used:
+   *
+   *   type := array|bool|func|object|number|string|oneOf([...])|instanceOf(...)
+   *   decl := ReactPropTypes.{type}(.isRequired)?
+   *
+   * Each and every declaration produces a function with the same signature. This
+   * allows the creation of custom validation functions. For example:
+   *
+   *  var MyLink = React.createClass({
+   *    propTypes: {
+   *      // An optional string or URI prop named "href".
+   *      href: function(props, propName, componentName) {
+   *        var propValue = props[propName];
+   *        if (propValue != null && typeof propValue !== 'string' &&
+   *            !(propValue instanceof URI)) {
+   *          return new Error(
+   *            'Expected a string or an URI for ' + propName + ' in ' +
+   *            componentName
+   *          );
+   *        }
+   *      }
+   *    },
+   *    render: function() {...}
+   *  });
+   *
+   * @internal
+   */
+
+  var ANONYMOUS = '<<anonymous>>';
+
+  // Important!
+  // Keep this list in sync with production version in `./factoryWithThrowingShims.js`.
+  var ReactPropTypes = {
+    array: createPrimitiveTypeChecker('array'),
+    bool: createPrimitiveTypeChecker('boolean'),
+    func: createPrimitiveTypeChecker('function'),
+    number: createPrimitiveTypeChecker('number'),
+    object: createPrimitiveTypeChecker('object'),
+    string: createPrimitiveTypeChecker('string'),
+    symbol: createPrimitiveTypeChecker('symbol'),
+
+    any: createAnyTypeChecker(),
+    arrayOf: createArrayOfTypeChecker,
+    element: createElementTypeChecker(),
+    elementType: createElementTypeTypeChecker(),
+    instanceOf: createInstanceTypeChecker,
+    node: createNodeChecker(),
+    objectOf: createObjectOfTypeChecker,
+    oneOf: createEnumTypeChecker,
+    oneOfType: createUnionTypeChecker,
+    shape: createShapeTypeChecker,
+    exact: createStrictShapeTypeChecker,
+  };
+
+  /**
+   * inlined Object.is polyfill to avoid requiring consumers ship their own
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is
+   */
+  /*eslint-disable no-self-compare*/
+  function is(x, y) {
+    // SameValue algorithm
+    if (x === y) {
+      // Steps 1-5, 7-10
+      // Steps 6.b-6.e: +0 != -0
+      return x !== 0 || 1 / x === 1 / y;
+    } else {
+      // Step 6.a: NaN == NaN
+      return x !== x && y !== y;
+    }
+  }
+  /*eslint-enable no-self-compare*/
+
+  /**
+   * We use an Error-like object for backward compatibility as people may call
+   * PropTypes directly and inspect their output. However, we don't use real
+   * Errors anymore. We don't inspect their stack anyway, and creating them
+   * is prohibitively expensive if they are created too often, such as what
+   * happens in oneOfType() for any type before the one that matched.
+   */
+  function PropTypeError(message) {
+    this.message = message;
+    this.stack = '';
+  }
+  // Make `instanceof Error` still work for returned errors.
+  PropTypeError.prototype = Error.prototype;
+
+  function createChainableTypeChecker(validate) {
+    if (true) {
+      var manualPropTypeCallCache = {};
+      var manualPropTypeWarningCount = 0;
+    }
+    function checkType(isRequired, props, propName, componentName, location, propFullName, secret) {
+      componentName = componentName || ANONYMOUS;
+      propFullName = propFullName || propName;
+
+      if (secret !== ReactPropTypesSecret) {
+        if (throwOnDirectAccess) {
+          // New behavior only for users of `prop-types` package
+          var err = new Error(
+            'Calling PropTypes validators directly is not supported by the `prop-types` package. ' +
+            'Use `PropTypes.checkPropTypes()` to call them. ' +
+            'Read more at http://fb.me/use-check-prop-types'
+          );
+          err.name = 'Invariant Violation';
+          throw err;
+        } else if ("dev" !== 'production' && typeof console !== 'undefined') {
+          // Old behavior for people using React.PropTypes
+          var cacheKey = componentName + ':' + propName;
+          if (
+            !manualPropTypeCallCache[cacheKey] &&
+            // Avoid spamming the console because they are often not actionable except for lib authors
+            manualPropTypeWarningCount < 3
+          ) {
+            printWarning(
+              'You are manually calling a React.PropTypes validation ' +
+              'function for the `' + propFullName + '` prop on `' + componentName  + '`. This is deprecated ' +
+              'and will throw in the standalone `prop-types` package. ' +
+              'You may be seeing this warning due to a third-party PropTypes ' +
+              'library. See https://fb.me/react-warning-dont-call-proptypes ' + 'for details.'
+            );
+            manualPropTypeCallCache[cacheKey] = true;
+            manualPropTypeWarningCount++;
+          }
+        }
+      }
+      if (props[propName] == null) {
+        if (isRequired) {
+          if (props[propName] === null) {
+            return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required ' + ('in `' + componentName + '`, but its value is `null`.'));
+          }
+          return new PropTypeError('The ' + location + ' `' + propFullName + '` is marked as required in ' + ('`' + componentName + '`, but its value is `undefined`.'));
+        }
+        return null;
+      } else {
+        return validate(props, propName, componentName, location, propFullName);
+      }
+    }
+
+    var chainedCheckType = checkType.bind(null, false);
+    chainedCheckType.isRequired = checkType.bind(null, true);
+
+    return chainedCheckType;
+  }
+
+  function createPrimitiveTypeChecker(expectedType) {
+    function validate(props, propName, componentName, location, propFullName, secret) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== expectedType) {
+        // `propValue` being instance of, say, date/regexp, pass the 'object'
+        // check, but we can offer a more precise error message here rather than
+        // 'of type `object`'.
+        var preciseType = getPreciseType(propValue);
+
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + preciseType + '` supplied to `' + componentName + '`, expected ') + ('`' + expectedType + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createAnyTypeChecker() {
+    return createChainableTypeChecker(emptyFunctionThatReturnsNull);
+  }
+
+  function createArrayOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside arrayOf.');
+      }
+      var propValue = props[propName];
+      if (!Array.isArray(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an array.'));
+      }
+      for (var i = 0; i < propValue.length; i++) {
+        var error = typeChecker(propValue, i, componentName, location, propFullName + '[' + i + ']', ReactPropTypesSecret);
+        if (error instanceof Error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!isValidElement(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createElementTypeTypeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      if (!ReactIs.isValidElementType(propValue)) {
+        var propType = getPropType(propValue);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected a single ReactElement type.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createInstanceTypeChecker(expectedClass) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!(props[propName] instanceof expectedClass)) {
+        var expectedClassName = expectedClass.name || ANONYMOUS;
+        var actualClassName = getClassName(props[propName]);
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + actualClassName + '` supplied to `' + componentName + '`, expected ') + ('instance of `' + expectedClassName + '`.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createEnumTypeChecker(expectedValues) {
+    if (!Array.isArray(expectedValues)) {
+      if (true) {
+        if (arguments.length > 1) {
+          printWarning(
+            'Invalid arguments supplied to oneOf, expected an array, got ' + arguments.length + ' arguments. ' +
+            'A common mistake is to write oneOf(x, y, z) instead of oneOf([x, y, z]).'
+          );
+        } else {
+          printWarning('Invalid argument supplied to oneOf, expected an array.');
+        }
+      }
+      return emptyFunctionThatReturnsNull;
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      for (var i = 0; i < expectedValues.length; i++) {
+        if (is(propValue, expectedValues[i])) {
+          return null;
+        }
+      }
+
+      var valuesString = JSON.stringify(expectedValues, function replacer(key, value) {
+        var type = getPreciseType(value);
+        if (type === 'symbol') {
+          return String(value);
+        }
+        return value;
+      });
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of value `' + String(propValue) + '` ' + ('supplied to `' + componentName + '`, expected one of ' + valuesString + '.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createObjectOfTypeChecker(typeChecker) {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (typeof typeChecker !== 'function') {
+        return new PropTypeError('Property `' + propFullName + '` of component `' + componentName + '` has invalid PropType notation inside objectOf.');
+      }
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type ' + ('`' + propType + '` supplied to `' + componentName + '`, expected an object.'));
+      }
+      for (var key in propValue) {
+        if (has(propValue, key)) {
+          var error = typeChecker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+          if (error instanceof Error) {
+            return error;
+          }
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createUnionTypeChecker(arrayOfTypeCheckers) {
+    if (!Array.isArray(arrayOfTypeCheckers)) {
+       true ? printWarning('Invalid argument supplied to oneOfType, expected an instance of array.') : void 0;
+      return emptyFunctionThatReturnsNull;
+    }
+
+    for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+      var checker = arrayOfTypeCheckers[i];
+      if (typeof checker !== 'function') {
+        printWarning(
+          'Invalid argument supplied to oneOfType. Expected an array of check functions, but ' +
+          'received ' + getPostfixForTypeWarning(checker) + ' at index ' + i + '.'
+        );
+        return emptyFunctionThatReturnsNull;
+      }
+    }
+
+    function validate(props, propName, componentName, location, propFullName) {
+      for (var i = 0; i < arrayOfTypeCheckers.length; i++) {
+        var checker = arrayOfTypeCheckers[i];
+        if (checker(props, propName, componentName, location, propFullName, ReactPropTypesSecret) == null) {
+          return null;
+        }
+      }
+
+      return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`.'));
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createNodeChecker() {
+    function validate(props, propName, componentName, location, propFullName) {
+      if (!isNode(props[propName])) {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` supplied to ' + ('`' + componentName + '`, expected a ReactNode.'));
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      for (var key in shapeTypes) {
+        var checker = shapeTypes[key];
+        if (!checker) {
+          continue;
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+    return createChainableTypeChecker(validate);
+  }
+
+  function createStrictShapeTypeChecker(shapeTypes) {
+    function validate(props, propName, componentName, location, propFullName) {
+      var propValue = props[propName];
+      var propType = getPropType(propValue);
+      if (propType !== 'object') {
+        return new PropTypeError('Invalid ' + location + ' `' + propFullName + '` of type `' + propType + '` ' + ('supplied to `' + componentName + '`, expected `object`.'));
+      }
+      // We need to check all keys in case some are required but missing from
+      // props.
+      var allKeys = assign({}, props[propName], shapeTypes);
+      for (var key in allKeys) {
+        var checker = shapeTypes[key];
+        if (!checker) {
+          return new PropTypeError(
+            'Invalid ' + location + ' `' + propFullName + '` key `' + key + '` supplied to `' + componentName + '`.' +
+            '\nBad object: ' + JSON.stringify(props[propName], null, '  ') +
+            '\nValid keys: ' +  JSON.stringify(Object.keys(shapeTypes), null, '  ')
+          );
+        }
+        var error = checker(propValue, key, componentName, location, propFullName + '.' + key, ReactPropTypesSecret);
+        if (error) {
+          return error;
+        }
+      }
+      return null;
+    }
+
+    return createChainableTypeChecker(validate);
+  }
+
+  function isNode(propValue) {
+    switch (typeof propValue) {
+      case 'number':
+      case 'string':
+      case 'undefined':
+        return true;
+      case 'boolean':
+        return !propValue;
+      case 'object':
+        if (Array.isArray(propValue)) {
+          return propValue.every(isNode);
+        }
+        if (propValue === null || isValidElement(propValue)) {
+          return true;
+        }
+
+        var iteratorFn = getIteratorFn(propValue);
+        if (iteratorFn) {
+          var iterator = iteratorFn.call(propValue);
+          var step;
+          if (iteratorFn !== propValue.entries) {
+            while (!(step = iterator.next()).done) {
+              if (!isNode(step.value)) {
+                return false;
+              }
+            }
+          } else {
+            // Iterator will provide entry [k,v] tuples rather than values.
+            while (!(step = iterator.next()).done) {
+              var entry = step.value;
+              if (entry) {
+                if (!isNode(entry[1])) {
+                  return false;
+                }
+              }
+            }
+          }
+        } else {
+          return false;
+        }
+
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  function isSymbol(propType, propValue) {
+    // Native Symbol.
+    if (propType === 'symbol') {
+      return true;
+    }
+
+    // falsy value can't be a Symbol
+    if (!propValue) {
+      return false;
+    }
+
+    // 19.4.3.5 Symbol.prototype[@@toStringTag] === 'Symbol'
+    if (propValue['@@toStringTag'] === 'Symbol') {
+      return true;
+    }
+
+    // Fallback for non-spec compliant Symbols which are polyfilled.
+    if (typeof Symbol === 'function' && propValue instanceof Symbol) {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Equivalent of `typeof` but with special handling for array and regexp.
+  function getPropType(propValue) {
+    var propType = typeof propValue;
+    if (Array.isArray(propValue)) {
+      return 'array';
+    }
+    if (propValue instanceof RegExp) {
+      // Old webkits (at least until Android 4.0) return 'function' rather than
+      // 'object' for typeof a RegExp. We'll normalize this here so that /bla/
+      // passes PropTypes.object.
+      return 'object';
+    }
+    if (isSymbol(propType, propValue)) {
+      return 'symbol';
+    }
+    return propType;
+  }
+
+  // This handles more types than `getPropType`. Only used for error messages.
+  // See `createPrimitiveTypeChecker`.
+  function getPreciseType(propValue) {
+    if (typeof propValue === 'undefined' || propValue === null) {
+      return '' + propValue;
+    }
+    var propType = getPropType(propValue);
+    if (propType === 'object') {
+      if (propValue instanceof Date) {
+        return 'date';
+      } else if (propValue instanceof RegExp) {
+        return 'regexp';
+      }
+    }
+    return propType;
+  }
+
+  // Returns a string that is postfixed to a warning about an invalid type.
+  // For example, "undefined" or "of type array"
+  function getPostfixForTypeWarning(value) {
+    var type = getPreciseType(value);
+    switch (type) {
+      case 'array':
+      case 'object':
+        return 'an ' + type;
+      case 'boolean':
+      case 'date':
+      case 'regexp':
+        return 'a ' + type;
+      default:
+        return type;
+    }
+  }
+
+  // Returns class name of the object, if any.
+  function getClassName(propValue) {
+    if (!propValue.constructor || !propValue.constructor.name) {
+      return ANONYMOUS;
+    }
+    return propValue.constructor.name;
+  }
+
+  ReactPropTypes.checkPropTypes = checkPropTypes;
+  ReactPropTypes.resetWarningCache = checkPropTypes.resetWarningCache;
+  ReactPropTypes.PropTypes = ReactPropTypes;
+
+  return ReactPropTypes;
+};
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
+
+
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
+
+/***/ }),
 /* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+
+
+var printWarning = function() {};
+
+if (true) {
+  var ReactPropTypesSecret = __webpack_require__(16);
+  var loggedTypeFailures = {};
+  var has = Function.call.bind(Object.prototype.hasOwnProperty);
+
+  printWarning = function(text) {
+    var message = 'Warning: ' + text;
+    if (typeof console !== 'undefined') {
+      console.error(message);
+    }
+    try {
+      // --- Welcome to debugging React ---
+      // This error was thrown as a convenience so that you can use this stack
+      // to find the callsite that caused this warning to fire.
+      throw new Error(message);
+    } catch (x) {}
+  };
+}
+
+/**
+ * Assert that the values match with the type specs.
+ * Error messages are memorized and will only be shown once.
+ *
+ * @param {object} typeSpecs Map of name to a ReactPropType
+ * @param {object} values Runtime values that need to be type-checked
+ * @param {string} location e.g. "prop", "context", "child context"
+ * @param {string} componentName Name of the component for error messages.
+ * @param {?Function} getStack Returns the component stack.
+ * @private
+ */
+function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
+  if (true) {
+    for (var typeSpecName in typeSpecs) {
+      if (has(typeSpecs, typeSpecName)) {
+        var error;
+        // Prop type validation may throw. In case they do, we don't want to
+        // fail the render phase where it didn't fail before. So we log it.
+        // After these have been cleaned up, we'll let them throw.
+        try {
+          // This is intentionally an invariant that gets caught. It's the same
+          // behavior as without this statement except with a better message.
+          if (typeof typeSpecs[typeSpecName] !== 'function') {
+            var err = Error(
+              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +
+              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'
+            );
+            err.name = 'Invariant Violation';
+            throw err;
+          }
+          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);
+        } catch (ex) {
+          error = ex;
+        }
+        if (error && !(error instanceof Error)) {
+          printWarning(
+            (componentName || 'React class') + ': type specification of ' +
+            location + ' `' + typeSpecName + '` is invalid; the type checker ' +
+            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +
+            'You may have forgotten to pass an argument to the type checker ' +
+            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +
+            'shape all require an argument).'
+          );
+        }
+        if (error instanceof Error && !(error.message in loggedTypeFailures)) {
+          // Only monitor this failure once because there tends to be a lot of the
+          // same error.
+          loggedTypeFailures[error.message] = true;
+
+          var stack = getStack ? getStack() : '';
+
+          printWarning(
+            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Resets warning cache when testing.
+ *
+ * @private
+ */
+checkPropTypes.resetWarningCache = function() {
+  if (true) {
+    loggedTypeFailures = {};
+  }
+}
+
+module.exports = checkPropTypes;
+
+
+/***/ }),
+/* 30 */
 /***/ (function(module, exports) {
 
 /*! adal-angular v1.0.17 2018-02-27 */
@@ -19963,7 +19962,7 @@ var AuthenticationContext=function(){"use strict";return AuthenticationContext=f
 this.log(this.CONSTANTS.LOGGING_LEVEL.INFO,a,null)},AuthenticationContext.prototype.verbose=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.VERBOSE,a,null)},AuthenticationContext.prototype.errorPii=function(a,b){this.log(this.CONSTANTS.LOGGING_LEVEL.ERROR,a,b,!0)},AuthenticationContext.prototype.warnPii=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.WARN,a,null,!0)},AuthenticationContext.prototype.infoPii=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.INFO,a,null,!0)},AuthenticationContext.prototype.verbosePii=function(a){this.log(this.CONSTANTS.LOGGING_LEVEL.VERBOSE,a,null,!0)},AuthenticationContext.prototype._libVersion=function(){return"1.0.17"},"undefined"!=typeof module&&module.exports&&(module.exports=AuthenticationContext,module.exports.inject=function(a){return new AuthenticationContext(a)}),AuthenticationContext}();
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19974,7 +19973,7 @@ tslib_1.__exportStar(__webpack_require__(164), exports);
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19985,7 +19984,7 @@ tslib_1.__exportStar(__webpack_require__(217), exports);
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19993,9 +19992,9 @@ tslib_1.__exportStar(__webpack_require__(217), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
-var index_1 = __webpack_require__(31);
+var index_1 = __webpack_require__(32);
 var Utilities_1 = __webpack_require__(2);
-var Icon_1 = __webpack_require__(30);
+var Icon_1 = __webpack_require__(31);
 var renderItemIcon = function (props) {
     var item = props.item, hasIcons = props.hasIcons, classNames = props.classNames;
     // Only present to allow continued use of item.icon which is deprecated.
@@ -20083,13 +20082,12 @@ exports.ContextualMenuItem = ContextualMenuItem;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_33__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_34__;
 
 /***/ }),
-/* 34 */,
 /* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -20360,7 +20358,7 @@ exports.EventGroup = EventGroup;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(19);
+var Stylesheet_1 = __webpack_require__(20);
 var kebabRules_1 = __webpack_require__(130);
 var prefixRules_1 = __webpack_require__(131);
 var provideUnits_1 = __webpack_require__(133);
@@ -20661,7 +20659,7 @@ exports.ContextualMenuItemWrapper = ContextualMenuItemWrapper;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
-var BaseButton_1 = __webpack_require__(21);
+var BaseButton_1 = __webpack_require__(22);
 var Utilities_1 = __webpack_require__(2);
 var DefaultButton_styles_1 = __webpack_require__(229);
 var DefaultButton = /** @class */ (function (_super) {
@@ -20999,7 +20997,7 @@ exports.setWarningCallback = setWarningCallback;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(18);
+var dom_1 = __webpack_require__(17);
 var keyboard_1 = __webpack_require__(69);
 exports.IsFocusVisibleClassName = 'ms-Fabric--isFocusVisible';
 /**
@@ -21431,7 +21429,7 @@ tslib_1.__exportStar(__webpack_require__(207), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
-var BaseButton_1 = __webpack_require__(21);
+var BaseButton_1 = __webpack_require__(22);
 var Utilities_1 = __webpack_require__(2);
 var ActionButton_styles_1 = __webpack_require__(230);
 var ActionButton = /** @class */ (function (_super) {
@@ -22709,7 +22707,7 @@ exports.Async = Async;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(18);
+var dom_1 = __webpack_require__(17);
 var index_1 = __webpack_require__(10);
 var _scrollbarWidth;
 var _bodyScrollDisabledCount = 0;
@@ -22818,7 +22816,7 @@ exports.findScrollableParent = findScrollableParent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(19);
+var Stylesheet_1 = __webpack_require__(20);
 var LEFT = 'left';
 var RIGHT = 'right';
 var NO_FLIP = '@noflip';
@@ -22931,7 +22929,7 @@ var _a;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(19);
+var Stylesheet_1 = __webpack_require__(20);
 /**
  * Separates the classes and style objects. Any classes that are pre-registered
  * args are auto expanded into objects.
@@ -23335,7 +23333,7 @@ exports.hoistStatics = hoistStatics;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(18);
+var dom_1 = __webpack_require__(17);
 var localStorage_1 = __webpack_require__(154);
 // Default to undefined so that we initialize on first read.
 var _language;
@@ -24854,7 +24852,7 @@ exports.primaryStyles = primaryStyles;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
-var BaseButton_1 = __webpack_require__(21);
+var BaseButton_1 = __webpack_require__(22);
 var Utilities_1 = __webpack_require__(2);
 var CompoundButton_styles_1 = __webpack_require__(231);
 var CompoundButton = /** @class */ (function (_super) {
@@ -24888,7 +24886,7 @@ exports.CompoundButton = CompoundButton;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
-var BaseButton_1 = __webpack_require__(21);
+var BaseButton_1 = __webpack_require__(22);
 var Utilities_1 = __webpack_require__(2);
 var IconButton_styles_1 = __webpack_require__(232);
 var IconButton = /** @class */ (function (_super) {
@@ -25080,7 +25078,7 @@ exports.OverlayBase = OverlayBase;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var sp_http_1 = __webpack_require__(33);
+var sp_http_1 = __webpack_require__(34);
 var sp_core_library_1 = __webpack_require__(12);
 var IPropertyFieldListPicker_1 = __webpack_require__(103);
 var SPListPickerMockService_1 = __webpack_require__(249);
@@ -25197,7 +25195,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var FieldErrorMessage_module_scss_1 = __webpack_require__(250);
-var Icon_1 = __webpack_require__(30);
+var Icon_1 = __webpack_require__(31);
 /**
  * Component that shows an error message when something went wront with the property control
  */
@@ -25296,7 +25294,7 @@ var sp_core_library_ = __webpack_require__(12);
 var sp_core_library__default = /*#__PURE__*/__webpack_require__.n(sp_core_library_);
 
 // EXTERNAL MODULE: external "@microsoft/sp-webpart-base"
-var sp_webpart_base_ = __webpack_require__(23);
+var sp_webpart_base_ = __webpack_require__(25);
 var sp_webpart_base__default = /*#__PURE__*/__webpack_require__.n(sp_webpart_base_);
 
 // EXTERNAL MODULE: external "@microsoft/sp-property-pane"
@@ -25330,7 +25328,7 @@ var lib = __webpack_require__(111);
 var lib_default = /*#__PURE__*/__webpack_require__.n(lib);
 
 // EXTERNAL MODULE: ./node_modules/@pnp/pnpjs/dist/pnpjs.es5.js + 3 modules
-var pnpjs_es5 = __webpack_require__(28);
+var pnpjs_es5 = __webpack_require__(19);
 
 // CONCATENATED MODULE: ./lib/webparts/actionItemSlider/components/ActionItemSlider.js
 var __extends = (this && this.__extends) || (function () {
@@ -25354,7 +25352,7 @@ var ActionItemSlider_ActionItemSlider = /** @class */ (function (_super) {
         _this.getPageDetails = function () {
             var _a;
             if (_this.state.listTitle !== "") {
-                (_a = pnpjs_es5["b" /* sp */].web.lists
+                (_a = pnpjs_es5["c" /* sp */].web.lists
                     .getByTitle(_this.state.listTitle)
                     .items).select.apply(_a, _this.state.selectedKeys).get()
                     .then(function (items) {
@@ -25382,7 +25380,7 @@ var ActionItemSlider_ActionItemSlider = /** @class */ (function (_super) {
         };
         // Set the List Title and the selected keys on Property change
         _this.getListTitleById = function (nxtProps) {
-            pnpjs_es5["b" /* sp */].web.lists
+            pnpjs_es5["c" /* sp */].web.lists
                 .getById(nxtProps.listIds)
                 .select("Title")
                 .get()
@@ -25492,7 +25490,7 @@ var ActionItemSliderWebPart_ActionItemSliderWebPart = /** @class */ (function (_
         var _this = this;
         return _super.prototype.onInit.call(this).then(function (_) {
             // other init code may be present
-            pnpjs_es5["b" /* sp */].setup({
+            pnpjs_es5["c" /* sp */].setup({
                 spfxContext: _this.context
             });
         });
@@ -25519,7 +25517,7 @@ var ActionItemSliderWebPart_ActionItemSliderWebPart = /** @class */ (function (_
         var _this = this;
         var options;
         var filter2 = "Hidden eq false and CanBeDeleted eq true";
-        pnpjs_es5["b" /* sp */].web.lists
+        pnpjs_es5["c" /* sp */].web.lists
             .getById(this.properties.lists)
             .fields.select("InternalName", "Title")
             .filter(filter2)
@@ -26810,7 +26808,7 @@ __export(__webpack_require__(58));
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var ReactDom = __webpack_require__(5);
-var sp_webpart_base_1 = __webpack_require__(23);
+var sp_webpart_base_1 = __webpack_require__(25);
 var PropertyFieldListPickerHost_1 = __webpack_require__(58);
 var PropertyFieldListMultiPickerHost_1 = __webpack_require__(256);
 /**
@@ -26968,7 +26966,7 @@ var Callout_1 = __webpack_require__(83);
 var Label_1 = __webpack_require__(50);
 var Button_1 = __webpack_require__(88);
 var Panel_1 = __webpack_require__(238);
-var Icon_1 = __webpack_require__(30);
+var Icon_1 = __webpack_require__(31);
 var FocusZone_1 = __webpack_require__(90);
 var withResponsiveMode_1 = __webpack_require__(94);
 var Utilities_1 = __webpack_require__(2);
@@ -26977,7 +26975,7 @@ var stylesImport = __webpack_require__(248);
 var styles = stylesImport;
 var Checkbox_styles_1 = __webpack_require__(81);
 var Styling_1 = __webpack_require__(4);
-var KeytipData_1 = __webpack_require__(20);
+var KeytipData_1 = __webpack_require__(21);
 var Dropdown = /** @class */ (function (_super) {
     tslib_1.__extends(Dropdown, _super);
     function Dropdown(props) {
@@ -27576,10 +27574,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
 var Utilities_1 = __webpack_require__(2);
-var Icon_1 = __webpack_require__(30);
+var Icon_1 = __webpack_require__(31);
 var Checkbox_classNames_1 = __webpack_require__(184);
 var Checkbox_styles_1 = __webpack_require__(81);
-var KeytipData_1 = __webpack_require__(20);
+var KeytipData_1 = __webpack_require__(21);
 var Checkbox = /** @class */ (function (_super) {
     tslib_1.__extends(Checkbox, _super);
     /**
@@ -27703,7 +27701,7 @@ tslib_1.__exportStar(__webpack_require__(147), exports);
 tslib_1.__exportStar(__webpack_require__(148), exports);
 tslib_1.__exportStar(__webpack_require__(149), exports);
 tslib_1.__exportStar(__webpack_require__(150), exports);
-tslib_1.__exportStar(__webpack_require__(18), exports);
+tslib_1.__exportStar(__webpack_require__(17), exports);
 tslib_1.__exportStar(__webpack_require__(151), exports);
 tslib_1.__exportStar(__webpack_require__(152), exports);
 tslib_1.__exportStar(__webpack_require__(70), exports);
@@ -27733,7 +27731,7 @@ tslib_1.__exportStar(__webpack_require__(43), exports);
 Object.defineProperty(exports, "__esModule", { value: true });
 var EventGroup_1 = __webpack_require__(35);
 var scroll_1 = __webpack_require__(64);
-var dom_1 = __webpack_require__(18);
+var dom_1 = __webpack_require__(17);
 var SCROLL_ITERATION_DELAY = 16;
 var SCROLL_GUTTER_HEIGHT = 100;
 var MAX_SCROLL_VELOCITY = 15;
@@ -28217,7 +28215,7 @@ exports.mergeStyleSets = mergeStyleSets;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(19);
+var Stylesheet_1 = __webpack_require__(20);
 var styleToClassName_1 = __webpack_require__(36);
 /**
  * Registers a font face.
@@ -28236,7 +28234,7 @@ exports.fontFace = fontFace;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Stylesheet_1 = __webpack_require__(19);
+var Stylesheet_1 = __webpack_require__(20);
 var styleToClassName_1 = __webpack_require__(36);
 /**
  * Registers keyframe definitions.
@@ -28267,7 +28265,7 @@ exports.keyframes = keyframes;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(18);
+var dom_1 = __webpack_require__(17);
 function initializeDir(window) {
     var win = (window || dom_1.getWindow());
     if (win && !win.__hasInitializedDir__) {
@@ -29045,7 +29043,7 @@ exports.customizable = customizable;
 
 /* tslint:disable:no-string-literal */
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(18);
+var dom_1 = __webpack_require__(17);
 var IS_FOCUSABLE_ATTRIBUTE = 'data-is-focusable';
 var IS_VISIBLE_ATTRIBUTE = 'data-is-visible';
 var FOCUSZONE_ID_ATTRIBUTE = 'data-focuszone-id';
@@ -30027,7 +30025,7 @@ exports.setBaseUrl = setBaseUrl;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(18);
+var dom_1 = __webpack_require__(17);
 var sessionStorage_1 = __webpack_require__(161);
 var rtlifyRules_1 = __webpack_require__(65);
 var RTL_LOCAL_STORAGE_KEY = 'isRTL';
@@ -33329,7 +33327,7 @@ exports.getLabelClassNames = Utilities_1.memoizeFunction(function (theme, classN
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
-tslib_1.__exportStar(__webpack_require__(21), exports);
+tslib_1.__exportStar(__webpack_require__(22), exports);
 tslib_1.__exportStar(__webpack_require__(95), exports);
 tslib_1.__exportStar(__webpack_require__(228), exports);
 tslib_1.__exportStar(__webpack_require__(51), exports);
@@ -33363,7 +33361,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 tslib_1.__exportStar(__webpack_require__(213), exports);
 tslib_1.__exportStar(__webpack_require__(89), exports);
-tslib_1.__exportStar(__webpack_require__(32), exports);
+tslib_1.__exportStar(__webpack_require__(33), exports);
 
 
 /***/ }),
@@ -33379,10 +33377,10 @@ var ContextualMenu_types_1 = __webpack_require__(89);
 var FocusZone_1 = __webpack_require__(90);
 var ContextualMenu_classNames_1 = __webpack_require__(92);
 var Utilities_1 = __webpack_require__(2);
-var index_1 = __webpack_require__(31);
+var index_1 = __webpack_require__(32);
 var withResponsiveMode_1 = __webpack_require__(94);
 var Callout_1 = __webpack_require__(83);
-var ContextualMenuItem_1 = __webpack_require__(32);
+var ContextualMenuItem_1 = __webpack_require__(33);
 var index_2 = __webpack_require__(219);
 function getSubmenuItems(item) {
     return item.subMenuProps ? item.subMenuProps.items : item.items;
@@ -34988,9 +34986,9 @@ var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
 var Utilities_1 = __webpack_require__(2);
 var ContextualMenuItemWrapper_1 = __webpack_require__(38);
-var KeytipData_1 = __webpack_require__(20);
-var index_1 = __webpack_require__(31);
-var ContextualMenuItem_1 = __webpack_require__(32);
+var KeytipData_1 = __webpack_require__(21);
+var index_1 = __webpack_require__(32);
+var ContextualMenuItem_1 = __webpack_require__(33);
 var ContextualMenuAnchor = /** @class */ (function (_super) {
     tslib_1.__extends(ContextualMenuAnchor, _super);
     function ContextualMenuAnchor() {
@@ -35042,9 +35040,9 @@ var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
 var Utilities_1 = __webpack_require__(2);
 var ContextualMenuItemWrapper_1 = __webpack_require__(38);
-var KeytipData_1 = __webpack_require__(20);
-var index_1 = __webpack_require__(31);
-var ContextualMenuItem_1 = __webpack_require__(32);
+var KeytipData_1 = __webpack_require__(21);
+var index_1 = __webpack_require__(32);
+var ContextualMenuItem_1 = __webpack_require__(33);
 var ContextualMenuButton = /** @class */ (function (_super) {
     tslib_1.__extends(ContextualMenuButton, _super);
     function ContextualMenuButton() {
@@ -35116,10 +35114,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
 var Utilities_1 = __webpack_require__(2);
-var ContextualMenuItem_1 = __webpack_require__(32);
+var ContextualMenuItem_1 = __webpack_require__(33);
 var ContextualMenu_classNames_1 = __webpack_require__(92);
-var KeytipData_1 = __webpack_require__(20);
-var index_1 = __webpack_require__(31);
+var KeytipData_1 = __webpack_require__(21);
+var index_1 = __webpack_require__(32);
 var Divider_1 = __webpack_require__(223);
 var ContextualMenuItemWrapper_1 = __webpack_require__(38);
 var TouchIdleDelay = 500; /* ms */
@@ -35541,7 +35539,7 @@ exports.Button = Button;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(4);
 var Utilities_1 = __webpack_require__(2);
-var BaseButton_styles_1 = __webpack_require__(22);
+var BaseButton_styles_1 = __webpack_require__(23);
 var SplitButton_styles_1 = __webpack_require__(40);
 var ButtonThemes_1 = __webpack_require__(96);
 var DEFAULT_BUTTON_HEIGHT = '32px';
@@ -35571,7 +35569,7 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, p
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(4);
 var Utilities_1 = __webpack_require__(2);
-var BaseButton_styles_1 = __webpack_require__(22);
+var BaseButton_styles_1 = __webpack_require__(23);
 var DEFAULT_BUTTON_HEIGHT = '40px';
 var DEFAULT_PADDING = '0 4px';
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
@@ -35645,7 +35643,7 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(4);
 var Utilities_1 = __webpack_require__(2);
-var BaseButton_styles_1 = __webpack_require__(22);
+var BaseButton_styles_1 = __webpack_require__(23);
 var SplitButton_styles_1 = __webpack_require__(40);
 var ButtonThemes_1 = __webpack_require__(96);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, primary) {
@@ -35749,7 +35747,7 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, p
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(4);
 var Utilities_1 = __webpack_require__(2);
-var BaseButton_styles_1 = __webpack_require__(22);
+var BaseButton_styles_1 = __webpack_require__(23);
 var SplitButton_styles_1 = __webpack_require__(40);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
     var baseButtonStyles = BaseButton_styles_1.getStyles(theme);
@@ -35803,7 +35801,7 @@ exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(0);
 var React = __webpack_require__(1);
-var BaseButton_1 = __webpack_require__(21);
+var BaseButton_1 = __webpack_require__(22);
 var Utilities_1 = __webpack_require__(2);
 var CommandBarButton_styles_1 = __webpack_require__(234);
 var CommandBarButton = /** @class */ (function (_super) {
@@ -35837,7 +35835,7 @@ exports.CommandBarButton = CommandBarButton;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(4);
 var Utilities_1 = __webpack_require__(2);
-var BaseButton_styles_1 = __webpack_require__(22);
+var BaseButton_styles_1 = __webpack_require__(23);
 var SplitButton_styles_1 = __webpack_require__(40);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, focusInset, focusColor) {
     var baseButtonStyles = BaseButton_styles_1.getStyles(theme);
@@ -36008,7 +36006,7 @@ exports.MessageBarButton = MessageBarButton;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Styling_1 = __webpack_require__(4);
 var Utilities_1 = __webpack_require__(2);
-var BaseButton_styles_1 = __webpack_require__(22);
+var BaseButton_styles_1 = __webpack_require__(23);
 exports.getStyles = Utilities_1.memoizeFunction(function (theme, customStyles, focusInset, focusColor) {
     var baseButtonStyles = BaseButton_styles_1.getStyles(theme);
     var messageBarButtonStyles = {
@@ -37723,7 +37721,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(1);
 var ReactDOM = __webpack_require__(5);
-var sp_webpart_base_1 = __webpack_require__(23);
+var sp_webpart_base_1 = __webpack_require__(25);
 var PropertyFieldMultiSelectHost_1 = __webpack_require__(105);
 var lodash_1 = __webpack_require__(266);
 var PropertyFieldMultiSelectBuilder = (function () {

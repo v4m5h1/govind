@@ -6,6 +6,7 @@ import pnp, { Site, Web } from "@pnp/pnpjs";
 import { ExtensionContext } from "@microsoft/sp-extension-base";
 import { SearchBox, IconButton, getId } from "office-ui-fabric-react";
 import Panels from "./Panels";
+import GlobalAlerts from "./GlobalAlerts";
 
 export interface ITopNavigationProps {
   TopMenuTermSet?: string;
@@ -21,6 +22,13 @@ export interface ITopNavigationState {
 }
 
 const NAV_TERMS_KEY = "global-navigation-terms";
+
+// config site url here
+// const rootSite = new Site(
+//   "https://csharpsharepoint.sharepoint.com/sites/ModernCommunicationSite"
+// );
+
+const rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
 
 export default class TopNavigation extends React.Component<
   ITopNavigationProps,
@@ -139,23 +147,12 @@ export default class TopNavigation extends React.Component<
   }
 
   private generateMegaMenuLevel(levels: SPTermStore.ISPTermObject[]): any {
-    // let menuString: string = "";
-
-    // for (let i: number = 0; i < levels.length; i++) {
-    //   let levelItem: SPTermStore.ISPTermObject = levels[i];
     let menuString = levels.map((levelItem: SPTermStore.ISPTermObject) => {
       let url: string =
         typeof levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl ===
         "undefined"
           ? "#"
           : levelItem.localCustomProperties._Sys_Nav_SimpleLinkUrl;
-      // menuString += '<li><a href="' + url + '">' + levelItem.name + "</a>";
-      // if (levelItem.terms.length != 0) {
-      //   menuString += "<ul>";
-      //   menuString += this.generateMegaMenuLevel(levelItem.terms);
-      //   menuString += "</ul>";
-      // }
-      // menuString += "</li>";
       let subTerms =
         levelItem.terms.length != 0 ? (
           <ul>{this.generateMegaMenuLevel(levelItem.terms)}</ul>
@@ -206,6 +203,7 @@ export default class TopNavigation extends React.Component<
   public render(): React.ReactElement<ITopNavigationProps> {
     return (
       <div className={styles.app}>
+        <GlobalAlerts _rootSite={rootSite} />
         <div className={styles.menuContainer}>
           <div className={styles.menu} id="menu">
             <ul>
@@ -242,6 +240,7 @@ export default class TopNavigation extends React.Component<
             _closeFAQPanel={this._closeFAQPanel}
             _closeSettingsPanel={this._closeSettingsPanel}
             _closeFavouritesPanel={this._closeFavouritesPanel}
+            _rootSite={rootSite}
           />
         </div>
       </div>

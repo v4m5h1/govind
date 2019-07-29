@@ -10,10 +10,8 @@ export interface ITopNavigationApplicationCustomizerProperties {
 /** A Custom Action which can be run during execution of a Client Side Application */
 export default class TopNavigationApplicationCustomizer extends BaseApplicationCustomizer<ITopNavigationApplicationCustomizerProperties> {
     private _topPlaceholder;
-    private _topMenuItems;
     onInit(): Promise<void>;
     private _renderPlaceHolders;
     private _onDispose;
-    private generateMegaMenuLevel;
 }
 //# sourceMappingURL=TopNavigationApplicationCustomizer.d.ts.map

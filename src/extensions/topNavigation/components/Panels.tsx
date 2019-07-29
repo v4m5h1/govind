@@ -11,6 +11,7 @@ export interface IPanelsProps {
   _closeFAQPanel: any;
   _closeSettingsPanel: any;
   _closeFavouritesPanel: any;
+  _rootSite: Site;
 }
 
 export interface IPanelsState {
@@ -19,13 +20,6 @@ export interface IPanelsState {
   faqsHtml: string;
   favouritesHtml: string;
 }
-
-// config site url here
-// const rootSite = new Site(
-//   "https://csharpsharepoint.sharepoint.com/sites/ModernCommunicationSite"
-// );
-
-const rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
 
 export default class Panels extends React.Component<
   IPanelsProps,
@@ -37,7 +31,7 @@ export default class Panels extends React.Component<
   }
 
   private getTopNavConfig = () => {
-    rootSite.rootWeb.lists
+    this.props._rootSite.rootWeb.lists
       .getByTitle("TopNav")
       .items.get()
       .then(its => {
@@ -105,10 +99,7 @@ export default class Panels extends React.Component<
           onLightDismissClick={this.props._closeFavouritesPanel}
         >
           <div>
-            {/* <div
-              dangerouslySetInnerHTML={{ __html: this.state.favouritesHtml }}
-            /> */}
-            <MyFavorites configSite={rootSite} />
+            <MyFavorites configSite={this.props._rootSite} />
           </div>
         </Panel>
       </React.Fragment>

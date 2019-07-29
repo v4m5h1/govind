@@ -24,11 +24,11 @@ export interface ITopNavigationState {
 const NAV_TERMS_KEY = "global-navigation-terms";
 
 // config site url here
-// const rootSite = new Site(
-//   "https://csharpsharepoint.sharepoint.com/sites/ModernCommunicationSite"
-// );
+const rootSite = new Site(
+  "https://csharpsharepoint.sharepoint.com/sites/ModernCommunicationSite"
+);
 
-const rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
+// const rootSite = new Site("https://mjsp2019.sharepoint.com/sites/POCHub");
 
 export default class TopNavigation extends React.Component<
   ITopNavigationProps,

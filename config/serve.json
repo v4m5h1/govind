@@ -9,7 +9,7 @@
   },
   "serveConfigurations": {
     "default": {
-      "pageUrl": "https://mjsp2019.sharepoint.com/sites/POC/SitePages/Home.aspx",
+      "pageUrl": "https://csharpsharepoint.sharepoint.com/sites/ModernCommunicationSite/SitePages/Home.aspx",
       "customActions": {
         "26bf477a-157d-4ec2-a018-07cb707b6431": {
           "location": "ClientSideExtension.ApplicationCustomizer",
@@ -20,7 +20,7 @@
       }
     },
     "topNavigation": {
-      "pageUrl": "https://mjsp2019.sharepoint.com/sites/POC/SitePages/Home.aspx",
+      "pageUrl": "https://csharpsharepoint.sharepoint.com/sites/ModernCommunicationSite/SitePages/Home.aspx",
       "customActions": {
         "26bf477a-157d-4ec2-a018-07cb707b6431": {
           "location": "ClientSideExtension.ApplicationCustomizer",

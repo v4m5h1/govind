@@ -6,4 +6,10 @@
         ClientSideComponentId="26bf477a-157d-4ec2-a018-07cb707b6431"
         ClientSideComponentProperties="{&quot;TopMenuTermSet&quot;:&quot;TopNav&quot;}">
     </CustomAction>
+    <CustomAction
+        Title="BottomNavigation"
+        Location="ClientSideExtension.ApplicationCustomizer"
+        ClientSideComponentId="458d5d86-2f22-4fe9-9149-fb971409cce8"
+        ClientSideComponentProperties="">
+    </CustomAction>
 </Elements>

@@ -1,0 +1,37 @@
+// Custom styles for Bottom Navigation
+@import "~@microsoft/sp-office-ui-fabric-core/dist/sass/SPFabricCore.scss";
+
+.app {
+  .bottom {
+    height: 40px;
+    text-align: center;
+    line-height: 2.5;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: $ms-color-themePrimary;
+    color: $ms-color-white;
+  }
+  .logo {
+    width: 20%;
+    margin-left: 50px;
+  }
+  .bottomLinks {
+    width: 50%;
+    .link {
+      cursor: pointer;
+    }
+  }
+  .bottomControls {
+    width: 30%;
+    .link {
+      cursor: pointer;
+    }
+  }
+}
+
+// Hide the default class that starts with feedback
+div[class^="feedback_"] {
+  display: none !important;
+}

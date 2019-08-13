@@ -94,7 +94,7 @@ export default class TopNavigationApplicationCustomizer extends BaseApplicationC
 
   private _onDispose(): void {
     console.log(
-      "[TopNavigationApplicationCustomizer._onDispose] Disposed custom top and bottom placeholders."
+      "[TopNavigationApplicationCustomizer._onDispose] Disposed custom top placeholder."
     );
   }
 }

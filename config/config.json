@@ -25,6 +25,14 @@
           "manifest": "./src/webparts/stockTicker/StockTickerWebPart.manifest.json"
         }
       ]
+    },
+    "bottom-navigation-application-customizer": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/bottomNavigation/BottomNavigationApplicationCustomizer.js",
+          "manifest": "./src/extensions/bottomNavigation/BottomNavigationApplicationCustomizer.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -33,6 +41,7 @@
     "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
     "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js",
     "TopNavigationApplicationCustomizerStrings": "lib/extensions/topNavigation/loc/{locale}.js",
-    "StockTickerWebPartStrings": "lib/webparts/stockTicker/loc/{locale}.js"
+    "StockTickerWebPartStrings": "lib/webparts/stockTicker/loc/{locale}.js",
+    "BottomNavigationApplicationCustomizerStrings": "lib/extensions/bottomNavigation/loc/{locale}.js"
   }
 }

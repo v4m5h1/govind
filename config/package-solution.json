@@ -3,7 +3,7 @@
   "solution": {
     "name": "etrade-intranet-solution",
     "id": "01ae161f-e883-4961-8c0d-658dd1636024",
-    "version": "1.0.0.7",
+    "version": "1.0.0.11",
     "includeClientSideAssets": true,
     "isDomainIsolated": false,
     "skipFeatureDeployment": false,
@@ -12,12 +12,9 @@
         "title": "Application Extension - Deployment of custom action.",
         "description": "Deploys a custom action with ClientSideComponentId association",
         "id": "57cc79c1-7e21-42c3-9a58-cc1c5d425a74",
-        "version": "1.0.0.7",
+        "version": "1.0.0.11",
         "assets": {
-          "elementManifests": [
-            "elements.xml",
-            "clientsideinstance.xml"
-          ]
+          "elementManifests": ["elements.xml"]
         }
       }
     ]

@@ -56,7 +56,7 @@
     "gulp-stylelint": "^8.0.0",
     "jest": "^23.6.0",
     "jest-junit": "^6.3.0",
-    "stylelint": "^9.10.1",
+    "stylelint": "^15.10.1",
     "stylelint-config-standard": "^18.3.0",
     "stylelint-scss": "^3.6.1",
     "webpack-bundle-analyzer": "^3.3.2"
